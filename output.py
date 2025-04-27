@@ -4,7 +4,7 @@ import builder
 import utils as u
 
 #Global Vairables
-csv_path = r"/home/emmatey/dev/Day Sheet Maker/Source Data/output.csv"
+csv_path = r"/home/emmatey/src/Day-Sheet-Maker/Source Data/output.csv"
 hrd = builder.build_store(csv_path)
 valid_depts = []
 column_day_map = u.column_day_map(csv_path)
