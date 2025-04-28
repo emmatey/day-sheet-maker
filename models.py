@@ -6,6 +6,11 @@ class Store:
         self.store_number = store_number
         self.department_list = []
 
+    def __str__(self):
+        output = f"My Store Number is {self.store_number}\n"
+        output += f"Number of Departments = {len(self.department_list)}"
+        return output
+
     def add_department(self, department):
         self.department_list.append(department)
 
@@ -19,11 +24,6 @@ class Store:
                 for shift in employee.shifts:
                     employee.add_hours(shift.paid_hours)
 
-    def speak(self):
-        print(f'My Store Number is {self.store_number}')
-        for dept in self.department_list:
-            print(dept.dept_name)
-
 
 class Department:
     def __init__(self, dept_index, dept_name, time_blocks):
@@ -33,15 +33,15 @@ class Department:
         self.time_blocks = time_blocks
         self.role_labor_coverage = {}
 
+
     def add_employee(self, employee):
         self.employees.append(employee)
 
-    def speak(self):
-        print(self.dept_name)
-        print(self.dept_index)
-        print(f'dept_index = {self.dept_index}')
-        for employee in self.employees:
-            employee.speak()
+    def __str__(self):
+        output = f"{self.dept_name}\n"
+        output += f"dept_index = {self.dept_index}\n"
+        output += f"Number of Employees = {len(self.employees)}\n"
+        return output
 
 
 class Employee:
@@ -55,11 +55,21 @@ class Employee:
         self.emp_index = emp_index
         self.shifts = []
 
+    def __str__(self):
+       output = f"Name: {self.name}\n"
+       output += f"Role: {self.role}\n"
+       output += f"Hours This Week: {self.labor_hours_this_week}\n"
+       output += f"Employee Index: {self.emp_index}\n"
+       output += "Shifts:\n"
+       for shift in self.shifts:
+           output += f"  - {shift}\n"
+       return output
+
     def add_shift(self, daily_shift_parsed):
         self.shifts.append(daily_shift_parsed)
 
     def add_dept(self, dept):
-     self.dept = str(dept)
+        self.dept = str(dept)
 
     def add_hours(self, shift_paid_hours):
         current_hours = self.labor_hours_this_week
@@ -77,13 +87,6 @@ class Employee:
         else:
             self.display_role = self.role
 
-    def speak(self):
-        print(self.name)
-        print(self.role)
-        print(self.labor_hours_this_week)
-        print(self.emp_index)
-        print(self.shifts)
-
 
 class Shift:
     def __init__(self, day_index, start_time, end_time, paid_hours):
@@ -92,5 +95,5 @@ class Shift:
         self.end_time = end_time
         self.paid_hours = float(paid_hours)
 
-    def speak(self):
-        print(self.day_index, self.start_time, self.end_time, self.paid_hours)
+    def __str__(self):
+        return f"Day {self.day_index}: {self.start_time} - {self.end_time} ({self.paid_hours} hrs)"
