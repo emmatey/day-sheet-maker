@@ -1,8 +1,0 @@
-﻿# Ignore specific files
-notes.txt
-test.py
-scratchpad.py
-
-# Ignore specific folders
-Source Data/
-__pycache__/
