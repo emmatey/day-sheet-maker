@@ -442,10 +442,10 @@ def insert_headers_and_employees(ws, employee_group_dict, day_index, start_row=4
             current_row += 1
     #Employees and Headers All Written, Now add Hours Tally.
     #5 Merge Hours Tally Write Area
-    ws.merge_cells(start_row=current_row, start_column=4, end_row=current_row, end_column=6)
+    ws.merge_cells(start_row=current_row, start_column=3, end_row=current_row, end_column=6)
 
     #6 Insert Label
-    label_cell = ws.cell(row=current_row, column=4)
+    label_cell = ws.cell(row=current_row, column=3)
     label_cell.value = "Total Hours:"
     label_cell.alignment = Alignment(horizontal="right", vertical="center")
     label_cell.font = Font(name='Calibri', bold=True)
