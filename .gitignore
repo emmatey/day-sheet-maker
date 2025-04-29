@@ -1,12 +1,17 @@
 ﻿# Ignore notes and scratch files
-notes.txt
 notepad.odt
 test.py
 scratchpad.py
 
-# Ignore all text files
+# Ignore all generated data/output folders
+output/**
+Source Data/**
+
+# Ignore List by File Type
 *.txt
 *.odt
+*.csv
+*.xlsx
 
 # Ignore temporary/OS files
 *.bak
@@ -15,10 +20,14 @@ scratchpad.py
 .DS_Store
 Thumbs.db
 
-# Ignore Python cache
+# Ignore Python bytecode/cache
 __pycache__/
 *.pyc
 
-# Ignore output folders
-output/
-Source Data/
+# Ignore IDE/project files
+.vscode/
+.ropeproject/
+.idea/
+
+# Exceptions
+!Day Sheet Master.xlsx 
