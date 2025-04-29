@@ -6,6 +6,7 @@ scratchpad.py
 
 # Ignore all text files
 *.txt
+*.odt
 
 # Ignore temporary/OS files
 *.bak
@@ -18,6 +19,6 @@ Thumbs.db
 __pycache__/
 *.pyc
 
-# Ignore output folders (optional if you want)
+# Ignore output folders
 output/
 Source Data/
