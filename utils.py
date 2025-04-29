@@ -3,7 +3,6 @@ import re
 import csv
 import models as m
 import datetime
-import openpyxl
 from copy import copy
 from collections import defaultdict
 from openpyxl.styles import Border, Side, Font, Alignment, PatternFill
@@ -498,33 +497,36 @@ def insert_labor_trackers(ws, employee_group_dict, time_blocks, day_index, start
     return current_row
 
 
-def insert_effective_shopper_table(ws, employee_group, expeditor_map, time_blocks, day_index, start_row=4, start_col=11):
+def insert_effective_shopper_table(ws, employee_group, expeditor_requirements, time_blocks, day_index, start_row=4, start_col=11):
     """
     Insert a table showing effective shopper hours into a worksheet.
     """
 
-    # Define thin border style
+    # Borders
+    thick_border = Border(
+        left=Side(style="thick"),
+        right=Side(style="thick"),
+        top=Side(style="thick"),
+        bottom=Side(style="thick")
+    )
+
     thin_border = Border(
-        left=Side(style='thin'),
-        right=Side(style='thin'),
-        top=Side(style='thin'),
-        bottom=Side(style='thin')
+        left=Side(style="thin"),
+        right=Side(style="thin"),
+        top=Side(style="thin"),
+        bottom=Side(style="thin")
     )
 
     # --- 1. Write Header ---
-    ws.merge_cells(start_row=start_row, start_column=start_col, end_row=start_row + 1, end_column=start_col + 3)
-
-    # Template cell for background fill
-    template_cell = ws.cell(row=4, column=1)  # Assuming this has desired fill style
+    ws.merge_cells(start_row = start_row, start_column = start_col, end_row = start_row + 1, end_column = start_col + 3)
 
     # Set up header
     header_cell = ws.cell(row=start_row, column=start_col)
-    header_cell.fill = copy(template_cell.fill)
     header_cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
     # Define rich text font styles
-    title_font = InlineFont(sz=12, b=True, rFont="Calibri")
-    subtitle_font = InlineFont(sz=8, b=False, rFont="Calibri")
+    title_font = InlineFont(sz = 12, b = True, rFont = "Calibri")
+    subtitle_font = InlineFont(sz = 8, b = False, rFont = "Calibri")
     rich_text = CellRichText([
         TextBlock(text="Effective Shopper Hours (ESH)\n", font=title_font),
         TextBlock(text="Shopper Hours + (Expo Hours Actual - Expo Hours Required) = ESH", font=subtitle_font)
@@ -532,9 +534,9 @@ def insert_effective_shopper_table(ws, employee_group, expeditor_map, time_block
     header_cell.value = rich_text
 
     # Apply border to all merged cells manually
-    for row in ws.iter_rows(min_row=start_row, max_row=start_row+1, min_col=start_col, max_col=start_col+3):
+    for row in ws.iter_rows(min_row = start_row, max_row = start_row+1, min_col = start_col, max_col = start_col + 3):
         for cell in row:
-            cell.border = thin_border
+            cell.border = thick_border
 
     # Move to next row for column labels
     current_row = start_row + 2
@@ -578,7 +580,7 @@ def insert_effective_shopper_table(ws, employee_group, expeditor_map, time_block
 
         actual_expo_hours = expeditor_overlaps.get(block_name, 0)
         actual_shopper_hours = shopper_overlaps.get(block_name, 0)
-        required_expo_hours = expeditor_map[day_index].get(i, 0)
+        required_expo_hours = expeditor_requirements.get(i, 0)
 
         effective_hours = actual_shopper_hours + (actual_expo_hours - required_expo_hours)
 
@@ -703,125 +705,19 @@ ROLE_MAP = {
 }
 
 EXPEDITOR_REQUIREMENTS = {
-    "Hannaford to Go": {
-        0: {  # Sunday
-            0: 0,   # 05:00 - 06:00
-            1: 0,   # 06:00 - 07:00
-            2: 1,   # 07:00 - 08:00
-            3: 2,   # 08:00 - 09:00
-            4: 3,   # 09:00 - 10:00
-            5: 3,   # 10:00 - 11:00
-            6: 3,   # 11:00 - 12:00
-            7: 3,   # 12:00 - 13:00
-            8: 3,   # 13:00 - 14:00
-            9: 3,   # 14:00 - 15:00
-            10: 3,  # 15:00 - 16:00
-            11: 3,  # 16:00 - 17:00
-            12: 3,  # 17:00 - 18:00
-            13: 2,  # 18:00 - 19:00
-            14: 1,  # 19:00 - 20:00
-        },
-        1: {  # Monday
-            0: 0,   # 05:00 - 06:00
-            1: 0,   # 06:00 - 07:00
-            2: 1,   # 07:00 - 08:00
-            3: 2,   # 08:00 - 09:00
-            4: 2,   # 09:00 - 10:00
-            5: 2,   # 10:00 - 11:00
-            6: 2,   # 11:00 - 12:00
-            7: 3,   # 12:00 - 13:00
-            8: 3,   # 13:00 - 14:00
-            9: 2,   # 14:00 - 15:00
-            10: 2,  # 15:00 - 16:00
-            11: 3,  # 16:00 - 17:00
-            12: 3,  # 17:00 - 18:00
-            13: 2,  # 18:00 - 19:00
-            14: 1,  # 19:00 - 20:00
-        },
-        2: {  # Tuesday
-            0: 0,   # 05:00 - 06:00
-            1: 0,   # 06:00 - 07:00
-            2: 1,   # 07:00 - 08:00
-            3: 2,   # 08:00 - 09:00
-            4: 2,   # 09:00 - 10:00
-            5: 2,   # 10:00 - 11:00
-            6: 2,   # 11:00 - 12:00
-            7: 2,   # 12:00 - 13:00
-            8: 2,   # 13:00 - 14:00
-            9: 2,   # 14:00 - 15:00
-            10: 2,  # 15:00 - 16:00
-            11: 2,  # 16:00 - 17:00
-            12: 2,  # 17:00 - 18:00
-            13: 1,  # 18:00 - 19:00
-            14: 1,  # 19:00 - 20:00
-        },
-        3: {  # Wednesday
-            0: 0,   # 05:00 - 06:00
-            1: 0,   # 06:00 - 07:00
-            2: 1,   # 07:00 - 08:00
-            3: 2,   # 08:00 - 09:00
-            4: 2,   # 09:00 - 10:00
-            5: 2,   # 10:00 - 11:00
-            6: 2,   # 11:00 - 12:00
-            7: 2,   # 12:00 - 13:00
-            8: 2,   # 13:00 - 14:00
-            9: 2,   # 14:00 - 15:00
-            10: 2,  # 15:00 - 16:00
-            11: 2,  # 16:00 - 17:00
-            12: 2,  # 17:00 - 18:00
-            13: 1,  # 18:00 - 19:00
-            14: 1,  # 19:00 - 20:00
-        },
-        4: {  # Thursday
-            0: 0,   # 05:00 - 06:00
-            1: 0,   # 06:00 - 07:00
-            2: 1,   # 07:00 - 08:00
-            3: 2,   # 08:00 - 09:00
-            4: 2,   # 09:00 - 10:00
-            5: 2,   # 10:00 - 11:00
-            6: 2,   # 11:00 - 12:00
-            7: 2,   # 12:00 - 13:00
-            8: 2,   # 13:00 - 14:00
-            9: 2,   # 14:00 - 15:00
-            10: 2,  # 15:00 - 16:00
-            11: 2,  # 16:00 - 17:00
-            12: 2,  # 17:00 - 18:00
-            13: 1,  # 18:00 - 19:00
-            14: 1,  # 19:00 - 20:00
-        },
-        5: {  # Friday
-            0: 0,   # 05:00 - 06:00
-            1: 0,   # 06:00 - 07:00
-            2: 1,   # 07:00 - 08:00
-            3: 2,   # 08:00 - 09:00
-            4: 3,   # 09:00 - 10:00
-            5: 3,   # 10:00 - 11:00
-            6: 3,   # 11:00 - 12:00
-            7: 3,   # 12:00 - 13:00
-            8: 3,   # 13:00 - 14:00
-            9: 2,   # 14:00 - 15:00
-            10: 2,  # 15:00 - 16:00
-            11: 3,  # 16:00 - 17:00
-            12: 3,  # 17:00 - 18:00
-            13: 2,  # 18:00 - 19:00
-            14: 1,  # 19:00 - 20:00
-        },
-        6: {  # Saturday
-            0: 0,   # 05:00 - 06:00
-            1: 0,   # 06:00 - 07:00
-            2: 1,   # 07:00 - 08:00
-            3: 2,   # 08:00 - 09:00
-            4: 3,   # 09:00 - 10:00
-            5: 3,   # 10:00 - 11:00
-            6: 3,   # 11:00 - 12:00
-            7: 3,   # 12:00 - 13:00
-            8: 3,   # 13:00 - 14:00
-            9: 3,   # 14:00 - 15:00
-            10: 3,  # 15:00 - 16:00
-            11: 3,  # 16:00 - 17:00
-            12: 3,  # 17:00 - 18:00
-            13: 2,  # 18:00 - 19:00
-            14: 1,  # 19:00 - 20:00
-        }
-    }
+0: 1,   # 05:00 - 06:00
+1: 1,   # 06:00 - 07:00
+2: 2,   # 07:00 - 08:00
+3: 3,   # 08:00 - 09:00
+4: 3,   # 09:00 - 10:00
+5: 3,   # 10:00 - 11:00
+6: 3,   # 11:00 - 12:00
+7: 3,   # 12:00 - 13:00
+8: 3,   # 13:00 - 14:00
+9: 3,   # 14:00 - 15:00
+10: 3,  # 15:00 - 16:00
+11: 3,  # 16:00 - 17:00
+12: 3,  # 17:00 - 18:00
+13: 2,  # 18:00 - 19:00
+14: 1,  # 19:00 - 20:00
 }

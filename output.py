@@ -36,7 +36,7 @@ def populate_workbook(wb, dept, column_day_map, is_wall: bool = False):
 
         # Special case for Hannaford to Go department
         if dept.dept_name == 'Hannaford to Go':
-            u.insert_effective_shopper_table(ws, employee_group, u.EXPEDITOR_REQUIREMENTS["Hannaford to Go"], time_blocks, day)
+            u.insert_effective_shopper_table(ws, employee_group, u.EXPEDITOR_REQUIREMENTS, time_blocks, day)
         else:
             u.insert_labor_trackers(ws, employee_group, time_blocks, day)
 
