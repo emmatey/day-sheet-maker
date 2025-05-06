@@ -5,15 +5,17 @@ import utils as u
 
 # --- Global Variables ---
 import os
-csv_path = r"/home/emmatey/src/Day-Sheet-Maker/Source Data/output.csv"
+csv_path = r"/home/emmatey/code/day-sheet-maker/python/source data/output.csv"
+base_output_path = r"/home/emmatey/code/day-sheet-maker/Output"
 hrd = builder.build_store(csv_path)
 column_day_map = u.column_day_map(csv_path)
 
 # Create output directories if they don't exist
-for folder in ["output", "output/table", "output/wall"]:
-    if not os.path.exists(folder):
-        print(f"Creating directory: {folder}")
-        os.makedirs(folder)
+for folder in ["Table", "Wall"]:
+    full_folder_path = os.path.join(base_output_path, folder)
+    if not os.path.exists(full_folder_path):
+        print(f"Creating directory: {full_folder_path}")
+        os.makedirs(full_folder_path)
 
 # Filter out empty departments
 valid_depts = []
@@ -22,7 +24,6 @@ for dept in hrd.department_list:
         valid_depts.append(dept)
         print(f"Added department: '{dept.dept_name}'")
 
-# --- Functions ---
 def populate_workbook(wb, dept, column_day_map, is_wall: bool = False):
     for day, sheetname in enumerate(wb.sheetnames):
         ws = wb[sheetname]
@@ -100,11 +101,6 @@ def populate_workbook(wb, dept, column_day_map, is_wall: bool = False):
     return is_wall
 
 # --- Main Loop ---
-print("\nGenerating Day Sheets for all departments...")
-print("Files will be saved to:")
-print("  - output/table/ - For table versions (landscape orientation)")
-print("  - output/wall/ - For wall versions (portrait orientation with hidden columns)")
-print()
 
 for dept in valid_depts:
     # Generate both table and wall versions
@@ -116,10 +112,10 @@ for dept in valid_depts:
         is_wall = populate_workbook(wb, dept, column_day_map, is_wall=wall_mode)
 
         # Prepare folder path and filename
-        folder = "wall" if is_wall else "table"  # Choose folder based on is_wall flag
+        folder = "Wall" if is_wall else "Table"  # Choose folder based on is_wall flag
         save_name = dept.dept_name.replace(" ", "_")
 
         # Save to appropriate output folder
-        output_path = f"output/{folder}/{save_name}.xlsx"
+        output_path = os.path.join(base_output_path, folder, f"{save_name}.xlsx")
         print(f"Saving {output_path}")
         wb.save(output_path)
