@@ -6,7 +6,7 @@ import builder
 import utils as u
 
 
-def process_input(input_file):
+def ProcessInput(input_file):
     """
     Validates and processes the input file.
 
@@ -36,6 +36,15 @@ def process_input(input_file):
         raise ValueError('Invalid Input')
 
     return csv_file
+
+
+def FindValidDepts(hrd):
+    valid_depts = []
+    for dept in hrd.department_list:
+        if len(dept.employees) > 0:
+            valid_depts.append(dept)
+            print(f"Added department: '{dept.dept_name}'")
+    return valid_depts
 
 
 def ProcessOutput(save_location_path, valid_depts, column_day_map, WEEK_ENDING_DATE):
@@ -173,10 +182,10 @@ if __name__ == "__main__":
     input_file = sys.argv[1]
     save_folder = sys.argv[2]
 
-    csv_path = process_input(input_file)
+    csv_path = ProcessInput(input_file)
     hrd = builder.build_store(csv_path)
     column_day_map = u.column_day_map(csv_path)
-    valid_depts = [d for d in hrd.department_list if d.employees]
+    valid_depts = FindValidDepts(hrd)
 
     _, date_list = column_day_map
     weekEndingDate = date_list[-1]
