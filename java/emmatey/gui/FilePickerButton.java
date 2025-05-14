@@ -4,7 +4,7 @@ import javax.swing.filechooser.FileNameExtensionFilter;
 import java.io.File;
 import java.util.function.Consumer;
 
-public class FilePickerButton {
+public class FilePickerButton{
 
     public static JButton createButtonWithCallback(Consumer<String> onFilePicked){
        JButton button = new JButton("Choose Input File");

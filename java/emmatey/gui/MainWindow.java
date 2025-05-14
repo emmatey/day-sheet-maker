@@ -9,7 +9,7 @@ public class MainWindow implements Runnable {
     private String selectedFilePath;
 
     public void run() {
-     JFrame frame = new JFrame("Emma wuz here");  
+     JFrame frame = new JFrame();  
      frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
      frame.setSize(600, 480);
      frame.setLocationRelativeTo(null); //null argument sets frame to center of screen
@@ -39,6 +39,11 @@ public class MainWindow implements Runnable {
      filePickerButton.setPreferredSize(new Dimension(250, 50));
      filePickerButton.setMaximumSize(new Dimension(250, 50));
      contentPanel.add(filePickerButton);
+
+     //Add 'Generate' Button
+     JButton generateButton = GenerateButton.createGeneraButton();
+     contentPanel.add(generateButton);
+
 
      //Add panels to frame
      frame.getContentPane().add(header, BorderLayout.NORTH);

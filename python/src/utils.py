@@ -5,10 +5,9 @@ import models as m
 import datetime
 from copy import copy
 from collections import defaultdict
-from openpyxl.styles import Border, Side, Font, Alignment, PatternFill
+from openpyxl.styles import Border, Side, Font, Alignment
 from openpyxl.cell.rich_text import TextBlock, CellRichText
 from openpyxl.cell.text import InlineFont
-from openpyxl.utils import get_column_letter
 
 
 def department_row_map(csv_path):

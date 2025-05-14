@@ -1,30 +1,93 @@
 import openpyxl
-import openpyxl.utils
+import os
+import pandas as pd
+import sys
 import builder
 import utils as u
 
-# --- Global Variables ---
-import os
-csv_path = r"/home/emmatey/code/day-sheet-maker/python/source data/output.csv"
-base_output_path = r"/home/emmatey/code/day-sheet-maker/Output"
-hrd = builder.build_store(csv_path)
-column_day_map = u.column_day_map(csv_path)
 
-# Create output directories if they don't exist
-for folder in ["Table", "Wall"]:
-    full_folder_path = os.path.join(base_output_path, folder)
-    if not os.path.exists(full_folder_path):
-        print(f"Creating directory: {full_folder_path}")
-        os.makedirs(full_folder_path)
+def process_input(input_file):
+    """
+    Validates and processes the input file.
 
-# Filter out empty departments
-valid_depts = []
-for dept in hrd.department_list:
-    if len(dept.employees) > 0:
-        valid_depts.append(dept)
-        print(f"Added department: '{dept.dept_name}'")
+    If the file is an .xlsx, converts it to .csv.
+    If the file is already a .csv, uses it as-is.
+    Raises an error if the file type is unsupported.
+
+    Parameters:
+        input_file (str): Path to the input file (.csv or .xlsx)
+
+    Returns:
+        str: Path to the resulting .csv file
+    """
+    _, ext = os.path.splitext(input_file)
+    ext = ext.lower()
+
+    if ext == '.xlsx':
+        try:
+            df = pd.read_excel(input_file)
+            csv_file = input_file.replace('.xlsx', '_converted.csv')
+            df.to_csv(csv_file, index=False)
+        except:
+            raise ValueError('Invalid Input')
+    elif ext == '.csv':
+        csv_file = input_file
+    else:
+        raise ValueError('Invalid Input')
+
+    return csv_file
+
+
+def ProcessOutput(save_location_path, valid_depts, column_day_map, WEEK_ENDING_DATE):
+    """
+    Generates staffing sheet outputs for each department in both Table and Wall format.
+
+    Files are saved into a folder named 'daysheets-weekEnding-{WEEK_ENDING_DATE}' inside the given save path.
+
+    Parameters:
+        save_location_path (str): Base directory where output folder should be created
+        valid_depts (List[Department]): Departments to generate sheets for
+        column_day_map (Tuple[Dict[int, int], List[str]]): Tuple returned by u.column_day_map
+        WEEK_ENDING_DATE (str): The last date in the schedule (e.g. '3/22')
+
+    Returns:
+        str: Full path to the created output folder
+    """
+    outPath = os.path.join(save_location_path, f'DaySheets_WeekEnding_{WEEK_ENDING_DATE}')
+    os.makedirs(outPath, exist_ok=True)
+
+    for dept in valid_depts:
+        for wall_mode in [False, True]:
+            wb = openpyxl.load_workbook('Day Sheet Master.xlsx')
+            is_wall = populate_workbook(wb, dept, column_day_map, is_wall=wall_mode)
+
+            save_name = dept.dept_name.replace(" ", "_")
+            if is_wall:
+                save_name += "_WALL"
+
+            file_path = os.path.join(outPath, f"{save_name}.xlsx")
+            print(f"Saving: {file_path}")
+            wb.save(file_path)
+
+    return outPath
+
 
 def populate_workbook(wb, dept, column_day_map, is_wall: bool = False):
+    """
+    Populates each sheet in the given workbook with employee scheduling data
+    for the specified department.
+
+    Supports both 'table' and 'wall' layouts, and applies formatting accordingly.
+
+    Parameters:
+        wb (Workbook): An openpyxl Workbook object to populate
+        dept (Department): The department object to generate a schedule for
+        column_day_map (Tuple[Dict[int, int], List[str]]): Mapping of Excel columns to weekdays and a list of dates
+        is_wall (bool): If True, apply 'wall mode' formatting and layout
+
+    Returns:
+        bool: The is_wall flag, unchanged — used for naming output files
+    """
     for day, sheetname in enumerate(wb.sheetnames):
         ws = wb[sheetname]
 
@@ -42,7 +105,6 @@ def populate_workbook(wb, dept, column_day_map, is_wall: bool = False):
             u.insert_labor_trackers(ws, employee_group, time_blocks, day)
 
         # --- Page Setup & Formatting ---
-        # Hide columns if "wall" mode
         if is_wall:
             ws.column_dimensions['D'].hidden = True
             ws.column_dimensions['E'].hidden = True
@@ -75,47 +137,50 @@ def populate_workbook(wb, dept, column_day_map, is_wall: bool = False):
         ws.print_options.horizontalCentered = True
         ws.print_options.verticalCentered = False
 
-        # Set base column widths (A–M)
+        # Column Widths
         column_widths = {
             'A': 30.0, 'B': 12.0, 'C': 12.0, 'D': 5.0, 'E': 5.0,
             'F': 5.0, 'G': 8.0, 'H': 5.0, 'I': 3.0, 'J': 3.0,
-            #'K': 10.0, #'L': 10.0, #'M': 10.0
         }
         for col, width in column_widths.items():
             ws.column_dimensions[col].width = width
 
-        # Customize columns J–M for Hannaford to Go
         if dept.dept_name.lower() == 'hannaford to go':
             ws.column_dimensions['K'].width = 20
             ws.column_dimensions['L'].width = 10
             ws.column_dimensions['M'].width = 5
             ws.column_dimensions['N'].width = 5
 
-
-        # --- Print Area ---
+        # Print Area
         last_row = ws.max_row
         last_col_letter = openpyxl.utils.get_column_letter(14)  # Column N = 14
         ws.print_area = f"A1:{last_col_letter}{last_row}"
 
-    # Return the is_wall flag so we know whether to add "_wall" to the filename
     return is_wall
 
-# --- Main Loop ---
 
-for dept in valid_depts:
-    # Generate both table and wall versions
-    for wall_mode in [False, True]:  # First create table version, then wall version
-        # Load fresh master template for each department and each version
-        wb = openpyxl.load_workbook('Day Sheet Master.xlsx')
+if __name__ == "__main__":
+    """
+    Command-line entry point.
 
-        # Populate and get is_wall flag back
-        is_wall = populate_workbook(wb, dept, column_day_map, is_wall=wall_mode)
+    Usage:
+        python output.py <input_file> <save_directory>
+    """
+    if len(sys.argv) != 3:
+        print("Usage: python output.py <input_file> <save_directory>")
+        sys.exit(1)
 
-        # Prepare folder path and filename
-        folder = "Wall" if is_wall else "Table"  # Choose folder based on is_wall flag
-        save_name = dept.dept_name.replace(" ", "_")
+    input_file = sys.argv[1]
+    save_folder = sys.argv[2]
 
-        # Save to appropriate output folder
-        output_path = os.path.join(base_output_path, folder, f"{save_name}.xlsx")
-        print(f"Saving {output_path}")
-        wb.save(output_path)
+    csv_path = process_input(input_file)
+    hrd = builder.build_store(csv_path)
+    column_day_map = u.column_day_map(csv_path)
+    valid_depts = [d for d in hrd.department_list if d.employees]
+
+    _, date_list = column_day_map
+    weekEndingDate = date_list[-1]
+    WEEK_ENDING_DATE = weekEndingDate.replace('/', '-')
+
+    output_path = ProcessOutput(save_folder, valid_depts, column_day_map, WEEK_ENDING_DATE)
+    print(f"\n Done! Files saved in:\n{output_path}")
