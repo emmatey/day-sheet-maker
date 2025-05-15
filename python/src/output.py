@@ -1,3 +1,5 @@
+import argparse
+from numpy import outer
 import openpyxl
 import os
 import pandas as pd
@@ -39,15 +41,23 @@ def ProcessInput(input_file):
 
 
 def FindValidDepts(hrd):
+    """
+    Filters the department list to only those with at least one employee.
+
+    Parameters:
+        hrd (HierarchyRootDepartment): The root department object
+
+    Returns:
+        List[Department]: List of departments with employees
+    """
     valid_depts = []
     for dept in hrd.department_list:
         if len(dept.employees) > 0:
-            valid_depts.append(dept)
-            print(f"Added department: '{dept.dept_name}'")
+            valid_depts.append(dept.dept_name)
     return valid_depts
 
 
-def ProcessOutput(save_location_path, valid_depts, column_day_map, WEEK_ENDING_DATE):
+def ProcessOutput(save_location_path, output_depts, column_day_map, WEEK_ENDING_DATE):
     """
     Generates staffing sheet outputs for each department in both Table and Wall format.
 
@@ -55,7 +65,7 @@ def ProcessOutput(save_location_path, valid_depts, column_day_map, WEEK_ENDING_D
 
     Parameters:
         save_location_path (str): Base directory where output folder should be created
-        valid_depts (List[Department]): Departments to generate sheets for
+        output_depts (List[Department]): Departments to generate sheets for
         column_day_map (Tuple[Dict[int, int], List[str]]): Tuple returned by u.column_day_map
         WEEK_ENDING_DATE (str): The last date in the schedule (e.g. '3/22')
 
@@ -63,9 +73,9 @@ def ProcessOutput(save_location_path, valid_depts, column_day_map, WEEK_ENDING_D
         str: Full path to the created output folder
     """
     outPath = os.path.join(save_location_path, f'DaySheets_WeekEnding_{WEEK_ENDING_DATE}')
-    os.makedirs(outPath, exist_ok=True)
+    os.makedirs(outPath, exist_ok = True)
 
-    for dept in valid_depts:
+    for dept in output_depts:
         for wall_mode in [False, True]:
             wb = openpyxl.load_workbook('Day Sheet Master.xlsx')
             is_wall = populate_workbook(wb, dept, column_day_map, is_wall=wall_mode)
@@ -174,22 +184,36 @@ if __name__ == "__main__":
 
     Usage:
         python output.py <input_file> <save_directory>
+        --departments <depts_to_output>
+        --preview <prints FindValidDepts>
     """
-    if len(sys.argv) != 3:
-        print("Usage: python output.py <input_file> <save_directory>")
-        sys.exit(1)
 
-    input_file = sys.argv[1]
-    save_folder = sys.argv[2]
+    parser = argparse.ArgumentParser()
+    parser.add_argument('input_file', type = str)
+    parser.add_argument('save_directory', type = str)
+    parser.add_argument('--preview', action = 'store_true')
+    parser.add_argument('--departments', nargs = '+')
+    args = parser.parse_args()
 
-    csv_path = ProcessInput(input_file)
+    csv_path = ProcessInput(args.input_file)
     hrd = builder.build_store(csv_path)
     column_day_map = u.column_day_map(csv_path)
-    valid_depts = FindValidDepts(hrd)
 
-    _, date_list = column_day_map
-    weekEndingDate = date_list[-1]
-    WEEK_ENDING_DATE = weekEndingDate.replace('/', '-')
+    if args.preview:
+        preview_depts = FindValidDepts(hrd)
+        print(preview_depts)
 
-    output_path = ProcessOutput(save_folder, valid_depts, column_day_map, WEEK_ENDING_DATE)
-    print(f"\n Done! Files saved in:\n{output_path}")
+    elif args.departments:
+        #Get Week Ending Date
+        _, date_list = column_day_map
+        weekEndingDate = date_list[-1]
+        WEEK_ENDING_DATE = weekEndingDate.replace('/', '-')
+
+        output_depts = []
+        for dept in hrd.department_list:
+                if dept.dept_name in args.departments:
+                    output_depts.append(dept)
+
+        print(output_depts)
+        output_path = ProcessOutput(args.save_directory, output_depts, column_day_map, WEEK_ENDING_DATE)
+        print(f"\n Done! Files saved in:\n{output_path}")
