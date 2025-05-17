@@ -1,9 +1,7 @@
 import argparse
-from numpy import outer
 import openpyxl
 import os
 import pandas as pd
-import sys
 import builder
 import utils as u
 
@@ -184,8 +182,10 @@ if __name__ == "__main__":
 
     Usage:
         python output.py <input_file> <save_directory>
-        --departments <depts_to_output>
-        --preview <prints FindValidDepts>
+        --departments
+            a list of the departments to be processed and output. chosen by user from GUI
+        --preview
+            prints [FindValidDepts()]
     """
 
     parser = argparse.ArgumentParser()
@@ -201,7 +201,8 @@ if __name__ == "__main__":
 
     if args.preview:
         preview_depts = FindValidDepts(hrd)
-        print(preview_depts)
+        for dept in preview_depts:
+            print(dept)
 
     elif args.departments:
         #Get Week Ending Date
