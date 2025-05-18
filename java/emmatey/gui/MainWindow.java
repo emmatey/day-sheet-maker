@@ -1,3 +1,10 @@
+//FLOW 
+//Done
+//pick file > detect valid dept > pick dept(s) to process >
+//TO-Do
+//generate 'big red button' dialogue. two panels. generate button. output loc button> 
+//generate button is visually 'off' > saveloc clicked > open file picker > choose file > big red button comes online
+//click > play sound > close program > open saveloc.
 import javax.swing.*;
 import java.awt.BorderLayout;
 import java.awt.Color;
@@ -26,7 +33,7 @@ public class MainWindow implements Runnable {
      
      //Create Button Panel
      JPanel buttonPanel = new JPanel();
-     buttonPanel.setBackground(new Color(119, 221, 119));
+     buttonPanel.setBackground(new Color(253, 187, 244));
      buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
      buttonPanel.setPreferredSize(new Dimension(600, 55));
 
@@ -36,6 +43,8 @@ public class MainWindow implements Runnable {
      checkBoxPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
      checkBoxPanel.setPreferredSize(new Dimension(600, 335));
      checkBoxPanel.add(new JLabel("Pictures Will Go Here!"));
+     //eventually I want to point to a folder full of jpgs with a manifest file with file names. loop through manifest file and pick
+     //one at random on startup. would allow to change pics without updating app.
 
      //Add File Picker Button
      JButton filePickerButton = FilePickerButton.createButtonWithCallback(path -> {

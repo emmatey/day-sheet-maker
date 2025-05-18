@@ -1,15 +1,11 @@
 //this dialogue requires a list of strings from the getValidDepts() python funciton.
-import java.awt.FlowLayout;
+import java.awt.Dimension;
 import java.awt.GridLayout;
+
+import javax.swing.*;
+
 import java.util.ArrayList;
 import java.util.List;
-
-import javax.swing.ImageIcon;
-import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JOptionPane;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
 
 public class DepartmentSelectionDialog{
     
@@ -19,6 +15,7 @@ public class DepartmentSelectionDialog{
 
        // Holder pannel to be passed to JOptionPane
        JPanel holderPanel = new JPanel();
+       holderPanel.setLayout(new BoxLayout(holderPanel, BoxLayout.Y_AXIS));
 
        // Checkbox Panel
        JPanel checkboxPanel = new JPanel();
@@ -27,7 +24,7 @@ public class DepartmentSelectionDialog{
        
        // Button Panel
        JPanel buttonPanel = new JPanel();
-       buttonPanel.setLayout(new FlowLayout());
+       buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.X_AXIS));
        holderPanel.add(buttonPanel);
 
        // Select All Button
@@ -38,6 +35,7 @@ public class DepartmentSelectionDialog{
             }
         });
         buttonPanel.add(selectAll);
+        buttonPanel.add(Box.createRigidArea(new Dimension(7, 0)));  // horizontal gap between buttons
 
         // De-Select All Button
         JButton deselectAll = new JButton("De-Select All");
@@ -61,6 +59,9 @@ public class DepartmentSelectionDialog{
        // Add Picture
        ImageIcon gifIcon = new ImageIcon("../assets/dance-skeleton.gif");
        
+       // Move JOptionPane Buttons
+       UIManager.put("OptionPane.buttonOrientation", SwingConstants.LEFT);
+
        // Call JOptionPane Helper
         int returnValue = JOptionPane.showConfirmDialog(
         null,

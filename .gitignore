@@ -2,6 +2,7 @@
 notepad.odt
 test.py
 scratchpad.py
+notebooks/**
 
 # Generated Data/Output
 Output/**
