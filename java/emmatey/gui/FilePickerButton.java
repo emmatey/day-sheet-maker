@@ -17,7 +17,7 @@ public class FilePickerButton{
         );
         fileChooser.setFileFilter(filter);
         
-        //showOpenDialog, opens file chooser, and returns a value of 0 if file is picked, 1 if not, -1 if err
+        //opens file chooser, and returns a value of 0 if file is picked, 1 if not, -1 if err
         int result = fileChooser.showDialog(null, "Select Input File"); 
 
         //APPROVE_OPTION is a 'constant' equal to int 0 if a file is chosen.

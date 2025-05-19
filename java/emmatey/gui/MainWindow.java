@@ -37,16 +37,7 @@ public class MainWindow implements Runnable {
      buttonPanel.setLayout(new BoxLayout(buttonPanel, BoxLayout.Y_AXIS));
      buttonPanel.setPreferredSize(new Dimension(600, 55));
 
-     //Create Photo Panel
-     JPanel checkBoxPanel = new JPanel();
-     checkBoxPanel.setBackground(new Color(153, 0, 0));
-     checkBoxPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
-     checkBoxPanel.setPreferredSize(new Dimension(600, 335));
-     checkBoxPanel.add(new JLabel("Pictures Will Go Here!"));
-     //eventually I want to point to a folder full of jpgs with a manifest file with file names. loop through manifest file and pick
-     //one at random on startup. would allow to change pics without updating app.
-
-     //Add File Picker Button
+     //Call File Picker Button
      JButton filePickerButton = FilePickerButton.createButtonWithCallback(path -> {
       String selectedFilePath = path;
       List<String> validDepartments = PythonRunner.runPreview(selectedFilePath);
@@ -54,16 +45,26 @@ public class MainWindow implements Runnable {
       System.out.println(selectedDepartments);
      });
      
+     //Add File Picker Button
      filePickerButton.setAlignmentX(Component.CENTER_ALIGNMENT);
      filePickerButton.setFont(new Font("Monospaced", Font.BOLD, 16));
      filePickerButton.setPreferredSize(new Dimension(250, 50));
      filePickerButton.setMaximumSize(new Dimension(250, 50));
      buttonPanel.add(filePickerButton);
+     
+     //Create Photo Panel
+     JPanel photoPanel = new JPanel();
+     photoPanel.setBackground(new Color(153, 0, 0));
+     photoPanel.setLayout(new FlowLayout(FlowLayout.LEFT));
+     photoPanel.setPreferredSize(new Dimension(600, 335));
+     photoPanel.add(new JLabel("Pictures Will Go Here!"));
+     //eventually I want to point to a folder full of jpgs with a manifest file with file names. loop through manifest file and pick
+     //one at random on startup. would allow to change pics without updating app.
 
      //Add panels to frame
      frame.getContentPane().add(header, BorderLayout.NORTH);
      frame.getContentPane().add(buttonPanel, BorderLayout.CENTER);
-     frame.getContentPane().add(checkBoxPanel, BorderLayout.SOUTH);
+     frame.getContentPane().add(photoPanel, BorderLayout.SOUTH);
      frame.setVisible(true);
      frame.pack();
     }
