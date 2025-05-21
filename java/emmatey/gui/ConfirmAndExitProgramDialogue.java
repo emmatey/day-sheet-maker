@@ -1,6 +1,8 @@
-import java.util.List;
-
+import java.awt.*;
 import javax.swing.*;
+
+import java.io.File;
+import java.util.List;
 
 public class ConfirmAndExitProgramDialogue extends JDialog {
 
@@ -12,45 +14,66 @@ public class ConfirmAndExitProgramDialogue extends JDialog {
         selectedDepartments);
      };
     
-    public static void showDialog(String selectedFilePath, String savePath, List<String>selectedDepartments){
-        //Final Dialogue. This window will have a picture
-        //pannel, a loading bar, and a final close button
-        //that will end the program and open saveloc
-        //Will need one save and exit button
-        //one loading bar
-        //one photo framer 
-
+    public static void showDialog(JFrame parentFrame, String selectedFilePath, String savePath, List<String>selectedDepartments){
         //Create Parrent Window
-        JDialog dialogue = new JDialog();
+        JDialog dialogue = new JDialog(parentFrame, "Waiting Room", true);
 
         //Create Holder Panel
         JPanel holder = new JPanel();
         holder.setLayout(new BoxLayout(holder, BoxLayout.Y_AXIS));
 
-        //Create Photo Panel
-        JPanel photoFrame = new JPanel();
-        //placeholder
-        JLabel pic = new JLabel(new ImageIcon("skeleton-dance.gif"));
-        pic.setAlignmentX(CENTER_ALIGNMENT);
-        photoFrame.add(pic);
-        //placeholder
-        holder.add(photoFrame);
+        //Create Header Panel
+        JPanel header = new JPanel();
+        header.setBackground(new Color(253, 187, 244)); 
+        //header.setPreferredSize(new Dimension(600, 75));
+     
+        JLabel header_text = new JLabel("Image of the Day", SwingConstants.CENTER);
+        header_text.setFont(new Font("SansSerif", Font.BOLD, 24));
+        header_text.setHorizontalAlignment(SwingConstants.CENTER);
+        header.add(header_text);
+        holder.add(header);
 
-        //Create Progress Bar
+        //Create Photo Panel
+        JPanel photoPanel = new JPanel();
+        //placeholder########################################################
+        JLabel pic = new JLabel(new ImageIcon("../assets/dance-skeleton.gif"));
+        pic.setAlignmentX(CENTER_ALIGNMENT);
+        photoPanel.add(pic);
+        //placeholder########################################################
+        holder.add(photoPanel);
+        
+        //Create Loading Bar and Button Panel
+        JPanel progressAndClosePanel = new JPanel();
+        holder.add(progressAndClosePanel);
+
+        // Create Progress Bar
         JProgressBar progressBar = new JProgressBar();
         progressBar.setIndeterminate(true);
         progressBar.setString("Generating Day Sheets....Beep Boop");
         progressBar.setStringPainted(true);
-        holder.add(progressBar);
+        progressAndClosePanel.add(progressBar);
 
-        //Create JButton, Confirm and Close
-        JButton closeButton = new JButton("Zip It Up \n & \n Zip..It..Out!");
+        // Create JButton, Confirm and Close
+        JButton closeButton = new JButton("Save and Exit");
+        closeButton.setEnabled(false);
         closeButton.addActionListener(event -> {
+            try {
+                Desktop.getDesktop().open(new File(savePath));
+            } catch (Exception ex) {
+                ex.printStackTrace();
+                JOptionPane.showMessageDialog(parentFrame, "Could not open folder:\n" + savePath);
+                return;
+            }
+
+            System.exit(0);
         });
-        holder.add(closeButton);
+        progressAndClosePanel.add(closeButton);
+
+
+
 
         //Create Background Thread
-        SwingWorker lilLoader = new SwingWorker<Void, Void>() {
+        SwingWorker<Void, Void> lilLoader = new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground(){
                 handleSave(selectedFilePath, savePath, selectedDepartments);
@@ -59,17 +82,26 @@ public class ConfirmAndExitProgramDialogue extends JDialog {
             
             @Override
             protected void done(){
+                // Loading Bar
                 progressBar.setIndeterminate(false);
+                progressBar.setString("Complete!");
 
+                // Close Button
+                closeButton.setEnabled(true);
+                closeButton.setBackground(Color.GREEN);
+
+                // Audio Cue
+                Toolkit.getDefaultToolkit().beep();
             }
         };
-        //Add panels to frame
-        dialogue.add(holder);
-        dialogue.pack();
-        dialogue.setVisible(true);
 
         lilLoader.execute();
 
+        //Add panels to frame
+        dialogue.add(holder);
+        dialogue.pack();
+        dialogue.setLocationRelativeTo(parentFrame);
+        dialogue.setVisible(true);
     }
 
 }

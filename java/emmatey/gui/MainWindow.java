@@ -50,6 +50,7 @@ public class MainWindow implements Runnable {
      JButton saveLocButton = SaveDirPicker.createButton(path -> {
         this.saveDirPath = path;
         ConfirmAndExitProgramDialogue.showDialog(
+         mainFrame,
          selectedFilePath,
          saveDirPath, 
          selectedDepartments);
