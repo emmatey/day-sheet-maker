@@ -4,7 +4,7 @@ import java.util.function.Consumer;
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 
-public class saveDirPicker {
+public class SaveDirPicker {
 
     public static JButton createButton(Consumer<String> saveLoc){
         JButton saveButton = new JButton("Choose Save Location");

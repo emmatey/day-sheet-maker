@@ -1,14 +1,22 @@
+import java.awt.Component;
+import java.awt.Dimension;
+import java.awt.Font;
+import java.io.File;
+import java.util.function.Consumer;
+
 import javax.swing.JButton;
 import javax.swing.JFileChooser;
 import javax.swing.filechooser.FileNameExtensionFilter;
-import java.io.File;
-import java.util.function.Consumer;
 
 public class FilePickerButton{
 
     public static JButton createButtonWithCallback(Consumer<String> onFilePicked){
        JButton button = new JButton("Choose Input File");
        button.setToolTipText(".exe or .xlsx; whole store schedule.");
+       button.setAlignmentX(Component.CENTER_ALIGNMENT);
+       button.setFont(new Font("Monospaced", Font.BOLD, 16));
+       button.setPreferredSize(new Dimension(250, 50));
+       button.setMaximumSize(new Dimension(250, 50));
       
        button.addActionListener(event -> {
         JFileChooser fileChooser = new JFileChooser();
