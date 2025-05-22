@@ -1,3 +1,5 @@
+package emmatey.gui;
+
 import java.awt.*;
 import javax.swing.*;
 

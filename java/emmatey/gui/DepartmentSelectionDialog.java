@@ -1,3 +1,5 @@
+package emmatey.gui;
+
 //this dialogue requires a list of strings from the getValidDepts() python funciton.
 import java.awt.Dimension;
 import java.awt.GridLayout;

@@ -5,7 +5,6 @@ scratchpad.py
 notebooks/**
 
 # Generated Data/Output
-Output/**
 python/source data/**
 *.xlsx
 
