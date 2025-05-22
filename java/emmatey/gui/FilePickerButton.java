@@ -1,6 +1,7 @@
 import java.awt.Component;
 import java.awt.Dimension;
 import java.awt.Font;
+
 import java.io.File;
 import java.util.function.Consumer;
 
@@ -19,16 +20,21 @@ public class FilePickerButton{
        button.setMaximumSize(new Dimension(250, 50));
       
        button.addActionListener(event -> {
+        // spawn
         JFileChooser fileChooser = new JFileChooser();
         FileNameExtensionFilter filter = new FileNameExtensionFilter(
             "Spreadsheet Files (.xlsx, .csv)", "xlsx", "csv"
         );
         fileChooser.setFileFilter(filter);
-        
-        //opens file chooser, and returns a value of 0 if file is picked, 1 if not, -1 if err
-        int result = fileChooser.showDialog(null, "Select Input File"); 
 
-        //APPROVE_OPTION is a 'constant' equal to int 0 if a file is chosen.
+        // play music
+        File songPath = new File("../assets/thinkMusic.wav");
+        MediaHandler.playSound(songPath, false);
+        
+        // returns a value of 0 if file is picked, 1 if not, -1 if err
+        int result = fileChooser.showDialog(null, "Select Input File");
+
+        // APPROVE_OPTION is a 'constant' equal to int 0 if a file is chosen.
         if (result == JFileChooser.APPROVE_OPTION){
             File selectedFile = fileChooser.getSelectedFile();
             String absolutePath = selectedFile.getAbsolutePath();

@@ -15,34 +15,35 @@ public class ConfirmAndExitProgramDialogue extends JDialog {
      };
     
     public static void showDialog(JFrame parentFrame, String selectedFilePath, String savePath, List<String>selectedDepartments){
-        //Create Parrent Window
+        // Create Parrent Window
         JDialog dialogue = new JDialog(parentFrame, "Waiting Room", true);
 
-        //Create Holder Panel
+        // Create Holder Panel
         JPanel holder = new JPanel();
         holder.setLayout(new BoxLayout(holder, BoxLayout.Y_AXIS));
 
-        //Create Header Panel
+        // Create Header Panel
         JPanel header = new JPanel();
-        header.setBackground(new Color(253, 187, 244)); 
-        //header.setPreferredSize(new Dimension(600, 75));
-     
-        JLabel header_text = new JLabel("Image of the Day", SwingConstants.CENTER);
+        header.setBackground(new Color(128, 172, 221)); 
+
+        // Add Header Text
+        JLabel header_text = new JLabel("A Moment of Tranquility", SwingConstants.CENTER);
         header_text.setFont(new Font("SansSerif", Font.BOLD, 24));
         header_text.setHorizontalAlignment(SwingConstants.CENTER);
         header.add(header_text);
         holder.add(header);
 
-        //Create Photo Panel
+        // Create and Populate Media Panel
         JPanel photoPanel = new JPanel();
-        //placeholder########################################################
-        JLabel pic = new JLabel(new ImageIcon("../assets/dance-skeleton.gif"));
-        pic.setAlignmentX(CENTER_ALIGNMENT);
-        photoPanel.add(pic);
-        //placeholder########################################################
+        photoPanel.setBackground(new Color(128, 172, 221));
+        File gifPath = new File("../assets/hangingTree.gif");
+        JLabel media = MediaHandler.getGifLabel(gifPath);
+
+        media.setAlignmentX(CENTER_ALIGNMENT);
+        photoPanel.add(media);
         holder.add(photoPanel);
         
-        //Create Loading Bar and Button Panel
+        // Create Loading Bar and Button Panel
         JPanel progressAndClosePanel = new JPanel();
         holder.add(progressAndClosePanel);
 
@@ -69,10 +70,7 @@ public class ConfirmAndExitProgramDialogue extends JDialog {
         });
         progressAndClosePanel.add(closeButton);
 
-
-
-
-        //Create Background Thread
+        // Create Background Thread
         SwingWorker<Void, Void> lilLoader = new SwingWorker<Void, Void>() {
             @Override
             protected Void doInBackground(){
@@ -88,16 +86,19 @@ public class ConfirmAndExitProgramDialogue extends JDialog {
 
                 // Close Button
                 closeButton.setEnabled(true);
-                closeButton.setBackground(Color.GREEN);
+                closeButton.setBackground(new Color(180, 255, 200));
 
                 // Audio Cue
                 Toolkit.getDefaultToolkit().beep();
             }
         };
 
+        // Start Background Tasks
         lilLoader.execute();
+        File soundPath = new File("../assets/forestAudio.wav");
+        MediaHandler.playSound(soundPath, true);
 
-        //Add panels to frame
+        // Add panels to frame
         dialogue.add(holder);
         dialogue.pack();
         dialogue.setLocationRelativeTo(parentFrame);

@@ -1,6 +1,7 @@
 //this dialogue requires a list of strings from the getValidDepts() python funciton.
 import java.awt.Dimension;
 import java.awt.GridLayout;
+import java.io.File;
 
 import javax.swing.*;
 
@@ -57,7 +58,10 @@ public class DepartmentSelectionDialog{
         JScrollPane scrollPaneWrapper = new JScrollPane(holderPanel);
 
        // Add Picture
-       ImageIcon gifIcon = new ImageIcon("../assets/dance-skeleton.gif");
+       File gifFile = new File("../assets/danceSkeleton.gif");
+       System.out.println("Trying to load gif from: " + gifFile.getAbsolutePath());
+       System.out.println("Exists? " + gifFile.exists());
+       ImageIcon gifIcon = new ImageIcon(gifFile.getAbsolutePath());
        
        // Move JOptionPane Buttons
        UIManager.put("OptionPane.buttonOrientation", SwingConstants.LEFT);
