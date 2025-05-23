@@ -1,31 +1,29 @@
-﻿# Notes and Scratch Files
+﻿# Scratch / Local Notes
 notepad.odt
 test.py
 scratchpad.py
-notebooks/**
+notebooks/
 
-# Generated Data/Output
-python/source data/**
+# Compiled Executables
+/output*
+output.exe
+
+# Generated Data
 *.xlsx
+python/source data/
 
-# Java Bytecode
+# Java Build Artifacts
 *.class
+*.jar
 
 # Python Bytecode
 __pycache__/
 *.pyc
-
-# Temporary / OS Files
-*.bak
-*.swp
-*.tmp
-.DS_Store
-Thumbs.db
 
 # IDE and Project Configs
 .vscode/
 .ropeproject/
 .idea/
 
-# Allowlist
-!python/src/Day Sheet Master.xlsx
+# Allow List
+!assets/Day Sheet Master.xlsx
