@@ -1,5 +1,6 @@
 import argparse
 import openpyxl
+import sys
 import os
 import pandas as pd
 import builder
@@ -54,6 +55,8 @@ def FindValidDepts(hrd):
             valid_depts.append(dept.dept_name)
     return valid_depts
 
+def getBasePath():
+    return os.path.dirname(os.path.abspath(sys.argv[0]))
 
 def ProcessOutput(save_location_path, output_depts, column_day_map, WEEK_ENDING_DATE):
     """
@@ -75,7 +78,9 @@ def ProcessOutput(save_location_path, output_depts, column_day_map, WEEK_ENDING_
 
     for dept in output_depts:
         for wall_mode in [False, True]:
-            wb = openpyxl.load_workbook('Day Sheet Master.xlsx')
+            templatePath = os.path.join(getBasePath(), "assets", "Day Sheet Master.xlsx")
+            wb = openpyxl.load_workbook(templatePath)
+
             is_wall = populate_workbook(wb, dept, column_day_map, is_wall=wall_mode)
 
             save_name = dept.dept_name.replace(" ", "_")
@@ -85,6 +90,7 @@ def ProcessOutput(save_location_path, output_depts, column_day_map, WEEK_ENDING_
             file_path = os.path.join(outPath, f"{save_name}.xlsx")
             print(f"Saving: {file_path}")
             wb.save(file_path)
+            print(f"Saved: {file_path}")
 
     return outPath
 

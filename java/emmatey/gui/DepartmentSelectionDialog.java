@@ -60,10 +60,7 @@ public class DepartmentSelectionDialog{
         JScrollPane scrollPaneWrapper = new JScrollPane(holderPanel);
 
        // Add Picture
-       File gifFile = new File("../assets/danceSkeleton.gif");
-       System.out.println("Trying to load gif from: " + gifFile.getAbsolutePath());
-       System.out.println("Exists? " + gifFile.exists());
-       ImageIcon gifIcon = new ImageIcon(gifFile.getAbsolutePath());
+       ImageIcon gifIcon = MediaHandler.getGifIcon("danceSkeleton.gif");
        
        // Move JOptionPane Buttons
        UIManager.put("OptionPane.buttonOrientation", SwingConstants.LEFT);

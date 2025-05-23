@@ -38,9 +38,7 @@ public class ConfirmAndExitProgramDialogue extends JDialog {
         // Create and Populate Media Panel
         JPanel photoPanel = new JPanel();
         photoPanel.setBackground(new Color(128, 172, 221));
-        File gifPath = new File("../assets/hangingTree.gif");
-        JLabel media = MediaHandler.getGifLabel(gifPath);
-
+        JLabel media = MediaHandler.getGifLabel("hangingTree.gif");
         media.setAlignmentX(CENTER_ALIGNMENT);
         photoPanel.add(media);
         holder.add(photoPanel);
@@ -96,9 +94,8 @@ public class ConfirmAndExitProgramDialogue extends JDialog {
         };
 
         // Start Background Tasks
+        MediaHandler.playSound("forestAudio.wav", true);
         lilLoader.execute();
-        File soundPath = new File("../assets/forestAudio.wav");
-        MediaHandler.playSound(soundPath, true);
 
         // Add panels to frame
         dialogue.add(holder);

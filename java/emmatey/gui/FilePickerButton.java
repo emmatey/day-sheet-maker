@@ -30,8 +30,7 @@ public class FilePickerButton{
         fileChooser.setFileFilter(filter);
 
         // play music
-        File songPath = new File("../assets/thinkMusic.wav");
-        MediaHandler.playSound(songPath, false);
+        MediaHandler.playSound("thinkMusic.wav", false);
         
         // returns a value of 0 if file is picked, 1 if not, -1 if err
         int result = fileChooser.showDialog(null, "Select Input File");

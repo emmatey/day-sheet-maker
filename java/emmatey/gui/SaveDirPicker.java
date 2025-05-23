@@ -28,8 +28,7 @@ public class SaveDirPicker {
             fileChooser.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 
             // play music
-            File songPath = new File("../assets/thinkMusic.wav");
-            MediaHandler.playSound(songPath, false);
+            MediaHandler.playSound("thinkMusic.wav", false);
 
             // return
             int returnVal = fileChooser.showDialog(null, "Choose Save Location");
