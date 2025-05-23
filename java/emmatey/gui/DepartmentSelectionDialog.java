@@ -61,6 +61,9 @@ public class DepartmentSelectionDialog{
 
        // Add Picture
        ImageIcon gifIcon = MediaHandler.getGifIcon("danceSkeleton.gif");
+
+       // Play Music
+       MediaHandler.playSound("takeFive.wav", false);
        
        // Move JOptionPane Buttons
        UIManager.put("OptionPane.buttonOrientation", SwingConstants.LEFT);
@@ -80,6 +83,7 @@ public class DepartmentSelectionDialog{
         if (returnValue == JOptionPane.OK_OPTION){
             for (JCheckBox cb : checkboxes){
                 if (cb.isSelected()== true){
+                    MediaHandler.stopSound();
                     selectedDepartments.add(cb.getText());
                 }
             }

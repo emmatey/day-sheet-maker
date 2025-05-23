@@ -11,12 +11,12 @@ public class MainWindow implements Runnable {
    private String selectedFilePath;
    private String saveDirPath;
    private List<String> selectedDepartments;
+   private List<String> validDepartments;
    private JButton[] buttonReference;
 
-   private void handleFileSelected(String filePath){
+   public void handleFileSelected(String filePath){
      System.out.println(filePath);
-     List<String> validDepartments = PythonRunner.runPreview(filePath);
-     this.selectedDepartments = DepartmentSelectionDialog.showSelectDialog(validDepartments);
+     this.validDepartments = PythonRunner.runPreview(filePath);
      System.out.println(selectedDepartments);
     }
   
@@ -47,8 +47,14 @@ public class MainWindow implements Runnable {
         this.selectedFilePath = path;
         // Stop Background Music on Callback
         MediaHandler.stopSound();
-        handleFileSelected(selectedFilePath);
-
+        
+        // Create Loading Menu Object
+        SimpleLoadingDialog loadingDialog = new SimpleLoadingDialog();
+        loadingDialog.showAndRun(mainFrame, this, selectedFilePath, () -> {
+        
+        // Open Department Selection Menu on Callback
+        this.selectedDepartments = DepartmentSelectionDialog.showSelectDialog(validDepartments);  
+        
         // Enable Save Button on Callback
         buttonReference[0].setEnabled(true);
 
@@ -57,7 +63,7 @@ public class MainWindow implements Runnable {
 
         // Change Color for Visual Cue  on Callback 
         buttonReference[0].setBackground(new Color(180, 255, 200));
-
+      });
      });
      buttonPanel.add(Box.createVerticalGlue());
      buttonPanel.add(filePickerButton);
