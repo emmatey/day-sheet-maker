@@ -319,7 +319,7 @@ def employee_group(dept, day_index):
 
     # After the preferred roles, assign any remaining employees
     for emp in dept.employees:
-        if emp not in all_sorted:
+        if emp not in all_sorted:#MAYBE LATER I CAN ADD CODE HERE TO SUCC UNSEEN ROLES TO ADD TO SETTINGS.
             for shift in emp.shifts:
                 if shift.day_index == day_index:
                     employee_group[emp.display_role].append(emp)
@@ -651,7 +651,7 @@ TIME_BLOCKS = {
     "Deli": [("04:00", "11:00", "Prep"), ("11:00", "17:00", "Service"), ("17:00", "20:00", "Close")],
     "Bakery": [("04:00", "11:00", "Production"), ("11:00", "16:00", "Service"), ("16:00", "20:00", "Clean")],
     "Customer Service": [("07:00", "12:00", "Morning"), ("12:00", "17:00", "Midday"), ("17:00", "23:00", "Evening")],
-    "Pharmacy": [("04:00", "12:00", "popopopo"), ("12:00", "16:00", "eeeeee"), ("16:00", "19:00", "the void comes")]
+    "Pharmacy": [("07:00", "12:00", "Open"), ("12:00", "17:00", "Mid Day"), ("17:00", "22:00", "Close")]
 }
 
 
@@ -702,6 +702,7 @@ ROLE_MAP = {
         "default": "Pharmacy Tech",
     },
 }
+
 
 EXPEDITOR_REQUIREMENTS = {
 0: 1,   # 05:00 - 06:00
