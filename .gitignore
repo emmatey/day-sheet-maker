@@ -3,12 +3,13 @@ notepad.odt
 test.py
 scratchpad.py
 notebooks/
+
+# Past Versions
 version 0.1.0/
 
 # Compiled Executables
 /output*
 output.exe
-/release*
 
 # Generated Data
 *.xlsx
