@@ -1,32 +1,35 @@
-﻿# Scratch / Local Notes
+﻿# === Scratch / Local Notes ===
 notepad.odt
-test.py
+longTermPlans.odt
 scratchpad.py
-notebooks/
+test.py
 
-# Past Versions
-version 0.1.0/
-
-# Compiled Executables
-/output*
-output.exe
-
-# Generated Data
+# === Generated / Temporary Data ===
 *.xlsx
-python/source data/
+testData/
 
-# Java Build Artifacts
-*.class
-*.jar
-
-# Python Bytecode
+# === Python Artifacts ===
 __pycache__/
 *.pyc
 
-# IDE and Project Configs
+# === IDE / Editor Configs ===
 .vscode/
 .ropeproject/
 .idea/
+*.swp
+*.swo
+*~
 
-# Allow List
+# === Node / React (Frontend) ===
+frontend/node_modules/
+frontend/dist/
+frontend/.next/
+frontend/.vite/
+frontend/build/
+
+# === Env / Secrets ===
+.env
+.env.local
+
+# === Allow list ===
 !assets/Day Sheet Master.xlsx
