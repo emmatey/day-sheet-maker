@@ -27,9 +27,9 @@ def ProcessInput(input_file):
 
     if ext == '.xlsx':
         try:
-            df = pd.read_excel(input_file)
+            dataframe = pd.read_excel(input_file)
             csv_file = input_file.replace('.xlsx', '_converted.csv')
-            df.to_csv(csv_file, index=False)
+            dataframe.to_csv(csv_file, index=False)
         except:
             raise ValueError('Invalid Input')
     elif ext == '.csv':
@@ -231,6 +231,13 @@ if __name__ == "__main__":
     hrd = builder.build_store(csv_path, config_handler_object.settings_time_blocks, config_handler_object.settings_role_map)
     column_day_map = u.column_day_map(csv_path)
 
+    # Clean up .converted.csv
+    if "_converted.csv" in csv_path and os.path.exists(csv_path):
+        try:
+            os.remove(csv_path)
+        except Exception as e:
+            print(f"Error {e}. \n {csv_path} was unable to be removed\n")
+
     if args.preview:
         preview_depts = FindValidDepts(hrd)
         for dept in preview_depts:
@@ -247,6 +254,9 @@ if __name__ == "__main__":
                 if dept.dept_name in args.departments:
                     output_depts.append(dept)
 
-        print(output_depts)
+        print("Departments Processed:")
+        for dept in output_depts:
+            print(dept)
+
         output_path = ProcessOutput(args.save_directory, output_depts, column_day_map, WEEK_ENDING_DATE)
         print(f"\n Done! Files saved in:\n{output_path}")
