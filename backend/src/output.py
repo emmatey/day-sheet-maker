@@ -120,8 +120,8 @@ def populate_workbook(wb, dept, column_day_map, is_wall: bool = False):
         u.insert_title_cell(ws, day, column_day_map)
         u.insert_headers_and_employees(ws, employee_group, day)
 
-        # Special case for Hannaford to Go department
-        if dept.dept_name == 'Hannaford to Go':
+        # Special case for HTG department
+        if "to Go" in dept.dept_name:
             u.insert_effective_shopper_table(ws, employee_group, config_handler_object.settings_esh, time_blocks, day)
         else:
             u.insert_labor_trackers(ws, employee_group, time_blocks, day)
@@ -202,41 +202,24 @@ if __name__ == "__main__":
         """
     )
 
+    #Settings
+    config_handler_object = c.ConfigHandler()
+    
+    #Arg Parser
     parser = argparse.ArgumentParser(
         description = desc, 
         formatter_class = argparse.RawDescriptionHelpFormatter,
         usage = argparse.SUPPRESS
     )
     parser.add_argument("input_file", type = str)
-    parser.add_argument("save_directory", type = str, nargs = '?')
+    parser.add_argument("save_directory", type = str, default = config_handler_object.settings_save_loc, nargs = "?")
     parser.add_argument("--preview", action = "store_true")
     parser.add_argument("--departments", nargs = '+')
     args = parser.parse_args()
 
-    #Ensure valid argument combinations
-    if args.preview:
-        if args.departments:
-            parser.error("--preview cannot be combined with --departments")
-    
-    elif args.departments:
-        if not args.save_directory:
-            parser.error("--departments requires save_directory")
-    
-    else:
-        parser.error("Either --preview or --departments must be provided.")
-
-    #Begin actual logic
-    config_handler_object = c.ConfigHandler()
     csv_path = ProcessInput(args.input_file)
     hrd = builder.build_store(csv_path, config_handler_object.settings_time_blocks, config_handler_object.settings_role_map)
     column_day_map = u.column_day_map(csv_path)
-
-    # Clean up .converted.csv
-    if "_converted.csv" in csv_path and os.path.exists(csv_path):
-        try:
-            os.remove(csv_path)
-        except Exception as e:
-            print(f"Error {e}. \n {csv_path} was unable to be removed\n")
 
     if args.preview:
         preview_depts = FindValidDepts(hrd)
@@ -260,3 +243,10 @@ if __name__ == "__main__":
 
         output_path = ProcessOutput(args.save_directory, output_depts, column_day_map, WEEK_ENDING_DATE)
         print(f"\n Done! Files saved in:\n{output_path}")
+
+     # Clean up .converted.csv
+    if "_converted.csv" in csv_path and os.path.exists(csv_path):
+        try:
+            os.remove(csv_path)
+        except Exception as e:
+            print(f"Error {e}. \n {csv_path} was unable to be removed\n")
