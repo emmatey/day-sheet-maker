@@ -1,5 +1,3 @@
-import ConfigHandler
-
 default_settings = {
     "TIME_BLOCKS": {
         "Hannaford to Go": [
@@ -124,7 +122,11 @@ default_settings = {
         "13": 2,
         "14": 1
     },
-    "SAVE_LOCATION":{
+    "SAVE_LOCATION": {
         "save_location_string" : "DEFAULT_PLACEHOLDER"
+    },
+    "OUTPUT_SETTINGS": {
+        "OUTPUT_ORIENTATION_INDEX": 2,
+        "copy_input_to_archive": True
     }
 }
