@@ -113,7 +113,8 @@ def parse_shift_cell(shift_cell, index):
     """
     Parses a cell containing shift information and returns a list of Shift objects.
 
-    Handles both single and split shifts. For split shifts, durations are not currently separated.
+    Handles both single and split shifts. For split shifts, paid hours are now
+    proportionally allocated to each segment.
 
     Args:
         shift_cell (str): The cell string from the name_row that may contain shift data.
@@ -122,25 +123,51 @@ def parse_shift_cell(shift_cell, index):
     Returns:
         list of Shift objects.
     """
-    regex_double = r'(\d+:\d+\w+)-(\d+:\d+\w+)\n(\d+:\d+\w+)-(\d+:\d+\w+)'
     regex_single = r'(\d+:\d+\w+)-(\d+:\d+\w+)'
+    regex_double = r'(\d+:\d+\w+)-(\d+:\d+\w+)\n(\d+:\d+\w+)-(\d+:\d+\w+)'
     regex_duration = r'Hrs:(.+)'
 
-    duration = re.search(regex_duration, shift_cell)
+    single = re.search(regex_single, shift_cell)
     double = re.search(regex_double, shift_cell)
+    duration = re.search(regex_duration, shift_cell)
+
     if double and duration:
+        total_paid_hours_across_both_shifts_in_seconds = (float((duration.group(1))) * 60 * 60)
+
+        first_shift_start = datetime.datetime.strptime(double.group(1), '%I:%M%p')
+        first_shift_end = datetime.datetime.strptime(double.group(2), '%I:%M%p')
+        first_shift_duration = (first_shift_end - first_shift_start)
+        first_shift_duration_in_seconds = first_shift_duration.seconds
+
+        second_shift_start = datetime.datetime.strptime(double.group(3), '%I:%M%p')
+        second_shift_end = datetime.datetime.strptime(double.group(4), '%I:%M%p')
+        second_shift_duration = (second_shift_end  - second_shift_start)
+        second_shift_duration_in_seconds = second_shift_duration.seconds
+
+        if first_shift_duration_in_seconds >= (6 * 60 * 60):
+            # Subtract Half Hour for Lunch if Shift Duration is Greater Than or Equal to Six Hours
+            first_shift_duration_in_seconds = (first_shift_duration_in_seconds - (0.5 * 60 * 60))
+            first_shift_duration_in_seconds = int(first_shift_duration_in_seconds)
+
+        if second_shift_duration_in_seconds >= (6 * 60 * 60):
+            # Subtract Half Hour for Lunch if Shift Duration is Greater Than or Equal to Six Hours
+            second_shift_duration_in_seconds = (second_shift_duration_in_seconds - (0.5 * 60 * 60))
+            second_shift_duration_in_seconds = int(second_shift_duration_in_seconds)
+
+        if total_paid_hours_across_both_shifts_in_seconds != (first_shift_duration_in_seconds + second_shift_duration_in_seconds):
+            if first_shift_duration_in_seconds > second_shift_duration_in_seconds:
+                first_shift_duration_in_seconds = (total_paid_hours_across_both_shifts_in_seconds - second_shift_duration_in_seconds)
+            if second_shift_duration_in_seconds > first_shift_duration_in_seconds:
+                second_shift_duration_in_seconds = (total_paid_hours_across_both_shifts_in_seconds - first_shift_duration_in_seconds)
+
+        final_paid_time_first_shift = round((first_shift_duration_in_seconds / 60 / 60))
+        final_paid_time_second_shift = round((second_shift_duration_in_seconds / 60 / 60))
+
         return [
-            m.Shift(index,
-                    datetime.datetime.strptime(double.group(1), '%I:%M%p').time(),
-                    datetime.datetime.strptime(double.group(2), '%I:%M%p').time(),
-                    float(duration.group(1))),
-            m.Shift(index,
-                    datetime.datetime.strptime(double.group(3), '%I:%M%p').time(),
-                    datetime.datetime.strptime(double.group(4), '%I:%M%p').time(),
-                    0.0) #all paid hours for the day are already contained in the first shift object of the split/double shift.
+            m.Shift(index, first_shift_start.time(), first_shift_end.time(), final_paid_time_first_shift),
+            m.Shift(index, second_shift_start.time(), second_shift_end.time(), final_paid_time_second_shift)
         ]
 
-    single = re.search(regex_single, shift_cell)
     if single and duration:
         return [m.Shift(index,
                         datetime.datetime.strptime(single.group(1), '%I:%M%p').time(),

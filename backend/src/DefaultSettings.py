@@ -53,16 +53,16 @@ default_settings = {
             ["17:00", "23:00", "Evening"]
         ],
         "Pharmacy": [
-            ["04:00", "12:00", "popopopo"],
-            ["12:00", "16:00", "eeeeee"],
-            ["16:00", "19:00", "the void comes"]
+            ["07:00", "11:00", "Morning"],
+            ["11:00", "15:00", "Midday"],
+            ["15:00", "19:00", "Evening"]
         ]
     },
     "ROLE_MAP": {
         "Hannaford to Go": {
             "roles": ["Expeditor", "Shopper"],
             "clean_roles": ["Expeditor", "Shopper"],
-            "default": "Shopper"
+            "default": "Associate"
         },
         "Center Store": {
             "roles": ["Ctr Str Mgmt", "Ctr Str Lead", "Ctr Str Clerk", "Stock Crew Assoc", "Maintenance"],

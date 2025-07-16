@@ -11,7 +11,7 @@ class ConfigHandler:
 
     DEFAULT_FILE_NAME = "settings.json"
 
-    def __init__(self, cfg_file_name=DEFAULT_FILE_NAME):
+    def __init__(self, cfg_file_name = DEFAULT_FILE_NAME):
         """
         Initializes the config handler.
         Loads or creates a settings file and parses its content into internal attributes.
@@ -31,12 +31,10 @@ class ConfigHandler:
         if self.detect_config():
             self.settings = self.read_config()
             self.parse_config(self.settings)
-            print(self.set_default_archive())
         else:
             self.generate_default_config()
             self.settings = self.read_config()
             self.parse_config(self.settings)
-            print(self.set_default_archive())
 
     @staticmethod
     def get_project_root():
@@ -127,7 +125,10 @@ class ConfigHandler:
             print("Save Location Setting Inaccessible. Config file may be broken. "
                   "Restore default settings or delete config file.")
             sys.exit(1)
-
+        
+        # Executes method, prints return value
+        print(self.set_default_archive())
+        
         # Convert EXPEDITOR_REQUIREMENTS keys from strings to ints
         raw_esh = settings.get("EXPEDITOR_REQUIREMENTS", {})
         self.settings_esh = {int(k): v for k, v in raw_esh.items()}

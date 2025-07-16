@@ -31,7 +31,7 @@ def ProcessInput(input_file):
             csv_file = input_file.replace('.xlsx', '_converted.csv')
             dataframe.to_csv(csv_file, index=False)
         except:
-            raise ValueError('Invalid Input')
+            raise ValueError('Invalid Input, Could not Convert to CSV')
     elif ext == '.csv':
         csv_file = input_file
     else:
