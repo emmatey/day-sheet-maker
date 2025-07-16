@@ -123,12 +123,12 @@ def parse_shift_cell(shift_cell, index):
     Returns:
         list of Shift objects.
     """
-    regex_single = r'(\d+:\d+\w+)-(\d+:\d+\w+)'
     regex_double = r'(\d+:\d+\w+)-(\d+:\d+\w+)\n(\d+:\d+\w+)-(\d+:\d+\w+)'
+    regex_single = r'(\d+:\d+\w+)-(\d+:\d+\w+)'
     regex_duration = r'Hrs:(.+)'
 
-    single = re.search(regex_single, shift_cell)
     double = re.search(regex_double, shift_cell)
+    single = re.search(regex_single, shift_cell)
     duration = re.search(regex_duration, shift_cell)
 
     if double and duration:
@@ -136,13 +136,17 @@ def parse_shift_cell(shift_cell, index):
 
         first_shift_start = datetime.datetime.strptime(double.group(1), '%I:%M%p')
         first_shift_end = datetime.datetime.strptime(double.group(2), '%I:%M%p')
+        if first_shift_end <= first_shift_start:
+            first_shift_end += datetime.timedelta(days=1)
         first_shift_duration = (first_shift_end - first_shift_start)
-        first_shift_duration_in_seconds = first_shift_duration.seconds
+        first_shift_duration_in_seconds = first_shift_duration.total_seconds()
 
         second_shift_start = datetime.datetime.strptime(double.group(3), '%I:%M%p')
         second_shift_end = datetime.datetime.strptime(double.group(4), '%I:%M%p')
-        second_shift_duration = (second_shift_end  - second_shift_start)
-        second_shift_duration_in_seconds = second_shift_duration.seconds
+        if second_shift_end <= second_shift_start:
+            second_shift_end += datetime.timedelta(days=1)
+        second_shift_duration = (second_shift_end - second_shift_start)
+        second_shift_duration_in_seconds = second_shift_duration.total_seconds()
 
         if first_shift_duration_in_seconds >= (6 * 60 * 60):
             # Subtract Half Hour for Lunch if Shift Duration is Greater Than or Equal to Six Hours
@@ -164,15 +168,23 @@ def parse_shift_cell(shift_cell, index):
         final_paid_time_second_shift = round((second_shift_duration_in_seconds / 60 / 60))
 
         return [
-            m.Shift(index, first_shift_start.time(), first_shift_end.time(), final_paid_time_first_shift),
-            m.Shift(index, second_shift_start.time(), second_shift_end.time(), final_paid_time_second_shift)
+            m.Shift(index,
+                    first_shift_start.time(),
+                    first_shift_end.time(),
+                    final_paid_time_first_shift),
+            m.Shift(index,
+                    second_shift_start.time(),
+                    second_shift_end.time(),
+                    final_paid_time_second_shift)
         ]
 
     if single and duration:
-        return [m.Shift(index,
+        return [
+            m.Shift(index,
                         datetime.datetime.strptime(single.group(1), '%I:%M%p').time(),
                         datetime.datetime.strptime(single.group(2), '%I:%M%p').time(),
-                        float(duration.group(1)))]
+                        float(duration.group(1)))
+        ]
 
     return []
 
