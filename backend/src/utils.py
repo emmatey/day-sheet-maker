@@ -329,6 +329,7 @@ def employee_group(dept, day_index, config_object_role_map):
     Args:
         dept (Department): The department object containing employees and shifts.
         day_index (int): The day of the week (0 = Sunday, 1 = Monday, etc.)
+        config_object_role_map: The settings for "raw" roles and their associated "clean names"
 
     Returns:
         defaultdict(list): A dictionary where keys are display_role names
@@ -336,11 +337,12 @@ def employee_group(dept, day_index, config_object_role_map):
     """
 
     # Start with a defaultdict so every role key auto-creates a list
-    employee_group = defaultdict(list)
+    employee_group = {}
 
     # Get the role mapping for this department (which defines header order)
     role_map = config_object_role_map.get(dept.dept_name, {})
     clean_roles = role_map.get('clean_roles', [])
+    role_labor_tracker_enabled = role_map.get('labor_tracker_enabled', [])
     role_index = 0
 
     # This will track employees who were placed correctly in a role
@@ -351,7 +353,11 @@ def employee_group(dept, day_index, config_object_role_map):
         for emp in dept.employees:
             for shift in emp.shifts:
                 if shift.day_index == day_index and emp.display_role == clean_roles[role_index] and emp not in all_sorted:
-                    employee_group[emp.display_role].append(emp)
+                    if emp.display_role not in employee_group:
+                        employee_group[emp.display_role] = ([emp], role_labor_tracker_enabled[role_index])
+                    else:
+                        employee_group[emp.display_role][0].append(emp)
+                    
                     all_sorted.append(emp)
 
         role_index += 1
@@ -361,12 +367,15 @@ def employee_group(dept, day_index, config_object_role_map):
         if emp not in all_sorted:#MAYBE LATER I CAN ADD CODE HERE TO SUCC UNSEEN ROLES TO ADD TO SETTINGS.
             for shift in emp.shifts:
                 if shift.day_index == day_index:
-                    employee_group[emp.display_role].append(emp)
-
+                    if emp.display_role not in employee_group:
+                        employee_group[emp.display_role] = ([emp], 1)
+                    else:
+                        employee_group[emp.display_role][0].append(emp)
+                    
     return employee_group
 
 
-def insert_labor_tracker(ws, labor_data, title, start_row, start_col=10):
+def insert_labor_tracker(ws, labor_data, title, start_row, start_col = 10):
     """
     Inserts a small labor tracker table into the worksheet.
     """
@@ -430,11 +439,11 @@ def insert_labor_tracker(ws, labor_data, title, start_row, start_col=10):
         current_row += 1
 
 
-def insert_headers_and_employees(ws, employee_group_dict, day_index, start_row=4):
+def insert_headers_and_employees(ws, employee_group_dict, day_index, start_row = 4):
     role_names = list(employee_group_dict.keys())
     current_row = start_row
 
-    for i, employee_list in enumerate(employee_group_dict.values()):
+    for i, (employee_list, is_enabled) in enumerate(employee_group_dict.values()):
         # 1. Insert role header
         insert_role_header(ws, current_row, role_names[i])
         current_row += 1
@@ -502,7 +511,7 @@ def insert_labor_trackers(ws, employee_group_dict, time_blocks, day_index, start
 
     Args:
         ws (Worksheet): The Excel worksheet.
-        employee_group_dict (dict): display_role -> list of Employee objects.
+        employee_group_dict (dict): display_role -> (list of Employee objects, tracker_enabled).
         time_blocks (list): The list of time blocks to calculate coverage.
         day_index (int): Which day to calculate (0=Sunday, 6=Saturday).
         start_row (int): The row to start inserting trackers.
@@ -511,26 +520,34 @@ def insert_labor_trackers(ws, employee_group_dict, time_blocks, day_index, start
     Returns:
         int: The next empty row after all trackers.
     """
-    role_names = list(employee_group_dict.keys())
-    role_values = list(employee_group_dict.values())
+    role_display_names = list(employee_group_dict.keys())
+    grouped_employees_by_role = list(employee_group_dict.values())
     current_row = start_row
 
-    for i, role in enumerate(role_names):
-        display_subject = role_values[i]
-        if len(display_subject) > 1:
-            labor_coverage = defaultdict(int)
-            for emp in employee_group_dict[role_names[i]]:
-                for shift in emp.shifts:
-                    if shift.day_index == day_index:
-                        overlap = calculate_block_overlaps(shift.start_time, shift.end_time, time_blocks)
-                        for block, hours in overlap.items():
-                            labor_coverage[block] += hours
+    for i, role_name in enumerate(role_display_names):
+        employees_with_shifts_today, tracker_enabled = grouped_employees_by_role[i]
 
-                # Insert a labor tracker for this role
-            insert_labor_tracker(ws, labor_coverage, f"Labor Coverage: {role_names[i]}", start_row=current_row, start_col=start_col)
+        if tracker_enabled == 0:
+            continue #return to start of loop without rendering labor tracker.
+            
+        block_hours_total = defaultdict(int)
 
-                # Move down after each labor tracker
-            current_row += 5  # adjust depending on your tracker size
+        for emp in employees_with_shifts_today:
+            for shift in emp.shifts:
+                if shift.day_index == day_index:
+                    overlaps = calculate_block_overlaps(shift.start_time, shift.end_time, time_blocks)
+                    for block, hours in overlaps.items():
+                        block_hours_total[block] += hours
+
+        insert_labor_tracker(
+            ws,
+            block_hours_total,
+            f"Labor Coverage: {role_name}",
+            start_row = current_row,
+            start_col = start_col
+        )
+
+        current_row += 5  # move down after each tracker
 
     return current_row
 
@@ -601,7 +618,8 @@ def insert_effective_shopper_table(ws, employee_group, expeditor_requirements, t
     expeditor_overlaps = defaultdict(float)
 
     for role_name in ["Shopper", "Expeditor"]:
-        for emp in employee_group.get(role_name, []):
+        employees, _ = employee_group.get(role_name, ([], 1))
+        for emp in employees:
             for shift in emp.shifts:
                 if shift.day_index == day_index:
                     overlaps = calculate_block_overlaps(shift.start_time, shift.end_time, time_blocks)

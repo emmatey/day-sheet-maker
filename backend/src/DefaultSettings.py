@@ -62,46 +62,55 @@ default_settings = {
         "Hannaford to Go": {
             "roles": ["Expeditor", "Shopper"],
             "clean_roles": ["Expeditor", "Shopper"],
+            "labor_tracker_enabled": [1, 1],
             "default": "Associate"
         },
         "Center Store": {
             "roles": ["Ctr Str Mgmt", "Ctr Str Lead", "Ctr Str Clerk", "Stock Crew Assoc", "Maintenance"],
             "clean_roles": ["Management", "Management", "Clerk", "Overnight", "Maintenance"],
+            "labor_tracker_enabled": [1, 1, 1, 1, 1],
             "default": "Clerk"
         },
         "Produce": {
             "roles": ["Associate"],
             "clean_roles": ["Produce Associate"],
+            "labor_tracker_enabled": [1],
             "default": "Produce Associate"
         },
         "Meat": {
             "roles": ["Meat Associate"],
             "clean_roles": ["Meat Associate"],
+            "labor_tracker_enabled": [1],
             "default": "Meat Associate"
         },
         "Seafood": {
             "roles": ["Seafood Associate", "Meat Associate"],
             "clean_roles": ["Seafood Associate", "Meat Associate"],
+            "labor_tracker_enabled": [1, 1],
             "default": "Seafood Associate"
         },
         "Deli": {
             "roles": ["Deli Associate"],
             "clean_roles": ["Deli Associate"],
+            "labor_tracker_enabled": [1],
             "default": "Deli Associate"
         },
         "Bakery": {
             "roles": ["Associate"],
             "clean_roles": ["Bakery Associate"],
+            "labor_tracker_enabled": [1],
             "default": "Bakery Associate"
         },
         "Customer Service": {
             "roles": ["ServiceLeadr", "Service Desk Assoc", "Cashier Exp", "ServiceClerk", "SL SelfScan"],
             "clean_roles": ["Lead", "Service Desk", "Register Team", "Register Team", "Service Desk"],
+            "labor_tracker_enabled": [1, 1, 1, 1, 1],
             "default": "Customer Service Associate"
         },
         "Pharmacy": {
             "roles": ["Pharmacist", "Pharmacy Tech", "Tech"],
             "clean_roles": ["Pharmacist", "Pharmacy Tech", "Tech"],
+            "labor_tracker_enabled": [1, 1, 1],
             "default": "Pharmacy Associate"
         }
     },
