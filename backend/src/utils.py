@@ -573,23 +573,23 @@ def insert_effective_shopper_table(ws, employee_group, expeditor_requirements, t
     )
 
     # --- 1. Write Header ---
-    ws.merge_cells(start_row = start_row, start_column = start_col, end_row = start_row + 1, end_column = start_col + 3)
+    ws.merge_cells(start_row=start_row, start_column=start_col, end_row=start_row + 1, end_column=start_col + 3)
 
     # Set up header
     header_cell = ws.cell(row=start_row, column=start_col)
     header_cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
     # Define rich text font styles
-    title_font = InlineFont(sz = 12, b = True, rFont = "Calibri")
-    subtitle_font = InlineFont(sz = 8, b = False, rFont = "Calibri")
+    title_font = InlineFont(sz=12, b=True, rFont="Calibri")
+    subtitle_font = InlineFont(sz=8, b=False, rFont="Calibri")
     rich_text = CellRichText([
         TextBlock(text="Effective Shopper Hours (ESH)\n", font=title_font),
-        TextBlock(text="Shopper Hours + (Expo Hours Actual - Expo Hours Required) = ESH", font=subtitle_font)
+        TextBlock(text="Total Hours - [Estimated 'Non-Shopping' & Break Hours] = ESH", font=subtitle_font)
     ])
     header_cell.value = rich_text
 
     # Apply border to all merged cells manually
-    for row in ws.iter_rows(min_row = start_row, max_row = start_row+1, min_col = start_col, max_col = start_col + 3):
+    for row in ws.iter_rows(min_row=start_row, max_row=start_row+1, min_col=start_col, max_col=start_col + 3):
         for cell in row:
             cell.border = thick_border
 
@@ -597,7 +597,7 @@ def insert_effective_shopper_table(ws, employee_group, expeditor_requirements, t
     current_row = start_row + 2
 
     # --- 2. Write Table Column Headers ---
-    headers = ["Time Range", "Expo Hrs Req", "ESH", ""]
+    headers = ["Time Range", "Non-Shopping Hrs", "ESH", ""]
     header_font = Font(name="Calibri", bold=True)
     header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
@@ -613,32 +613,24 @@ def insert_effective_shopper_table(ws, employee_group, expeditor_requirements, t
 
     current_row += 1  # move to first data row
 
-    # --- 3. Calculate Shopper and Expo Overlaps ---
-    shopper_overlaps = defaultdict(float)
-    expeditor_overlaps = defaultdict(float)
-
-    for role_name in ["Shopper", "Expeditor"]:
-        employees, _ = employee_group.get(role_name, ([], 1))
+    # --- 3. Calculate All Employee Overlaps ---
+    total_overlaps = defaultdict(float)
+    for employees, _ in employee_group.values():
         for emp in employees:
             for shift in emp.shifts:
                 if shift.day_index == day_index:
                     overlaps = calculate_block_overlaps(shift.start_time, shift.end_time, time_blocks)
                     for block_key, hours in overlaps.items():
-                        if role_name == "Shopper":
-                            shopper_overlaps[block_key] += hours
-                        elif role_name == "Expeditor":
-                            expeditor_overlaps[block_key] += hours
+                        total_overlaps[block_key] += hours
 
     # --- 4. Write Data Rows ---
     for i, block in enumerate(time_blocks):
         block_start, block_end, _ = block
         block_name = f"{block[2]} = {block_start}-{block_end}"
 
-        actual_expo_hours = expeditor_overlaps.get(block_name, 0)
-        actual_shopper_hours = shopper_overlaps.get(block_name, 0)
+        actual_total_hours = total_overlaps.get(block_name, 0)
         required_expo_hours = expeditor_requirements.get(i, 0)
-
-        effective_hours = actual_shopper_hours + (actual_expo_hours - required_expo_hours)
+        effective_hours = actual_total_hours - required_expo_hours
 
         # Write time range
         time_range_cell = ws.cell(row=current_row, column=start_col)
@@ -681,4 +673,3 @@ def insert_effective_shopper_table(ws, employee_group, expeditor_requirements, t
         for r in range(group_start_row + 1, min(group_start_row + 3, current_row)):
             empty_cell = ws.cell(row=r, column=start_col + 3)
             empty_cell.border = thin_border
-
