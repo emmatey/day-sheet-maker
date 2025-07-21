@@ -9,7 +9,7 @@ from openpyxl.styles import Border, Side, Font, Alignment
 from openpyxl.cell.rich_text import TextBlock, CellRichText
 from openpyxl.cell.text import InlineFont
 
-
+# Helper Functions
 def department_row_map(csv_path):
 
     # This function parses the .csv and builds a dictionary that maps
@@ -79,6 +79,59 @@ def column_day_map(csv_path):
         return {col: i for i, col in enumerate(sorted(matched_columns))}, dates
 
 
+def employee_group(dept, day_index, config_object_role_map):
+    """
+    Groups employees into their output headers for a given department and day.
+
+    Args:
+        dept (Department): The department object containing employees and shifts.
+        day_index (int): The day of the week (0 = Sunday, 1 = Monday, etc.)
+        config_object_role_map: The settings for "raw" roles and their associated "clean names"
+
+    Returns:
+        defaultdict(list): A dictionary where keys are display_role names
+                           and values are lists of employee names under that role.
+    """
+
+    # Start with a defaultdict so every role key auto-creates a list
+    employee_group = {}
+
+    # Get the role mapping for this department (which defines header order)
+    role_map = config_object_role_map.get(dept.dept_name, {})
+    clean_roles = role_map.get('clean_roles', [])
+    role_labor_tracker_enabled = role_map.get('labor_tracker_enabled', [])
+    role_index = 0
+
+    # This will track employees who were placed correctly in a role
+    all_sorted = []
+
+    # First, sort employees according to the preferred role order
+    for i in range(len(clean_roles)):
+        for emp in dept.employees:
+            for shift in emp.shifts:
+                if shift.day_index == day_index and emp.display_role == clean_roles[role_index] and emp not in all_sorted:
+                    if emp.display_role not in employee_group:
+                        employee_group[emp.display_role] = ([emp], role_labor_tracker_enabled[role_index])
+                    else:
+                        employee_group[emp.display_role][0].append(emp)
+                    
+                    all_sorted.append(emp)
+
+        role_index += 1
+
+    # After the preferred roles, assign any remaining employees
+    for emp in dept.employees:
+        if emp not in all_sorted:#MAYBE LATER I CAN ADD CODE HERE TO SUCC UNSEEN ROLES TO ADD TO SETTINGS.
+            for shift in emp.shifts:
+                if shift.day_index == day_index:
+                    if emp.display_role not in employee_group:
+                        employee_group[emp.display_role] = ([emp], 1)
+                    else:
+                        employee_group[emp.display_role][0].append(emp)
+                    
+    return employee_group
+
+
 def extract_store_number(csv_path):
     """
     Extracts the store number from a .csv file.
@@ -107,86 +160,6 @@ def extract_store_number(csv_path):
 
     # If we get here, no store number was found
     return None
-
-
-def parse_shift_cell(shift_cell, index):
-    """
-    Parses a cell containing shift information and returns a list of Shift objects.
-
-    Handles both single and split shifts. For split shifts, paid hours are now
-    proportionally allocated to each segment.
-
-    Args:
-        shift_cell (str): The cell string from the name_row that may contain shift data.
-        index (int): The column index where the shift is located.
-
-    Returns:
-        list of Shift objects.
-    """
-    regex_double = r'(\d+:\d+\w+)-(\d+:\d+\w+)\n(\d+:\d+\w+)-(\d+:\d+\w+)'
-    regex_single = r'(\d+:\d+\w+)-(\d+:\d+\w+)'
-    regex_duration = r'Hrs:(.+)'
-
-    double = re.search(regex_double, shift_cell)
-    single = re.search(regex_single, shift_cell)
-    duration = re.search(regex_duration, shift_cell)
-
-    if double and duration:
-        total_paid_hours_across_both_shifts_in_seconds = (float((duration.group(1))) * 60 * 60)
-
-        first_shift_start = datetime.datetime.strptime(double.group(1), '%I:%M%p')
-        first_shift_end = datetime.datetime.strptime(double.group(2), '%I:%M%p')
-        if first_shift_end <= first_shift_start:
-            first_shift_end += datetime.timedelta(days=1)
-        first_shift_duration = (first_shift_end - first_shift_start)
-        first_shift_duration_in_seconds = first_shift_duration.total_seconds()
-
-        second_shift_start = datetime.datetime.strptime(double.group(3), '%I:%M%p')
-        second_shift_end = datetime.datetime.strptime(double.group(4), '%I:%M%p')
-        if second_shift_end <= second_shift_start:
-            second_shift_end += datetime.timedelta(days=1)
-        second_shift_duration = (second_shift_end - second_shift_start)
-        second_shift_duration_in_seconds = second_shift_duration.total_seconds()
-
-        if first_shift_duration_in_seconds >= (6 * 60 * 60):
-            # Subtract Half Hour for Lunch if Shift Duration is Greater Than or Equal to Six Hours
-            first_shift_duration_in_seconds = (first_shift_duration_in_seconds - (0.5 * 60 * 60))
-            first_shift_duration_in_seconds = int(first_shift_duration_in_seconds)
-
-        if second_shift_duration_in_seconds >= (6 * 60 * 60):
-            # Subtract Half Hour for Lunch if Shift Duration is Greater Than or Equal to Six Hours
-            second_shift_duration_in_seconds = (second_shift_duration_in_seconds - (0.5 * 60 * 60))
-            second_shift_duration_in_seconds = int(second_shift_duration_in_seconds)
-
-        if total_paid_hours_across_both_shifts_in_seconds != (first_shift_duration_in_seconds + second_shift_duration_in_seconds):
-            if first_shift_duration_in_seconds > second_shift_duration_in_seconds:
-                first_shift_duration_in_seconds = (total_paid_hours_across_both_shifts_in_seconds - second_shift_duration_in_seconds)
-            if second_shift_duration_in_seconds > first_shift_duration_in_seconds:
-                second_shift_duration_in_seconds = (total_paid_hours_across_both_shifts_in_seconds - first_shift_duration_in_seconds)
-
-        final_paid_time_first_shift = round((first_shift_duration_in_seconds / 60 / 60))
-        final_paid_time_second_shift = round((second_shift_duration_in_seconds / 60 / 60))
-
-        return [
-            m.Shift(index,
-                    first_shift_start.time(),
-                    first_shift_end.time(),
-                    final_paid_time_first_shift),
-            m.Shift(index,
-                    second_shift_start.time(),
-                    second_shift_end.time(),
-                    final_paid_time_second_shift)
-        ]
-
-    if single and duration:
-        return [
-            m.Shift(index,
-                        datetime.datetime.strptime(single.group(1), '%I:%M%p').time(),
-                        datetime.datetime.strptime(single.group(2), '%I:%M%p').time(),
-                        float(duration.group(1)))
-        ]
-
-    return []
 
 
 def calculate_block_overlaps(shift_start, shift_end, time_blocks):
@@ -240,6 +213,111 @@ def calculate_block_overlaps(shift_start, shift_end, time_blocks):
     return overlaps
 
 
+def parse_shift_cell(shift_cell, index):
+    """
+    Parses a cell containing shift information and returns a list of Shift objects.
+
+    Handles both single and split shifts. For split shifts, paid hours are now
+    proportionally allocated to each segment.
+
+    Args:
+        shift_cell (str): The cell string from the name_row that may contain shift data.
+        index (int): The column index where the shift is located.
+
+    Returns:
+        list of Shift objects.
+    """
+    regex_double = r'(\d+:\d+\w+)-(\d+:\d+\w+)\n(\d+:\d+\w+)-(\d+:\d+\w+)'
+    regex_single = r'(\d+:\d+\w+)-(\d+:\d+\w+)'
+    regex_duration = r'Hrs:(.+)'
+
+    double = re.search(regex_double, shift_cell)
+    single = re.search(regex_single, shift_cell)
+    duration = re.search(regex_duration, shift_cell)
+
+    if double and duration:
+        total_paid_hours_across_both_shifts_in_seconds = (
+            float((duration.group(1))) * 60 * 60
+        )
+
+        first_shift_start = datetime.datetime.strptime(double.group(1), '%I:%M%p')
+        first_shift_end = datetime.datetime.strptime(double.group(2), '%I:%M%p')
+        if first_shift_end <= first_shift_start:
+            first_shift_end += datetime.timedelta(days=1)
+        first_shift_duration = (first_shift_end - first_shift_start)
+        first_shift_duration_in_seconds = first_shift_duration.total_seconds()
+
+        second_shift_start = datetime.datetime.strptime(double.group(3), '%I:%M%p')
+        second_shift_end = datetime.datetime.strptime(double.group(4), '%I:%M%p')
+        if second_shift_end <= second_shift_start:
+            second_shift_end += datetime.timedelta(days=1)
+        second_shift_duration = (second_shift_end - second_shift_start)
+        second_shift_duration_in_seconds = second_shift_duration.total_seconds()
+
+        if first_shift_duration_in_seconds >= (6 * 60 * 60):
+            # Subtract Half Hour for Lunch if Shift Duration is Greater Than or Equal to Six Hours
+            first_shift_duration_in_seconds = (
+                first_shift_duration_in_seconds - (0.5 * 60 * 60)
+            )
+            first_shift_duration_in_seconds = int(first_shift_duration_in_seconds)
+
+        if second_shift_duration_in_seconds >= (6 * 60 * 60):
+            # Subtract Half Hour for Lunch if Shift Duration is Greater Than or Equal to Six Hours
+            second_shift_duration_in_seconds = (
+                second_shift_duration_in_seconds - (0.5 * 60 * 60)
+            )
+            second_shift_duration_in_seconds = int(second_shift_duration_in_seconds)
+
+        if total_paid_hours_across_both_shifts_in_seconds != (
+            first_shift_duration_in_seconds + second_shift_duration_in_seconds
+        ):
+            if first_shift_duration_in_seconds > second_shift_duration_in_seconds:
+                first_shift_duration_in_seconds = (
+                    total_paid_hours_across_both_shifts_in_seconds
+                    - second_shift_duration_in_seconds
+                )
+            if second_shift_duration_in_seconds > first_shift_duration_in_seconds:
+                second_shift_duration_in_seconds = (
+                    total_paid_hours_across_both_shifts_in_seconds
+                    - first_shift_duration_in_seconds
+                )
+
+        final_paid_time_first_shift = round(
+            (first_shift_duration_in_seconds / 60 / 60)
+        )
+        final_paid_time_second_shift = round(
+            (second_shift_duration_in_seconds / 60 / 60)
+        )
+
+        return [
+            m.Shift(
+                index,
+                first_shift_start.time(),
+                first_shift_end.time(),
+                final_paid_time_first_shift,
+            ),
+            m.Shift(
+                index,
+                second_shift_start.time(),
+                second_shift_end.time(),
+                final_paid_time_second_shift,
+            ),
+        ]
+
+    if single and duration:
+        return [
+            m.Shift(
+                index,
+                datetime.datetime.strptime(single.group(1), '%I:%M%p').time(),
+                datetime.datetime.strptime(single.group(2), '%I:%M%p').time(),
+                float(duration.group(1)),
+            )
+        ]
+
+    return []
+
+
+# Rendering Funcitons
 def insert_title_cell(ws, day, column_day_map):
     _, dates = column_day_map
     days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
@@ -320,59 +398,6 @@ def insert_role_header(ws, row_number, role_name):
         else:
             target_cell.value = ""
             target_cell.border = copy(template_cell.border)
-
-
-def employee_group(dept, day_index, config_object_role_map):
-    """
-    Groups employees into their output headers for a given department and day.
-
-    Args:
-        dept (Department): The department object containing employees and shifts.
-        day_index (int): The day of the week (0 = Sunday, 1 = Monday, etc.)
-        config_object_role_map: The settings for "raw" roles and their associated "clean names"
-
-    Returns:
-        defaultdict(list): A dictionary where keys are display_role names
-                           and values are lists of employee names under that role.
-    """
-
-    # Start with a defaultdict so every role key auto-creates a list
-    employee_group = {}
-
-    # Get the role mapping for this department (which defines header order)
-    role_map = config_object_role_map.get(dept.dept_name, {})
-    clean_roles = role_map.get('clean_roles', [])
-    role_labor_tracker_enabled = role_map.get('labor_tracker_enabled', [])
-    role_index = 0
-
-    # This will track employees who were placed correctly in a role
-    all_sorted = []
-
-    # First, sort employees according to the preferred role order
-    for i in range(len(clean_roles)):
-        for emp in dept.employees:
-            for shift in emp.shifts:
-                if shift.day_index == day_index and emp.display_role == clean_roles[role_index] and emp not in all_sorted:
-                    if emp.display_role not in employee_group:
-                        employee_group[emp.display_role] = ([emp], role_labor_tracker_enabled[role_index])
-                    else:
-                        employee_group[emp.display_role][0].append(emp)
-                    
-                    all_sorted.append(emp)
-
-        role_index += 1
-
-    # After the preferred roles, assign any remaining employees
-    for emp in dept.employees:
-        if emp not in all_sorted:#MAYBE LATER I CAN ADD CODE HERE TO SUCC UNSEEN ROLES TO ADD TO SETTINGS.
-            for shift in emp.shifts:
-                if shift.day_index == day_index:
-                    if emp.display_role not in employee_group:
-                        employee_group[emp.display_role] = ([emp], 1)
-                    else:
-                        employee_group[emp.display_role][0].append(emp)
-                    
-    return employee_group
 
 
 def insert_labor_tracker(ws, labor_data, title, start_row, start_col = 10):
@@ -529,25 +554,26 @@ def insert_labor_trackers(ws, employee_group_dict, time_blocks, day_index, start
 
         if tracker_enabled == 0:
             continue #return to start of loop without rendering labor tracker.
-            
-        block_hours_total = defaultdict(int)
 
-        for emp in employees_with_shifts_today:
-            for shift in emp.shifts:
-                if shift.day_index == day_index:
-                    overlaps = calculate_block_overlaps(shift.start_time, shift.end_time, time_blocks)
-                    for block, hours in overlaps.items():
-                        block_hours_total[block] += hours
+        if tracker_enabled == 1 and len(employees_with_shifts_today) > 1:   
+            block_hours_total = defaultdict(int)
 
-        insert_labor_tracker(
-            ws,
-            block_hours_total,
-            f"Labor Coverage: {role_name}",
-            start_row = current_row,
-            start_col = start_col
-        )
+            for emp in employees_with_shifts_today:
+                for shift in emp.shifts:
+                    if shift.day_index == day_index:
+                        overlaps = calculate_block_overlaps(shift.start_time, shift.end_time, time_blocks)
+                        for block, hours in overlaps.items():
+                            block_hours_total[block] += hours
 
-        current_row += 5  # move down after each tracker
+            insert_labor_tracker(
+                ws,
+                block_hours_total,
+                f"Labor Coverage: {role_name}",
+                start_row = current_row,
+                start_col = start_col
+            )
+
+            current_row += 5  # move down after each tracker
 
     return current_row
 
@@ -559,37 +585,37 @@ def insert_effective_shopper_table(ws, employee_group, expeditor_requirements, t
 
     # Borders
     thick_border = Border(
-        left=Side(style="thick"),
-        right=Side(style="thick"),
-        top=Side(style="thick"),
-        bottom=Side(style="thick")
+        left = Side(style = "thick"),
+        right = Side(style = "thick"),
+        top = Side(style = "thick"),
+        bottom = Side(style = "thick")
     )
 
     thin_border = Border(
-        left=Side(style="thin"),
-        right=Side(style="thin"),
-        top=Side(style="thin"),
-        bottom=Side(style="thin")
+        left = Side(style = "thin"),
+        right = Side(style = "thin"),
+        top = Side(style = "thin"),
+        bottom = Side(style = "thin")
     )
 
     # --- 1. Write Header ---
-    ws.merge_cells(start_row=start_row, start_column=start_col, end_row=start_row + 1, end_column=start_col + 3)
+    ws.merge_cells(start_row = start_row, start_column = start_col, end_row = start_row + 1, end_column = start_col + 3)
 
     # Set up header
-    header_cell = ws.cell(row=start_row, column=start_col)
-    header_cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    header_cell = ws.cell(row = start_row, column = start_col)
+    header_cell.alignment = Alignment(horizontal = "center", vertical = "center", wrap_text = True)
 
     # Define rich text font styles
-    title_font = InlineFont(sz=12, b=True, rFont="Calibri")
-    subtitle_font = InlineFont(sz=8, b=False, rFont="Calibri")
+    title_font = InlineFont(sz = 12, b = True, rFont = "Calibri")
+    subtitle_font = InlineFont(sz = 8, b = False, rFont = "Calibri")
     rich_text = CellRichText([
-        TextBlock(text="Effective Shopper Hours (ESH)\n", font=title_font),
-        TextBlock(text="Total Hours - [Estimated 'Non-Shopping' & Break Hours] = ESH", font=subtitle_font)
+        TextBlock(text="Effective Shopper Hours (ESH)\n", font = title_font),
+        TextBlock(text="Total Hours - [Estimated 'Non-Shopping' & Break Hours] = ESH", font = subtitle_font)
     ])
     header_cell.value = rich_text
 
     # Apply border to all merged cells manually
-    for row in ws.iter_rows(min_row=start_row, max_row=start_row+1, min_col=start_col, max_col=start_col + 3):
+    for row in ws.iter_rows(min_row = start_row, max_row = start_row+1, min_col = start_col, max_col = start_col + 3):
         for cell in row:
             cell.border = thick_border
 
@@ -633,19 +659,19 @@ def insert_effective_shopper_table(ws, employee_group, expeditor_requirements, t
         effective_hours = actual_total_hours - required_expo_hours
 
         # Write time range
-        time_range_cell = ws.cell(row=current_row, column=start_col)
+        time_range_cell = ws.cell(row = current_row, column = start_col)
         time_range_cell.value = f"{block_start} - {block_end}"
         time_range_cell.alignment = header_alignment
         time_range_cell.border = thin_border
 
         # Write required expo hours
-        required_expo_cell = ws.cell(row=current_row, column=start_col + 1)
+        required_expo_cell = ws.cell(row=current_row, column = start_col + 1)
         required_expo_cell.value = required_expo_hours
         required_expo_cell.alignment = header_alignment
         required_expo_cell.border = thin_border
 
         # Write effective shopper hours
-        esh_cell = ws.cell(row=current_row, column=start_col + 2)
+        esh_cell = ws.cell(row = current_row, column = start_col + 2)
         esh_cell.value = round(effective_hours, 2)
         esh_cell.alignment = header_alignment
         esh_cell.border = thin_border
@@ -655,21 +681,21 @@ def insert_effective_shopper_table(ws, employee_group, expeditor_requirements, t
     # --- 5. Merge and sum every 3-hour chunk ---
     for group_start_row in range(start_row + 3, current_row, 3):
         sum_value = sum(
-            ws.cell(row=r, column=start_col + 2).value
+            ws.cell(row = r, column = start_col + 2).value
             for r in range(group_start_row, min(group_start_row + 3, current_row))
         )
         ws.merge_cells(
             start_row=group_start_row,
-            start_column=start_col + 3,
+            start_column = start_col + 3,
             end_row=min(group_start_row + 2, current_row - 1),
             end_column=start_col + 3
         )
-        merged_cell = ws.cell(row=group_start_row, column=start_col + 3)
+        merged_cell = ws.cell(row = group_start_row, column = start_col + 3)
         merged_cell.value = round(sum_value, 2)
         merged_cell.alignment = header_alignment
         merged_cell.border = thin_border
 
         # Fill borders for empty cells too
         for r in range(group_start_row + 1, min(group_start_row + 3, current_row)):
-            empty_cell = ws.cell(row=r, column=start_col + 3)
+            empty_cell = ws.cell(row = r, column = start_col + 3)
             empty_cell.border = thin_border

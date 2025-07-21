@@ -1,6 +1,3 @@
-import utils as u
-
-# Classes
 class Store:
     def __init__(self, store_number):
         self.store_number = store_number
@@ -33,10 +30,9 @@ class Department:
         self.time_blocks = time_blocks
         self.role_labor_coverage = {}
 
-
     def add_employee(self, employee):
         self.employees.append(employee)
-
+    
     def __str__(self):
         output = f"{self.dept_name}\n"
         output += f"dept_index = {self.dept_index}\n"
@@ -46,8 +42,9 @@ class Department:
 
 class Employee:
     #Create the employee object
-    def __init__(self, emp_index, name, role):
+    def __init__(self, emp_index, name, middle_initial, role):
         self.name = name
+        self.middle_initial = middle_initial
         self.dept = ''
         self.role = role
         self.display_role = str() #this will be used in output
@@ -57,7 +54,8 @@ class Employee:
 
     def __str__(self):
        output = f"Name: {self.name}\n"
-       output += f"Role: {self.role}\n"
+       output += f"Raw Role: {self.role}\n"
+       output += f"Role: {self.display_role}\n"
        output += f"Hours This Week: {self.labor_hours_this_week}\n"
        output += f"Employee Index: {self.emp_index}\n"
        output += "Shifts:\n"

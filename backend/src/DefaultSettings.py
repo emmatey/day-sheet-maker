@@ -75,43 +75,43 @@ default_settings = {
             "roles": ["Associate"],
             "clean_roles": ["Produce Associate"],
             "labor_tracker_enabled": [1],
-            "default": "Produce Associate"
+            "default": "Associate"
         },
         "Meat": {
             "roles": ["Meat Associate"],
             "clean_roles": ["Meat Associate"],
             "labor_tracker_enabled": [1],
-            "default": "Meat Associate"
+            "default": "Associate"
         },
         "Seafood": {
             "roles": ["Seafood Associate", "Meat Associate"],
             "clean_roles": ["Seafood Associate", "Meat Associate"],
             "labor_tracker_enabled": [1, 1],
-            "default": "Seafood Associate"
+            "default": "Associate"
         },
         "Deli": {
             "roles": ["Deli Associate"],
             "clean_roles": ["Deli Associate"],
             "labor_tracker_enabled": [1],
-            "default": "Deli Associate"
+            "default": "Associate"
         },
         "Bakery": {
             "roles": ["Associate"],
             "clean_roles": ["Bakery Associate"],
             "labor_tracker_enabled": [1],
-            "default": "Bakery Associate"
+            "default": "Associate"
         },
         "Customer Service": {
             "roles": ["ServiceLeadr", "Service Desk Assoc", "Cashier Exp", "ServiceClerk", "SL SelfScan"],
             "clean_roles": ["Lead", "Service Desk", "Register Team", "Register Team", "Service Desk"],
             "labor_tracker_enabled": [1, 1, 1, 1, 1],
-            "default": "Customer Service Associate"
+            "default": "Associate"
         },
         "Pharmacy": {
             "roles": ["Pharmacist", "Pharmacy Tech", "Tech"],
             "clean_roles": ["Pharmacist", "Pharmacy Tech", "Tech"],
             "labor_tracker_enabled": [1, 1, 1],
-            "default": "Pharmacy Associate"
+            "default": "Associate"
         }
     },
     "EXPEDITOR_REQUIREMENTS": {
