@@ -65,32 +65,6 @@ def build_store(csv_path, config_object_settings_time_blocks, config_object_sett
                 
                 break
 
-    def disambiguate_duplicate_names(store, debug = False):
-        """
-        Adds middle initials to employees who share the same name within the same department.
-
-        Args:
-            store (Store): The store object containing departments and employees.
-            debug (bool): If True, prints which names were disambiguated.
-        """
-        for department in store.department_list:
-            employees_by_name = defaultdict(list)
-
-            # Group employees by their clean base name
-            for employee in department.employees:
-                employees_by_name[employee.name].append(employee)
-
-            # Add middle initials where duplicates exist
-            for name, list_of_employee_objects_with_said_name in employees_by_name.items():
-                if len(list_of_employee_objects_with_said_name) > 1:
-                    for emp in list_of_employee_objects_with_said_name:
-                        # Only add middle initial if one exists
-                        if emp.middle_initial:
-                            first, last = emp.name.split(maxsplit=1)
-                            emp.name = f"{first} {emp.middle_initial.upper()} {last}"
-                            if debug:
-                                print(f"Updated: {name} -> {emp.name}")
-
     hrd.calculate_hours()
-    disambiguate_duplicate_names(hrd)
+    u.disambiguate_duplicate_names(hrd)
     return hrd

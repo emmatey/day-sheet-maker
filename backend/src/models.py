@@ -21,7 +21,6 @@ class Store:
                 for shift in employee.shifts:
                     employee.add_hours(shift.paid_hours)
 
-
 class Department:
     def __init__(self, dept_index, dept_name, time_blocks):
         self.dept_name = dept_name
@@ -38,7 +37,6 @@ class Department:
         output += f"dept_index = {self.dept_index}\n"
         output += f"Number of Employees = {len(self.employees)}\n"
         return output
-
 
 class Employee:
     #Create the employee object
@@ -83,8 +81,9 @@ class Employee:
             clean_index = valid_roles.index(self.role)
             self.display_role = clean_roles[clean_index]
         else:
-            self.display_role = role_map.get("default", self.role)
-
+            default_title = role_map.get("default", self.role)
+            self.display_role = default_title
+            self.name = f"{self.name} - {[self.role]}"
 
 class Shift:
     def __init__(self, day_index, start_time, end_time, paid_hours):

@@ -25,6 +25,8 @@ class ConfigHandler:
         self.settings_role_map = {}
         self.settings_esh = {}
         self.settings_copy_input_to_archive = True
+        self.settings_enable_esh = True
+        self.settings_daily_notes_override = False
         self.settings_output_orientation_index = 2
         self.settings_save_loc = "DEFAULT_PLACEHOLDER"
 
@@ -113,7 +115,9 @@ class ConfigHandler:
         # Toggles
         settings_toggles_dict = settings.get("OUTPUT_SETTINGS", {})
         self.settings_copy_input_to_archive = settings_toggles_dict.get("copy_input_to_archive", True)
+        self.settings_enable_esh = settings_toggles_dict.get("enable_esh", True)
         self.settings_output_orientation_index = settings_toggles_dict.get("OUTPUT_ORIENTATION_INDEX", 2)
+        self.settings_daily_notes_override = settings_toggles_dict.get("daily_notes_override", False)
 
         # Save Location
         try:

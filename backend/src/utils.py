@@ -9,6 +9,7 @@ from openpyxl.styles import Border, Side, Font, Alignment
 from openpyxl.cell.rich_text import TextBlock, CellRichText
 from openpyxl.cell.text import InlineFont
 
+
 # Helper Functions
 def department_row_map(csv_path):
 
@@ -148,17 +149,12 @@ def extract_store_number(csv_path):
     """
     with open(csv_path, "r") as f:
         inputCSV = csv.reader(f)
-        # Go through each row in the CSV
         for row in inputCSV:
-            # Check each cell in the row
             for cell in row:
-                # Look for a pattern like 'Store:1234'
                 match = re.search(r'Store:(\d+)', cell)
                 if match:
-                    # Return only the digits part (e.g., '1234')
                     return match.group(1)
 
-    # If we get here, no store number was found
     return None
 
 
@@ -243,7 +239,7 @@ def parse_shift_cell(shift_cell, index):
         first_shift_start = datetime.datetime.strptime(double.group(1), '%I:%M%p')
         first_shift_end = datetime.datetime.strptime(double.group(2), '%I:%M%p')
         if first_shift_end <= first_shift_start:
-            first_shift_end += datetime.timedelta(days=1)
+            first_shift_end += datetime.timedelta(days = 1)
         first_shift_duration = (first_shift_end - first_shift_start)
         first_shift_duration_in_seconds = first_shift_duration.total_seconds()
 
@@ -317,6 +313,33 @@ def parse_shift_cell(shift_cell, index):
     return []
 
 
+def disambiguate_duplicate_names(store, debug = False):
+        """
+        Adds middle initials to employees who share the same name within the same department.
+
+        Args:
+            store (Store): The store object containing departments and employees.
+            debug (bool): If True, prints which names were disambiguated.
+        """
+        for department in store.department_list:
+            employees_by_name = defaultdict(list)
+
+            # Group employees by their clean base name
+            for employee in department.employees:
+                employees_by_name[employee.name].append(employee)
+
+            # Add middle initials where duplicates exist
+            for name, list_of_employee_objects_with_said_name in employees_by_name.items():
+                if len(list_of_employee_objects_with_said_name) > 1:
+                    for emp in list_of_employee_objects_with_said_name:
+                        # Only add middle initial if one exists
+                        if emp.middle_initial:
+                            first, last = emp.name.split(maxsplit=1)
+                            emp.name = f"{first} {emp.middle_initial.upper()} {last}"
+                            if debug:
+                                print(f"Updated: {name} -> {emp.name}")
+
+
 # Rendering Funcitons
 def insert_title_cell(ws, day, column_day_map):
     _, dates = column_day_map
@@ -332,6 +355,16 @@ def insert_title_cell(ws, day, column_day_map):
 
     # Insert the value
     template_cell.value = f"{days[day]} - {dates[day]}"
+
+
+def insert_footer(ws, store_number):
+    """
+    Adds a footer with the store number and generation date to the bottom-right corner of the printed page.
+    """
+    date_generated = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+    ws.oddFooter.right.text = f"Store {store_number} | Generated {date_generated}"
+    ws.oddFooter.right.size = 8 
+    ws.oddFooter.right.font = "Calibri"
 
 
 def insert_role_header(ws, row_number, role_name):
@@ -408,29 +441,29 @@ def insert_labor_tracker(ws, labor_data, title, start_row, start_col = 10):
 
     # Borders
     thick_border = Border(
-        left=Side(style="thick"),
-        right=Side(style="thick"),
-        top=Side(style="thick"),
-        bottom=Side(style="thick")
+        left=Side(style = "thick"),
+        right=Side(style = "thick"),
+        top=Side(style = "thick"),
+        bottom=Side(style = "thick")
     )
 
     thin_border = Border(
-        left=Side(style="thin"),
-        right=Side(style="thin"),
-        top=Side(style="thin"),
-        bottom=Side(style="thin")
+        left=Side(style = "thin"),
+        right=Side(style = "thin"),
+        top=Side(style = "thin"),
+        bottom=Side(style = "thin")
     )
 
     # 1. Title row
-    ws.merge_cells(start_row=start_row, start_column=start_col, end_row=start_row, end_column=start_col+4)
+    ws.merge_cells(start_row = start_row, start_column=start_col, end_row = start_row, end_column = start_col + 4)
 
-    for col in range(start_col, start_col+5):
-        cell = ws.cell(row=start_row, column=col)
+    for col in range(start_col, start_col + 5):
+        cell = ws.cell(row = start_row, column = col)
         cell.border = thick_border
-        cell.font = Font(bold=True, size=12, name='Calibri')
-        cell.alignment = Alignment(horizontal="center", vertical="center")
+        cell.font = Font(bold = True, size = 12, name='Calibri')
+        cell.alignment = Alignment(horizontal="center", vertical = "center")
 
-    title_cell = ws.cell(row=start_row, column=start_col)
+    title_cell = ws.cell(row = start_row, column = start_col)
     title_cell.value = title
 
     # 2. Data rows
@@ -462,6 +495,66 @@ def insert_labor_tracker(ws, labor_data, title, start_row, start_col = 10):
         hours_cell.alignment = Alignment(horizontal="center", vertical="center")
 
         current_row += 1
+
+
+def insert_daily_notes(ws, start_row = 4, start_col = 10, height = 20, width = 5):
+    """
+    Inserts 'Daily Notes', a blank space to write, in place of labor trackers if chosen by user.
+
+    Args:
+        ws (Worksheet): The Excel worksheet.
+        start_row (int): Row to place the header.
+        start_col (int): Starting column for the rectangle.
+        height (int): Number of rows the rectangle should extend down.
+        width (int): Number of columns the rectangle should span.
+    """
+    from openpyxl.styles import Font, Alignment, Border, Side
+
+    # Borders
+    thick_border = Border(
+        left = Side(style = "thick"),
+        right = Side(style = "thick"),
+        top = Side(style = "thick"),
+        bottom = Side(style = "thick")
+    )
+    thin_border = Border(
+        left = Side(style = "thin"),
+        right = Side(style = "thin"),
+        top = Side(style = "thin"),
+        bottom = Side(style = "thin")
+    )
+
+    # 1. Insert "Daily Notes" header
+    ws.merge_cells(
+        start_row = start_row,
+        start_column = start_col,
+        end_row = start_row,
+        end_column = start_col + width - 1
+    )
+    for c in range(start_col, start_col + width):
+        cell = ws.cell(row = start_row, column = c)
+        cell.border = thick_border
+
+    header_cell = ws.cell(row = start_row, column = start_col)
+    header_cell.value = "Daily Notes"
+    header_cell.font = Font(bold = True, size = 14, name = 'Calibri')
+    header_cell.alignment = Alignment(horizontal = "center", vertical = "center")
+
+    # 2. Create rectangle area below header
+    for r in range(start_row + 1, start_row + 1 + height):
+        for c in range(start_col, start_col + width):
+            cell = ws.cell(row = r, column = c)
+            cell.value = ""  # leave blank for notes
+            cell.border = thin_border
+            cell.alignment = Alignment(horizontal = "left", vertical = "top")
+
+    # Merge cells for a large writing area
+    ws.merge_cells(
+        start_row = start_row + 1,
+        start_column = start_col,
+        end_row = start_row + height,
+        end_column = start_col + width - 1
+    )
 
 
 def insert_headers_and_employees(ws, employee_group_dict, day_index, start_row = 4):

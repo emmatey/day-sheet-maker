@@ -1,6 +1,11 @@
 default_settings = {
     "TIME_BLOCKS": {
         "Hannaford to Go": [
+            ["05:00", "10:00", "Morning Crew"],
+            ["10:00", "15:00", "Mid-Day"],
+            ["15:00", "20:00", "Evening"]
+        ],
+        "Hannaford to Go ESH": [
             ["05:00", "06:00", "05:00 - 06:00"],
             ["06:00", "07:00", "06:00 - 07:00"],
             ["07:00", "08:00", "07:00 - 08:00"],
@@ -63,7 +68,7 @@ default_settings = {
             "roles": ["Expeditor", "Shopper"],
             "clean_roles": ["Expeditor", "Shopper"],
             "labor_tracker_enabled": [1, 1],
-            "default": "Associate"
+            "default": "Shopper"
         },
         "Center Store": {
             "roles": ["Ctr Str Mgmt", "Ctr Str Lead", "Ctr Str Clerk", "Stock Crew Assoc", "Maintenance"],
@@ -105,7 +110,7 @@ default_settings = {
             "roles": ["ServiceLeadr", "Service Desk Assoc", "Cashier Exp", "ServiceClerk", "SL SelfScan"],
             "clean_roles": ["Lead", "Service Desk", "Register Team", "Register Team", "Service Desk"],
             "labor_tracker_enabled": [1, 1, 1, 1, 1],
-            "default": "Associate"
+            "default": "Register Team"
         },
         "Pharmacy": {
             "roles": ["Pharmacist", "Pharmacy Tech", "Tech"],
@@ -136,6 +141,8 @@ default_settings = {
     },
     "OUTPUT_SETTINGS": {
         "OUTPUT_ORIENTATION_INDEX": 2,
-        "copy_input_to_archive": True
+        "copy_input_to_archive": True,
+        "enable_esh": True,
+        "daily_notes_override": False
     }
 }

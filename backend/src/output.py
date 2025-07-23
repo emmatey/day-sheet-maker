@@ -72,7 +72,7 @@ def CreateWorkbook(wall_mode_list, output_depts, column_day_map, outPath):
             templatePath = c.ConfigHandler.get_project_root() / "assets" / "Day Sheet Master.xlsx"
             wb = openpyxl.load_workbook(templatePath)
 
-            is_wall = populate_workbook(wb, dept, column_day_map, is_wall=wall_mode)
+            is_wall = populate_workbook(wb, dept, column_day_map, is_wall = wall_mode)
 
             save_name = dept.dept_name.replace(" ", "_")
             if is_wall:
@@ -84,7 +84,7 @@ def CreateWorkbook(wall_mode_list, output_depts, column_day_map, outPath):
             print(f"Saved: {file_path}")
 
 
-def ProcessOutput(save_location_path, WEEK_ENDING_DATE, settings_object, input_file_path):
+def ProcessOutput(save_location_path, WEEK_ENDING_DATE, STORE_NUMBER, settings_object, input_file_path):
     """
     Generates staffing sheet outputs for selected departments in Table and/or Wall formats.
 
@@ -97,7 +97,7 @@ def ProcessOutput(save_location_path, WEEK_ENDING_DATE, settings_object, input_f
     Returns:
         str: Full path to the created output folder
     """
-    outPath = os.path.join(save_location_path, f'DaySheets_WeekEnding_{WEEK_ENDING_DATE}')
+    outPath = os.path.join(save_location_path, f'DaySheets_{STORE_NUMBER}_WeekEnding_{WEEK_ENDING_DATE}')
     os.makedirs(outPath, exist_ok=True)
 
     if settings_object.settings_copy_input_to_archive:
@@ -138,12 +138,25 @@ def populate_workbook(wb, dept, column_day_map, is_wall: bool = False):
 
         u.insert_title_cell(ws, day, column_day_map)
         u.insert_headers_and_employees(ws, employee_group, day)
+        u.insert_footer(ws, hrd.store_number)
 
-        if "to Go" in dept.dept_name:
+        role_enabled = employee_group.values()
+        role_enabled_list = []
+        role_enabled_notes_override_token = True
+        for i in role_enabled:
+            role_enabled_list.append(i[-1])
+        for i in role_enabled_list:
+            if i != 0:
+                role_enabled_notes_override_token = False
+
+        if "to Go" in dept.dept_name and config_handler_object.settings_enable_esh == True:
+            time_blocks = config_handler_object.settings_time_blocks.get("Hannaford to Go ESH", [])
             u.insert_effective_shopper_table(ws, employee_group, config_handler_object.settings_esh, time_blocks, day)
+        elif config_handler_object.settings_daily_notes_override == True or role_enabled_notes_override_token == True:
+            u.insert_daily_notes(ws)
         else:
-            u.insert_labor_trackers(ws, employee_group, time_blocks, day)
-
+            u.insert_labor_trackers(ws, employee_group, time_blocks, day) 
+            
         # Formatting based on layout
         if is_wall:
             ws.column_dimensions['D'].hidden = True
@@ -254,6 +267,7 @@ if __name__ == "__main__":
         output_path = ProcessOutput(
             args.save_directory,
             WEEK_ENDING_DATE,
+            hrd.store_number,
             config_handler_object,
             input_file
         )
