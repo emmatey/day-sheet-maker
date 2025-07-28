@@ -26,8 +26,6 @@ class ConfigHandler:
         self.settings_esh = {}
         self.settings_copy_input_to_archive = True
         self.settings_enable_esh = True
-        self.settings_daily_notes_override = False
-        self.settings_output_orientation_index = 2
         self.settings_save_loc = "DEFAULT_PLACEHOLDER"
         self.settings_blacklists = self.settings.get("Blacklists", {})
         self.settings_new_dept_or_role_blacklist = {
@@ -166,8 +164,6 @@ class ConfigHandler:
         settings_toggles_dict = settings.get("OUTPUT_SETTINGS", {})
         self.settings_copy_input_to_archive = settings_toggles_dict.get("copy_input_to_archive", True)
         self.settings_enable_esh = settings_toggles_dict.get("enable_esh", True)
-        self.settings_output_orientation_index = settings_toggles_dict.get("OUTPUT_ORIENTATION_INDEX", 2)
-        self.settings_daily_notes_override = settings_toggles_dict.get("daily_notes_override", False)
 
         # Save Location
         try:
@@ -275,3 +271,39 @@ class ConfigHandler:
 
         self.save_config()
 
+    def ensure_dept_output_settings(self, new_depts):
+        """
+        Ensure the OUTPUT_SETTINGS entry for a department exists with defaults.
+
+        Args:
+            dept_name (str): The name of the department.
+        """
+        departments = self.settings.setdefault("OUTPUT_SETTINGS", {}).setdefault("Departments", {})
+
+        for dept in new_depts:
+            if dept not in departments:
+                departments[dept] = {
+                    "orientation_index": 2,
+                    "daily_notes_override": False
+                }
+        
+        self.save_config()
+    
+    def get_dept_output_setting(self, dept_name, key, default = None):
+        """
+        Retrieve a department-specific output setting.
+
+        Args:
+            dept_name (str): The name of the department.
+            key (str): The setting key (e.g., 'orientation_index', 'daily_notes_override').
+            default (Any): The default value if not found.
+
+        Returns:
+            The department-specific setting or default.
+        """
+        return (
+            self.settings.get("OUTPUT_SETTINGS", {})
+            .get("Departments", {})
+            .get(dept_name, {})
+            .get(key, default)
+        )

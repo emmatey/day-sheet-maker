@@ -144,9 +144,45 @@ default_settings = {
         "save_location_string" : "DEFAULT_PLACEHOLDER"
     },
     "OUTPUT_SETTINGS": {
-        "OUTPUT_ORIENTATION_INDEX": 2,
-        "copy_input_to_archive": True,
-        "enable_esh": True,
-        "daily_notes_override": False
+    "copy_input_to_archive": True,
+    "enable_esh": False,
+    "Departments": {
+        "Hannaford to Go": {
+            "output_orientation_index": 2,
+            "daily_notes_override": False
+        },
+        "Center Store": {
+            "output_orientation_index": 2,
+            "daily_notes_override": False
+        },
+        "Produce": {
+            "output_orientation_index": 2,
+            "daily_notes_override": False
+        },
+        "Meat": {
+            "output_orientation_index": 2,
+            "daily_notes_override": False
+        },
+        "Seafood": {
+            "output_orientation_index": 2,
+            "daily_notes_override": False
+        },
+        "Deli": {
+            "output_orientation_index": 2,
+            "daily_notes_override": False
+        },
+        "Bakery": {
+            "output_orientation_index": 2,
+            "daily_notes_override": False
+        },
+        "Customer Service": {
+            "output_orientation_index": 2,
+            "daily_notes_override": False
+        },
+        "Pharmacy": {
+            "output_orientation_index": 2,
+            "daily_notes_override": False
+        }
     }
+}  
 }

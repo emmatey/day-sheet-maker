@@ -83,7 +83,7 @@ class Employee:
         else:
             default_title = role_map.get("default", self.role)
             self.display_role = default_title
-            self.name = f"{self.name} - {[self.role]}"
+            self.name = f"{self.name} - ({self.role})"
 
 class Shift:
     def __init__(self, day_index, start_time, end_time, paid_hours):

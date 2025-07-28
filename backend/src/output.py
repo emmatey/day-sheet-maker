@@ -57,7 +57,7 @@ def FindValidDepts(hrd):
     return valid_depts
 
 
-def CreateWorkbook(wall_mode_list, output_depts, column_day_map, outPath):
+def CreateWorkbook(wall_mode_list, output_depts, column_day_map, outPath, daily_notes_override):
     """
     Creates and saves Excel workbooks for each department in specified wall/table format(s).
 
@@ -72,7 +72,13 @@ def CreateWorkbook(wall_mode_list, output_depts, column_day_map, outPath):
             templatePath = c.ConfigHandler.get_project_root() / "assets" / "Day Sheet Master.xlsx"
             wb = openpyxl.load_workbook(templatePath)
 
-            is_wall = populate_workbook(wb, dept, column_day_map, is_wall = wall_mode)
+            is_wall = populate_workbook(
+                wb, 
+                dept, 
+                column_day_map, 
+                daily_notes_override, 
+                is_wall = wall_mode
+            )
 
             save_name = dept.dept_name.replace(" ", "_")
             if is_wall:
@@ -84,7 +90,7 @@ def CreateWorkbook(wall_mode_list, output_depts, column_day_map, outPath):
             print(f"Saved: {file_path}")
 
 
-def ProcessOutput(save_location_path, WEEK_ENDING_DATE, STORE_NUMBER, settings_object, input_file_path):
+def ProcessOutput(save_location_path, WEEK_ENDING_DATE, STORE_NUMBER, settings_object, input_file_path, output_depts, column_day_map):
     """
     Generates staffing sheet outputs for selected departments in Table and/or Wall formats.
 
@@ -110,14 +116,24 @@ def ProcessOutput(save_location_path, WEEK_ENDING_DATE, STORE_NUMBER, settings_o
         [True],        # 1 = WALL_ONLY
         [True, False]  # 2 = BOTH
     ]
-    wall_mode_list = wall_mode_options[settings_object.settings_output_orientation_index]
+    
+    for dept in output_depts:
+        orientation_index = settings_object.get_dept_output_setting(dept.dept_name, "orientation_index", 2)
+        daily_notes_override = settings_object.get_dept_output_setting(dept.dept_name, "daily_notes_override", False)
+        wall_mode_list = wall_mode_options[orientation_index]
 
-    CreateWorkbook(wall_mode_list, output_depts, column_day_map, outPath)
+        CreateWorkbook(
+            wall_mode_list, 
+            [dept], 
+            column_day_map, 
+            outPath, 
+            daily_notes_override
+        )
 
     return outPath
 
 
-def populate_workbook(wb, dept, column_day_map, is_wall: bool = False):
+def populate_workbook(wb, dept, column_day_map, daily_notes_override, is_wall: bool = False):
     """
     Populates a workbook with scheduling data for a department.
 
@@ -130,6 +146,11 @@ def populate_workbook(wb, dept, column_day_map, is_wall: bool = False):
     Returns:
         bool: The is_wall flag, unchanged
     """
+    def print_region_width_adjust(col_num_int):
+            last_row = ws.max_row
+            last_col_letter = openpyxl.utils.get_column_letter(col_num_int)
+            ws.print_area = f"A1:{last_col_letter}{last_row}"
+            
     for day, sheetname in enumerate(wb.sheetnames):
         ws = wb[sheetname]
 
@@ -140,6 +161,8 @@ def populate_workbook(wb, dept, column_day_map, is_wall: bool = False):
         u.insert_headers_and_employees(ws, employee_group, day)
         u.insert_footer(ws, hrd.store_number)
 
+        # If at least one 'labor tracker table' is enabled, don't draw the 'daily notes'
+        # Employee group = ({dict}, bool)
         role_enabled = employee_group.values()
         role_enabled_list = []
         role_enabled_notes_override_token = True
@@ -149,13 +172,21 @@ def populate_workbook(wb, dept, column_day_map, is_wall: bool = False):
             if i != 0:
                 role_enabled_notes_override_token = False
 
-        if "to Go" in dept.dept_name and config_handler_object.settings_enable_esh == True:
+       
+        if "to go" in dept.dept_name.lower() and config_handler_object.settings_enable_esh == True:
             time_blocks = config_handler_object.settings_time_blocks.get("Hannaford to Go ESH", [])
+        
             u.insert_effective_shopper_table(ws, employee_group, config_handler_object.settings_esh, time_blocks, day)
-        elif config_handler_object.settings_daily_notes_override == True or role_enabled_notes_override_token == True:
+
+            ws.column_dimensions['K'].width = 20
+            ws.column_dimensions['L'].width = 10
+            ws.column_dimensions['M'].width = 5
+            ws.column_dimensions['N'].width = 5
+
+        elif daily_notes_override == True or role_enabled_notes_override_token == True:
             u.insert_daily_notes(ws)
         else:
-            u.insert_labor_trackers(ws, employee_group, time_blocks, day) 
+            u.insert_labor_trackers(ws, employee_group, time_blocks, day)
             
         # Formatting based on layout
         if is_wall:
@@ -173,23 +204,6 @@ def populate_workbook(wb, dept, column_day_map, is_wall: bool = False):
             ws.page_margins.top = 0.5
             ws.page_setup.orientation = ws.ORIENTATION_LANDSCAPE
 
-        # Page margins
-        ws.page_margins.left = 0.1
-        ws.page_margins.right = 0.1
-        ws.page_margins.bottom = 0.25
-        ws.page_margins.header = 0.1
-        ws.page_margins.footer = 0.1
-
-        # Fit to page
-        ws.page_setup.use_fit_to_page = True
-        ws.page_setup.fitToWidth = 1
-        ws.page_setup.fitToHeight = 1
-        ws.page_setup.scale = 100
-
-        # Centering
-        ws.print_options.horizontalCentered = True
-        ws.print_options.verticalCentered = False
-
         # Column widths
         column_widths = {
             'A': 30.0, 'B': 12.0, 'C': 12.0, 'D': 5.0, 'E': 5.0,
@@ -198,16 +212,24 @@ def populate_workbook(wb, dept, column_day_map, is_wall: bool = False):
         for col, width in column_widths.items():
             ws.column_dimensions[col].width = width
 
-        if dept.dept_name.lower() == 'hannaford to go':
-            ws.column_dimensions['K'].width = 20
-            ws.column_dimensions['L'].width = 10
-            ws.column_dimensions['M'].width = 5
-            ws.column_dimensions['N'].width = 5
+        # Page margins
+        ws.page_margins.left = 0.1
+        ws.page_margins.right = 0.1
+        ws.page_margins.bottom = 0.25
+        ws.page_margins.header = 0.1
+        ws.page_margins.footer = 0.1
 
-        # Print area
-        last_row = ws.max_row
-        last_col_letter = openpyxl.utils.get_column_letter(14)  # Column N = 14
-        ws.print_area = f"A1:{last_col_letter}{last_row}"
+        # Fit to page
+        ws.sheet_properties.pageSetUpPr.fitToPage = True
+        ws.page_setup.fitToWidth = 1
+        ws.page_setup.fitToHeight = 1
+        ws.page_setup.scale = None
+
+        # Centering
+        ws.print_options.horizontalCentered = True
+        ws.print_options.verticalCentered = False
+    
+        print_region_width_adjust(14)
 
     return is_wall
 
@@ -255,6 +277,7 @@ if __name__ == "__main__":
         config_handler_object.add_newly_detected_department_to_role_map(new_depts)
         config_handler_object.add_newly_detected_roles_to_relevant_depts(new_roles)
         config_handler_object.add_time_blocks_for_new_depts(new_depts)
+        config_handler_object.ensure_dept_output_settings(new_depts)
         hrd = builder.build_store(csv_path, config_handler_object.settings_time_blocks, config_handler_object.settings_role_map)
 
     if args.preview:
@@ -278,7 +301,9 @@ if __name__ == "__main__":
             WEEK_ENDING_DATE,
             hrd.store_number,
             config_handler_object,
-            input_file
+            input_file,
+            output_depts,
+            column_day_map
         )
         print(f"\n Done! Files saved in:\n{output_path}")
 
