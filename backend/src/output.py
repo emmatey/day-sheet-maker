@@ -272,10 +272,16 @@ if __name__ == "__main__":
 
     new_roles_and_depts = u.detect_new_roles_and_departments(hrd, config_handler_object)
     new_depts = new_roles_and_depts["new_departments"]
-    new_roles = new_roles_and_depts["emp_objects_with_unseen_roles"]
-    if new_depts or new_roles:
+    emp_objects_with_new_role = new_roles_and_depts["emp_objects_with_unseen_roles"]
+    if new_depts or emp_objects_with_new_role:
+        new_roles_set = set()
+        for emp_object_with_new_role in emp_objects_with_new_role:
+            new_roles_set.add(emp_object_with_new_role.role)
+        print(f"new_departments found!: {new_depts}")
+        print(f"new_roles found!: {new_roles_set}")
+
         config_handler_object.add_newly_detected_department_to_role_map(new_depts)
-        config_handler_object.add_newly_detected_roles_to_relevant_depts(new_roles)
+        config_handler_object.add_newly_detected_roles_to_relevant_depts(emp_objects_with_new_role)
         config_handler_object.add_time_blocks_for_new_depts(new_depts)
         config_handler_object.ensure_dept_output_settings(new_depts)
         hrd = builder.build_store(csv_path, config_handler_object.settings_time_blocks, config_handler_object.settings_role_map)
