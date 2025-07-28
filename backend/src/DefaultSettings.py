@@ -64,6 +64,10 @@ default_settings = {
         ]
     },
     "ROLE_MAP": {
+        "Blacklists": {
+            "departments": ["Authorized Hours RX", "Authorized Hrs", "Default", "Light Duty", "Management", "Pre-Opening", "Storm Loss", "Support Employment", "Training"],
+            "roles": ["Asst ARM", "Scan File"]
+            },
         "Hannaford to Go": {
             "roles": ["Expeditor", "Shopper"],
             "clean_roles": ["Expeditor", "Shopper"],
@@ -117,7 +121,7 @@ default_settings = {
             "clean_roles": ["Pharmacist", "Pharmacy Tech", "Tech"],
             "labor_tracker_enabled": [1, 1, 1],
             "default": "Associate"
-        }
+        },
     },
     "EXPEDITOR_REQUIREMENTS": {
         "0": 1,

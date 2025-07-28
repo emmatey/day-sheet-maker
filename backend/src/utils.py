@@ -1,4 +1,3 @@
-#Functions Base
 import re
 import csv
 import models as m
@@ -100,7 +99,7 @@ def employee_group(dept, day_index, config_object_role_map):
     # Get the role mapping for this department (which defines header order)
     role_map = config_object_role_map.get(dept.dept_name, {})
     clean_roles = role_map.get('clean_roles', [])
-    role_labor_tracker_enabled = role_map.get('labor_tracker_enabled', [])
+    role_labor_tracker_enabled_bool_list = role_map.get('labor_tracker_enabled', [])
     role_index = 0
 
     # This will track employees who were placed correctly in a role
@@ -112,7 +111,7 @@ def employee_group(dept, day_index, config_object_role_map):
             for shift in emp.shifts:
                 if shift.day_index == day_index and emp.display_role == clean_roles[role_index] and emp not in all_sorted:
                     if emp.display_role not in employee_group:
-                        employee_group[emp.display_role] = ([emp], role_labor_tracker_enabled[role_index])
+                        employee_group[emp.display_role] = ([emp], role_labor_tracker_enabled_bool_list[role_index])
                     else:
                         employee_group[emp.display_role][0].append(emp)
                     
@@ -122,7 +121,7 @@ def employee_group(dept, day_index, config_object_role_map):
 
     # After the preferred roles, assign any remaining employees
     for emp in dept.employees:
-        if emp not in all_sorted:#MAYBE LATER I CAN ADD CODE HERE TO SUCC UNSEEN ROLES TO ADD TO SETTINGS.
+        if emp not in all_sorted:
             for shift in emp.shifts:
                 if shift.day_index == day_index:
                     if emp.display_role not in employee_group:
@@ -131,6 +130,50 @@ def employee_group(dept, day_index, config_object_role_map):
                         employee_group[emp.display_role][0].append(emp)
                     
     return employee_group
+
+
+def detect_new_roles_and_departments(store_object, config_object):
+    """
+    Detects any roles or departments in the store_object that are not present in ROLE_MAP.
+
+    Args:
+        store_object (Store): The store object containing all departments and employees.
+        config_handler_object (ConfigHandler): The ConfigHandler instance with role maps.
+
+    Returns:
+        dict: {
+            "new_departments": [list of dept names],
+            "new_roles": [list of roles]
+        }
+    """
+    role_map = config_object.settings_role_map
+    extant_roles_set = set()
+    departments_aleady_in_settings = set(role_map.keys())
+    blacklist_dept = config_object.settings_new_dept_or_role_blacklist.get("departments", [])
+    blacklist_role = config_object.settings_new_dept_or_role_blacklist.get("roles", [])
+
+    # 1. Build extant roles set across all departments
+    for dept_name, dept_map in role_map.items():
+        extant_roles_set.update(dept_map.get("roles", []))
+
+    # 2. Check for new departments and roles
+    emp_objects_with_unseen_roles = []
+    unseen_departments = []
+
+    for dept in store_object.department_list:
+        if dept.dept_name not in blacklist_dept:
+            if dept.dept_name not in departments_aleady_in_settings:
+                unseen_departments.append(dept.dept_name)
+
+            for emp in dept.employees:
+                if emp.role not in blacklist_role:
+                    if emp.role not in extant_roles_set:
+                        emp_objects_with_unseen_roles.append(emp)
+
+    return {
+        "new_departments": sorted(list(unseen_departments)),
+        "emp_objects_with_unseen_roles": list(emp_objects_with_unseen_roles)
+    }
 
 
 def extract_store_number(csv_path):

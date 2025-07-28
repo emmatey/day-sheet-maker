@@ -3,7 +3,6 @@ import utils as u
 import re
 import csv
 import NameFormatter
-from collections import defaultdict
 
 def build_store(csv_path, config_object_settings_time_blocks, config_object_settings_role_map):
     with open(csv_path, "r") as f:
