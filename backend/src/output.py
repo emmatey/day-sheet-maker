@@ -277,8 +277,8 @@ if __name__ == "__main__":
         new_roles_set = set()
         for emp_object_with_new_role in emp_objects_with_new_role:
             new_roles_set.add(emp_object_with_new_role.role)
-        print(f"new_departments found!: {new_depts}")
-        print(f"new_roles found!: {new_roles_set}")
+        print(f"New Departments found!: {new_depts}")
+        print(f"New Roles found!: {new_roles_set}")
 
         config_handler_object.add_newly_detected_department_to_role_map(new_depts)
         config_handler_object.add_newly_detected_roles_to_relevant_depts(emp_objects_with_new_role)

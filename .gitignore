@@ -26,10 +26,25 @@ frontend/dist/
 frontend/.next/
 frontend/.vite/
 frontend/build/
+frontend/npm-debug.log*
+frontend/yarn-debug.log*
+frontend/yarn-error.log*
+frontend/package-lock.json
+frontend/pnpm-lock.yaml
+
+# === React Cache / Misc ===
+frontend/.eslintcache
+frontend/.parcel-cache
+frontend/.turbo
+frontend/.swc
+frontend/.cache
+frontend/coverage/
 
 # === Env / Secrets ===
 .env
 .env.local
+frontend/.env
+frontend/.env.local
 
 # === Allow list ===
 !assets/Day Sheet Master.xlsx

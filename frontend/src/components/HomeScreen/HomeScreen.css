@@ -1,0 +1,61 @@
+/* HomeScreen.css */
+.home-screen {
+  width: 800px;
+  height: 600px;
+  background-size: cover;
+  background-position: center;
+  display: flex;
+  flex-direction: column;
+}
+
+.header-frame {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  background-color: #C3D9D6;
+  padding: 1rem 2rem;
+  border-top-left-radius: 12px;
+  border-top-right-radius: 12px;
+}
+
+.symbol-frame {
+  display: flex;
+  align-items: center;
+}
+
+.store-logo {
+  height: 60px;
+  object-fit: contain;
+}
+
+.title-card {
+  background-color: white;
+  padding: 0.5rem 1.5rem;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 0.5rem;
+  color: #222;
+  border: 2px solid #ccc;
+  width: fit-content;
+  max-width: 80%;
+  margin: 0 auto; 
+  text-align: center;
+}
+
+.accent-stripe {
+  height: 6px;
+  background-color: #B61F11; 
+  width: 100%;
+}
+
+.content-pane {
+  flex: 1;
+  background-color: #FED7AA; 
+  padding: 1rem;
+  display: flex;
+  flex-wrap: wrap;
+  gap: 1rem;
+  justify-content: center;
+  align-items: flex-start;
+  border-radius: 0 0 1rem 1rem;
+}
