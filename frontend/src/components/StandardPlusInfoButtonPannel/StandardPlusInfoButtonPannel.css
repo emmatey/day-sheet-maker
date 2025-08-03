@@ -1,0 +1,30 @@
+.standard-plus-info-panel {
+  position: relative;         
+  display: flex;
+  justify-content: center;    
+  align-items: center;
+  gap: 10px;
+}
+
+.panel-button {
+  background-color: #C3D9D6; 
+  border: 8px solid #FFEDD5; 
+  border-radius: 10px;
+  color: black;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease; 
+  width: 250px;
+  height: 80px;
+  padding: 0 2rem;           
+}
+
+.panel-button:hover {
+  border-color: #ED3326;
+}
+
+.info-button-panel-style {
+  position: absolute;
+  right: -80px;                
+}

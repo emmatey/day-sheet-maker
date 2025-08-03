@@ -1,7 +1,7 @@
 /* HomeScreen.css */
 .home-screen {
-  width: 800px;
-  height: 600px;
+  width: 700px;
+  height: 475px;
   background-size: cover;
   background-position: center;
   display: flex;
@@ -24,7 +24,7 @@
 }
 
 .store-logo {
-  height: 60px;
+  height: 75px;
   object-fit: contain;
 }
 
@@ -36,8 +36,8 @@
   font-size: 0.5rem;
   color: #222;
   border: 2px solid #ccc;
-  width: fit-content;
-  max-width: 80%;
+  width: 400px;
+  height: 60px;
   margin: 0 auto; 
   text-align: center;
 }
@@ -50,12 +50,12 @@
 
 .content-pane {
   flex: 1;
-  background-color: #FED7AA; 
-  padding: 1rem;
+  background-color: #FED7AA;
+  padding: 1rem; 
   display: flex;
-  flex-wrap: wrap;
-  gap: 1rem;
-  justify-content: center;
-  align-items: flex-start;
+  flex-direction: column;     
+  align-items: center;     
+  justify-content: center;   
+  gap: 1.5rem;                  
   border-radius: 0 0 1rem 1rem;
 }

@@ -35,7 +35,7 @@ def ProcessInput(input_file):
     elif ext == '.csv':
         csv_file = input_file
     else:
-        raise ValueError('Invalid Input')
+        raise ValueError(f'Invalid Input - input is: {input_file}')
 
     return csv_file, input_file
 
@@ -57,7 +57,7 @@ def FindValidDepts(hrd):
     return valid_depts
 
 
-def CreateWorkbook(wall_mode_list, output_depts, column_day_map, outPath, daily_notes_override):
+def CreateWorkbook(wall_mode_list, output_depts, column_day_map, outPath):
     """
     Creates and saves Excel workbooks for each department in specified wall/table format(s).
 
@@ -73,10 +73,9 @@ def CreateWorkbook(wall_mode_list, output_depts, column_day_map, outPath, daily_
             wb = openpyxl.load_workbook(templatePath)
 
             is_wall = populate_workbook(
-                wb, 
-                dept, 
-                column_day_map, 
-                daily_notes_override, 
+                wb,
+                dept,
+                column_day_map,
                 is_wall = wall_mode
             )
 
@@ -90,7 +89,7 @@ def CreateWorkbook(wall_mode_list, output_depts, column_day_map, outPath, daily_
             print(f"Saved: {file_path}")
 
 
-def ProcessOutput(save_location_path, WEEK_ENDING_DATE, STORE_NUMBER, settings_object, input_file_path, output_depts, column_day_map):
+def ProcessOutput(save_location_path, WEEK_ENDING_DATE, STORE_NUMBER, settings_object, input_file_path, output_dict, column_day_map, hrd):
     """
     Generates staffing sheet outputs for selected departments in Table and/or Wall formats.
 
@@ -116,24 +115,25 @@ def ProcessOutput(save_location_path, WEEK_ENDING_DATE, STORE_NUMBER, settings_o
         [True],        # 1 = WALL_ONLY
         [True, False]  # 2 = BOTH
     ]
-    
-    for dept in output_depts:
-        orientation_index = settings_object.get_dept_output_setting(dept.dept_name, "orientation_index", 2)
-        daily_notes_override = settings_object.get_dept_output_setting(dept.dept_name, "daily_notes_override", False)
+
+    for dept_name, orientation_index in output_dict.items():
         wall_mode_list = wall_mode_options[orientation_index]
+        dept_obj = next((d for d in hrd.department_list if d.dept_name == dept_name), None)
+        if not dept_obj:
+            print(f"Warning: Department '{dept_name}' not found in data")
+            continue
 
         CreateWorkbook(
-            wall_mode_list, 
-            [dept], 
-            column_day_map, 
-            outPath, 
-            daily_notes_override
+            wall_mode_list,
+            [dept_obj],
+            column_day_map,
+            outPath,
         )
 
     return outPath
 
 
-def populate_workbook(wb, dept, column_day_map, daily_notes_override, is_wall: bool = False):
+def populate_workbook(wb, dept, column_day_map, is_wall: bool = False):
     """
     Populates a workbook with scheduling data for a department.
 
@@ -150,7 +150,7 @@ def populate_workbook(wb, dept, column_day_map, daily_notes_override, is_wall: b
             last_row = ws.max_row
             last_col_letter = openpyxl.utils.get_column_letter(col_num_int)
             ws.print_area = f"A1:{last_col_letter}{last_row}"
-            
+
     for day, sheetname in enumerate(wb.sheetnames):
         ws = wb[sheetname]
 
@@ -172,10 +172,10 @@ def populate_workbook(wb, dept, column_day_map, daily_notes_override, is_wall: b
             if i != 0:
                 role_enabled_notes_override_token = False
 
-       
+
         if "to go" in dept.dept_name.lower() and config_handler_object.settings_enable_esh == True:
             time_blocks = config_handler_object.settings_time_blocks.get("Hannaford to Go ESH", [])
-        
+
             u.insert_effective_shopper_table(ws, employee_group, config_handler_object.settings_esh, time_blocks, day)
 
             ws.column_dimensions['K'].width = 20
@@ -183,11 +183,11 @@ def populate_workbook(wb, dept, column_day_map, daily_notes_override, is_wall: b
             ws.column_dimensions['M'].width = 5
             ws.column_dimensions['N'].width = 5
 
-        elif daily_notes_override == True or role_enabled_notes_override_token == True:
+        elif role_enabled_notes_override_token == True:
             u.insert_daily_notes(ws)
         else:
             u.insert_labor_trackers(ws, employee_group, time_blocks, day)
-            
+
         # Formatting based on layout
         if is_wall:
             ws.column_dimensions['D'].hidden = True
@@ -228,7 +228,7 @@ def populate_workbook(wb, dept, column_day_map, daily_notes_override, is_wall: b
         # Centering
         ws.print_options.horizontalCentered = True
         ws.print_options.verticalCentered = False
-    
+
         print_region_width_adjust(14)
 
     return is_wall
@@ -236,34 +236,42 @@ def populate_workbook(wb, dept, column_day_map, daily_notes_override, is_wall: b
 
 if __name__ == "__main__":
     desc = """
-    Command-line entry point.
+        Command-line entry point.
 
-    Usage:
-        python output.py <input_file> <save_directory> --departments <DEPT> <DEPT>...
-        python output.py <input_file> --preview
+        Usage:
+            python output.py <input_file> <save_directory> --output <DEPT>:<MODE> [<DEPT>:<MODE> ...]
+            python output.py <input_file> --preview
 
-    Positional Arguments:
-        input_file          Path to the input CSV file.
-        save_directory      Directory where output will be saved. Required for --departments.
+        Positional Arguments:
+            input_file          Path to the input CSV file.
+            save_directory      Directory where output will be saved. Required for --output.
 
-    Optional Arguments:
-        --preview           Preview all available departments in the input file. Does not save output.
-        --departments       One or more department names to process and output. Requires save_directory.
-                            **CASE SENSITIVE**
-    """
+        Optional Arguments:
+            --preview           Preview all available departments in the input file. Does not save output.
+            --output            One or more department output settings.
+                                Format: <DEPT>:<MODE>
+                                  <DEPT>  = Department name (case-sensitive, must match schedule data)
+                                  <MODE>  = 0 = Table, 1 = Wall, 2 = Both
+                                Example:
+                                  python output.py schedule.csv ./out --output Bakery:2 Deli:0 Produce:1
+        """
 
     config_handler_object = c.ConfigHandler()
 
     parser = argparse.ArgumentParser(
-        description=desc,
-        formatter_class=argparse.RawDescriptionHelpFormatter,
+        description = desc,
+        formatter_class = argparse.RawDescriptionHelpFormatter,
         usage=argparse.SUPPRESS
     )
 
     parser.add_argument("input_file", type=str)
     parser.add_argument("save_directory", type=str, default=config_handler_object.settings_save_loc, nargs="?")
     parser.add_argument("--preview", action="store_true")
-    parser.add_argument("--departments", nargs='+')
+    parser.add_argument(
+        "--output",
+        nargs='+',
+        help="Departments and orientation index in the form DeptName:Index (Index = 0=Table, 1=Wall, 2=Both)"
+    )
     args = parser.parse_args()
 
     csv_path, input_file = ProcessInput(args.input_file)
@@ -283,7 +291,6 @@ if __name__ == "__main__":
         config_handler_object.add_newly_detected_department_to_role_map(new_depts)
         config_handler_object.add_newly_detected_roles_to_relevant_depts(emp_objects_with_new_role)
         config_handler_object.add_time_blocks_for_new_depts(new_depts)
-        config_handler_object.ensure_dept_output_settings(new_depts)
         hrd = builder.build_store(csv_path, config_handler_object.settings_time_blocks, config_handler_object.settings_role_map)
 
     if args.preview:
@@ -291,16 +298,22 @@ if __name__ == "__main__":
         for dept in preview_depts:
             print(dept)
 
-    elif args.departments:
+    elif args.output:
         _, date_list = column_day_map
         weekEndingDate = date_list[-1]
         WEEK_ENDING_DATE = weekEndingDate.replace('/', '-')
 
-        output_depts = [dept for dept in hrd.department_list if dept.dept_name in args.departments]
+        output_dict = {}
+        for entry in args.output:
+            try:
+                dept_name, index_str = entry.split(":")
+                output_dict[dept_name] = int(index_str)
+            except ValueError:
+                raise ValueError(f"Invalid format for --output entry: '{entry}'. Expected DeptName:Index")
 
-        print("Departments Processed:")
-        for dept in output_depts:
-            print(dept)
+        print("Output selection received:")
+        for dept_name, idx in output_dict.items():
+            print(f"{dept_name} → Orientation index {idx}")
 
         output_path = ProcessOutput(
             args.save_directory,
@@ -308,10 +321,11 @@ if __name__ == "__main__":
             hrd.store_number,
             config_handler_object,
             input_file,
-            output_depts,
-            column_day_map
+            output_dict,
+            column_day_map,
+            hrd
         )
-        print(f"\n Done! Files saved in:\n{output_path}")
+        print(f"\nDone! Files saved in:\n{output_path}")
 
     if "_converted.csv" in csv_path and os.path.exists(csv_path):
         try:

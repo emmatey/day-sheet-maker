@@ -1,21 +1,39 @@
-import './MainMenu.css';
+.info-button {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
 
-export default function MainMenu() {
-  return (
-    <div className="menu-container">
-      <div className="header">
-        <img src="/storeLogo.png" alt="Hannaford Logo" className="logo" />
-        <h1 className="title">Day Sheet Maker</h1>
-      </div>
+.outer-ring {
+  width: 60px;
+  height: 60px;
+  border-radius: 50%;
+  background-color: #93C5FD;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
 
-      <div className="red-stripe" />
+.outer-ring:hover {
+  background-color: #ED3326;
+  transition: all 0.2s ease;
+}
 
-      <div className="button-panel">
-        {/* Placeholder buttons */}
-        <button className="menu-button">Begin</button>
-        <button className="menu-button">Settings</button>
-        <button className="menu-button">About</button>
-      </div>
-    </div>
-  );
+.inner-circle {
+  width: 50px;
+  height: 50px;
+  border-radius: 50%;
+  background-color: #00ACF8; 
+  align-items: center;
+  justify-content: center;
+  display: flex;
+  align-items: center;
+  justify-content: center; 
+}
+
+.info-icon {
+  width: 14px;
+  height: 30px;
+  pointer-events: none; /* click passes through to button */
 }

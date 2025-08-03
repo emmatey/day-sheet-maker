@@ -73,7 +73,7 @@ class ConfigHandler:
             print(f"Default config written to: {self.config_path}")
         except Exception as e:
             print(f"Failed to write default config: {e}")
-    
+
     def set_default_archive(self):
         """
         Sets the default save location to a folder named 'Daysheet Archive'
@@ -119,7 +119,7 @@ class ConfigHandler:
                 return True
         print("Config not found in working directory.")
         return False
-    
+
     def read_config(self):
         """
         Reads the JSON configuration file from disk.
@@ -147,7 +147,7 @@ class ConfigHandler:
         except Exception as e:
             print(f"Failed to save config: {e}")
             sys.exit(1)
-            
+
     def parse_config(self, settings):
         """
         Parses relevant keys from the configuration dictionary and assigns them to internal attributes.
@@ -175,21 +175,21 @@ class ConfigHandler:
             print("Save Location Setting Inaccessible. Config file may be broken. "
                   "Restore default settings or delete config file.")
             sys.exit(1)
-        
+
         # Executes method, prints return value
         print(self.set_default_archive())
-        
+
         # Convert EXPEDITOR_REQUIREMENTS keys from strings to ints
         raw_esh = settings.get("EXPEDITOR_REQUIREMENTS", {})
         self.settings_esh = {int(k): v for k, v in raw_esh.items()}
-    
+
     def add_newly_detected_department_to_role_map(self, new_dept_list):
         """
         Add placeholder role map entries for newly detected departments.
 
-        This function is called when departments are found in a schedule 
-        that do not exist in the current ROLE_MAP. It creates the required 
-        structure (roles, clean_roles, labor_tracker_enabled, default) for 
+        This function is called when departments are found in a schedule
+        that do not exist in the current ROLE_MAP. It creates the required
+        structure (roles, clean_roles, labor_tracker_enabled, default) for
         each new department, allowing them to be fully configured later.
 
         Args:
@@ -215,14 +215,14 @@ class ConfigHandler:
         """
         Add newly detected roles to the relevant departments in the ROLE_MAP.
 
-        For each employee in the provided list, this function updates the 
-        corresponding department's role configuration by adding the new 
-        role to both 'roles' and 'clean_roles', and adjusts 
-        'labor_tracker_enabled' to maintain alignment with the total number 
+        For each employee in the provided list, this function updates the
+        corresponding department's role configuration by adding the new
+        role to both 'roles' and 'clean_roles', and adjusts
+        'labor_tracker_enabled' to maintain alignment with the total number
         of roles.
 
         Args:
-            list_of_emp_obj_with_new_roles (list): A list of Employee objects 
+            list_of_emp_obj_with_new_roles (list): A list of Employee objects
                 that contain roles not currently present in ROLE_MAP.
 
         Returns:
@@ -270,40 +270,3 @@ class ConfigHandler:
                 ]
 
         self.save_config()
-
-    def ensure_dept_output_settings(self, new_depts):
-        """
-        Ensure the OUTPUT_SETTINGS entry for a department exists with defaults.
-
-        Args:
-            dept_name (str): The name of the department.
-        """
-        departments = self.settings.setdefault("OUTPUT_SETTINGS", {}).setdefault("Departments", {})
-
-        for dept in new_depts:
-            if dept not in departments:
-                departments[dept] = {
-                    "orientation_index": 2,
-                    "daily_notes_override": False
-                }
-        
-        self.save_config()
-    
-    def get_dept_output_setting(self, dept_name, key, default = None):
-        """
-        Retrieve a department-specific output setting.
-
-        Args:
-            dept_name (str): The name of the department.
-            key (str): The setting key (e.g., 'orientation_index', 'daily_notes_override').
-            default (Any): The default value if not found.
-
-        Returns:
-            The department-specific setting or default.
-        """
-        return (
-            self.settings.get("OUTPUT_SETTINGS", {})
-            .get("Departments", {})
-            .get(dept_name, {})
-            .get(key, default)
-        )

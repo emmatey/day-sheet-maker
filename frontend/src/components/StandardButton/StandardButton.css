@@ -1,21 +1,15 @@
-import './MainMenu.css';
+.standard-button {
+  background-color: #C3D9D6; 
+  border: 2px solid #FFEDD5; 
+  border-radius: 10px;
+  padding: 0.5rem 1rem;
+  color: black;
+  font-size: 1.1rem;
+  font-weight: bold;
+  cursor: pointer;
+  transition: all 0.2s ease;
+}
 
-export default function MainMenu() {
-  return (
-    <div className="menu-container">
-      <div className="header">
-        <img src="/storeLogo.png" alt="Hannaford Logo" className="logo" />
-        <h1 className="title">Day Sheet Maker</h1>
-      </div>
-
-      <div className="red-stripe" />
-
-      <div className="button-panel">
-        {/* Placeholder buttons */}
-        <button className="menu-button">Begin</button>
-        <button className="menu-button">Settings</button>
-        <button className="menu-button">About</button>
-      </div>
-    </div>
-  );
+.standard-button:hover {
+  border-color: #ED3326;
 }
