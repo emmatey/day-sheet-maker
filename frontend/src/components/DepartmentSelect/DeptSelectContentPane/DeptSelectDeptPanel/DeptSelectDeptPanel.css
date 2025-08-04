@@ -1,0 +1,37 @@
+.dept-panel {
+  background-color: #FEE6CB;
+  border: 2px solid transparent;
+  border-radius: 6px;
+  padding: 0.5rem;
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  cursor: pointer;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.dept-panel:hover {
+  border-color: #ED3326;
+}
+
+.dept-panel.selected {
+  border-color: #ED3326;
+}
+
+.dept-title {
+  font-weight: bold;
+}
+
+.dept-controls {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.dept-controls select {
+  padding: 0.2rem;
+}
+
+.dept-controls input[type="radio"] {
+  cursor: pointer;
+}

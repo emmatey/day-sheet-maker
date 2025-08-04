@@ -1,0 +1,29 @@
+.deptselect-footer {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  padding: 1rem;
+  background-color: #FED7AA;
+  border-top: 2px solid #ccc;
+}
+
+.footer-left {
+  display: flex;
+  align-items: center;
+  gap: 0.5rem;
+}
+
+.footer-title-card {
+  background-color: white;
+  padding: 0.4rem 1rem;
+  border-radius: 12px;
+  font-weight: bold;
+  font-size: 1rem;
+  color: #222;
+  border: none; /* no border */
+}
+
+.footer-right {
+  display: flex;
+  align-items: center;
+}

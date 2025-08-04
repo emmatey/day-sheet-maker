@@ -1,10 +1,10 @@
 // src/components/HomeScreen/HeaderFrame/TitleCard.jsx
 import "./../HomeScreen.css";
 
-export default function TitleCard() {
+export default function TitleCard({ title }) {
   return (
     <div className="title-card">
-      <h1>Day Sheet Maker</h1>
+      <h1>{title}</h1>
     </div>
   );
 }

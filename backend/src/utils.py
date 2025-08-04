@@ -114,7 +114,7 @@ def employee_group(dept, day_index, config_object_role_map):
                         employee_group[emp.display_role] = ([emp], role_labor_tracker_enabled_bool_list[role_index])
                     else:
                         employee_group[emp.display_role][0].append(emp)
-                    
+
                     all_sorted.append(emp)
 
         role_index += 1
@@ -128,7 +128,7 @@ def employee_group(dept, day_index, config_object_role_map):
                         employee_group[emp.display_role] = ([emp], 1)
                     else:
                         employee_group[emp.display_role][0].append(emp)
-                    
+
     return employee_group
 
 
@@ -380,7 +380,7 @@ def disambiguate_duplicate_names(store, debug = False):
                             first, last = emp.name.split(maxsplit=1)
                             emp.name = f"{first} {emp.middle_initial.upper()} {last}"
                             if debug:
-                                print(f"Updated: {name} -> {emp.name}")
+                                print(f"Log: Updated: {name} -> {emp.name}")
 
 
 # Rendering Funcitons
@@ -406,7 +406,7 @@ def insert_footer(ws, store_number):
     """
     date_generated = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
     ws.oddFooter.right.text = f"Store {store_number} | Generated {date_generated}"
-    ws.oddFooter.right.size = 8 
+    ws.oddFooter.right.size = 8
     ws.oddFooter.right.font = "Calibri"
 
 
@@ -691,7 +691,7 @@ def insert_labor_trackers(ws, employee_group_dict, time_blocks, day_index, start
         if tracker_enabled == 0:
             continue #return to start of loop without rendering labor tracker.
 
-        if tracker_enabled == 1 and len(employees_with_shifts_today) > 1:   
+        if tracker_enabled == 1 and len(employees_with_shifts_today) > 1:
             block_hours_total = defaultdict(int)
 
             for emp in employees_with_shifts_today:

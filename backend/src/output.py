@@ -84,9 +84,9 @@ def CreateWorkbook(wall_mode_list, output_depts, column_day_map, outPath):
                 save_name += "_WALL"
 
             file_path = os.path.join(outPath, f"{save_name}.xlsx")
-            print(f"Saving: {file_path}")
+            print(f"Log: Saving: {file_path}")
             wb.save(file_path)
-            print(f"Saved: {file_path}")
+            print(f"Log: Saved: {file_path}")
 
 
 def ProcessOutput(save_location_path, WEEK_ENDING_DATE, STORE_NUMBER, settings_object, input_file_path, output_dict, column_day_map, hrd):
@@ -108,7 +108,7 @@ def ProcessOutput(save_location_path, WEEK_ENDING_DATE, STORE_NUMBER, settings_o
     if settings_object.settings_copy_input_to_archive:
         shutil.copy(input_file_path, outPath)
     else:
-        print("settings_copy_input_to_archive = False")
+        print("Log: settings_copy_input_to_archive = False")
 
     wall_mode_options = [
         [False],       # 0 = TABLE_ONLY
@@ -120,7 +120,7 @@ def ProcessOutput(save_location_path, WEEK_ENDING_DATE, STORE_NUMBER, settings_o
         wall_mode_list = wall_mode_options[orientation_index]
         dept_obj = next((d for d in hrd.department_list if d.dept_name == dept_name), None)
         if not dept_obj:
-            print(f"Warning: Department '{dept_name}' not found in data")
+            print(f"Log: Warning: Department '{dept_name}' not found in data")
             continue
 
         CreateWorkbook(
@@ -285,8 +285,8 @@ if __name__ == "__main__":
         new_roles_set = set()
         for emp_object_with_new_role in emp_objects_with_new_role:
             new_roles_set.add(emp_object_with_new_role.role)
-        print(f"New Departments found!: {new_depts}")
-        print(f"New Roles found!: {new_roles_set}")
+        print(f"Log: New Departments found!: {new_depts}")
+        print(f"Log: New Roles found!: {new_roles_set}")
 
         config_handler_object.add_newly_detected_department_to_role_map(new_depts)
         config_handler_object.add_newly_detected_roles_to_relevant_depts(emp_objects_with_new_role)
@@ -311,9 +311,9 @@ if __name__ == "__main__":
             except ValueError:
                 raise ValueError(f"Invalid format for --output entry: '{entry}'. Expected DeptName:Index")
 
-        print("Output selection received:")
+        print("Log: Output selection received:")
         for dept_name, idx in output_dict.items():
-            print(f"{dept_name} → Orientation index {idx}")
+            print(f"Log: {dept_name} → Orientation index {idx}")
 
         output_path = ProcessOutput(
             args.save_directory,
@@ -325,10 +325,10 @@ if __name__ == "__main__":
             column_day_map,
             hrd
         )
-        print(f"\nDone! Files saved in:\n{output_path}")
+        print(f"\nLog: Done! Files saved in:\n{output_path}")
 
     if "_converted.csv" in csv_path and os.path.exists(csv_path):
         try:
             os.remove(csv_path)
         except Exception as e:
-            print(f"Error {e}. \n {csv_path} was unable to be removed\n")
+            print(f"Log: Error {e}. \n {csv_path} was unable to be removed\n")

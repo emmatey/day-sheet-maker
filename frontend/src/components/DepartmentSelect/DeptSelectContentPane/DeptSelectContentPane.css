@@ -1,0 +1,9 @@
+.dept-select-content-pane {
+  background-color: #FED7AA; /* light peach */
+  padding: 1rem;
+  border-radius: 8px;
+  display: flex;
+  flex-direction: column;
+  gap: 0.5rem; /* space between panels */
+  color: black;
+}

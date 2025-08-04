@@ -70,9 +70,9 @@ class ConfigHandler:
         try:
             with open(self.config_path, 'w', encoding='utf-8') as config_file:
                 json.dump(default_settings, config_file, indent=4)
-            print(f"Default config written to: {self.config_path}")
+            print(f"Log: Default config written to: {self.config_path}")
         except Exception as e:
-            print(f"Failed to write default config: {e}")
+            print(f"Log: Failed to write default config: {e}")
 
     def set_default_archive(self):
         """
@@ -98,14 +98,14 @@ class ConfigHandler:
 
             except KeyError as e:
                 print(e)
-                print("Save Location Setting Inaccessible. Config file may be broken. "
-                      "Restore default settings or delete config file.")
+                print("Log: Save Location Setting Inaccessible. Config file may be broken. "
+                      "Log: Restore default settings or delete config file.")
                 sys.exit(1)
 
-            return f"Save Location Path Is: {self.settings_save_loc}\n"
+            return f"Log: Save Location Path Is: {self.settings_save_loc}\n"
 
         else:
-            return f"Save Location Path Is: {self.settings_save_loc}\n"
+            return f"Log: Save Location Path Is: {self.settings_save_loc}\n"
 
     def detect_config(self):
         """
@@ -115,9 +115,9 @@ class ConfigHandler:
         """
         for item in self.working_dir.iterdir():
             if item.name == self.cfg_file_name:
-                print(f"Config found: {item.name}")
+                print(f"Log: Config found: {item.name}")
                 return True
-        print("Config not found in working directory.")
+        print("Log: Config not found in working directory.")
         return False
 
     def read_config(self):
@@ -130,10 +130,10 @@ class ConfigHandler:
         try:
             with open(self.config_path, 'r', encoding='utf-8') as config_file:
                 settings = json.load(config_file)
-            print("Config loaded successfully.\n")
+            print("Log: Config loaded successfully.\n")
             return settings
         except Exception as e:
-            print(f"Failed to load config: {e}")
+            print(f"Log: Failed to load config: {e}")
             sys.exit(1)
 
     def save_config(self):
@@ -143,9 +143,9 @@ class ConfigHandler:
         try:
             with open(self.config_path, "w") as file:
                 json.dump(self.settings, file, indent = 4)
-            print("Config updated successfully.\n")
+            print("Log: Config updated successfully.\n")
         except Exception as e:
-            print(f"Failed to save config: {e}")
+            print(f"Log: Failed to save config: {e}")
             sys.exit(1)
 
     def parse_config(self, settings):
@@ -172,8 +172,8 @@ class ConfigHandler:
             self.settings_save_loc = save_location_string
         except KeyError as e:
             print(e)
-            print("Save Location Setting Inaccessible. Config file may be broken. "
-                  "Restore default settings or delete config file.")
+            print("Log: Save Location Setting Inaccessible. Config file may be broken. "
+                  "Log: Restore default settings or delete config file.")
             sys.exit(1)
 
         # Executes method, prints return value

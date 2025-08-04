@@ -7,7 +7,7 @@ export default function HeaderFrame() {
   return (
     <div className="header-frame">
       <SymbolFrame symbol="/storeLogo.png" />
-      <TitleCard />
+      <TitleCard title={"Day Sheet Maker"}/>
     </div>
   );
 }
