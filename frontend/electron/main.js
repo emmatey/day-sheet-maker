@@ -3,6 +3,7 @@ import os from "os";
 import path from "path";
 import { fileURLToPath } from "url";
 import { spawn } from "child_process";
+import { shell } from "electron";
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -11,8 +12,8 @@ let mainWindow;
 
 function createWindow() {
   mainWindow = new BrowserWindow({
-    width: 1000,
-    height: 800,
+    width: 1920,
+    height: 1080,
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
     },
@@ -44,13 +45,26 @@ app.whenReady().then(() => {
   });
 
   /**
+   * Open Dir Picker
+   */
+  ipcMain.handle("select-directory", async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
+      properties: ["openDirectory"],
+      defaultPath: path.join(os.homedir(), "Desktop"),
+    });
+    if (canceled) return null;
+    return filePaths[0];
+  });
+
+  /**
    * Run Python in --preview mode
    */
-  ipcMain.handle("run-python-preview", async (_event, inputFilePath) => {
-  const scriptPath = path.join(__dirname, "../../backend/src/output.py");
-  return runPython([scriptPath, inputFilePath, "--preview"]);
+  ipcMain.handle("run-python-preview", 
+    async (_event, inputFilePath) => {
+      const scriptPath = path.join(__dirname, "../../backend/src/output.py");
+      
+      return runPython([scriptPath, inputFilePath, "--preview"]);
 });
-
 
   /**
    * Run Python with --output
@@ -72,6 +86,32 @@ app.whenReady().then(() => {
       ]);
     }
   );
+
+  ipcMain.handle("open-folder", async (_event, folderPath) => {
+  await shell.openPath(folderPath);
+  });
+
+
+  ipcMain.handle("confirm-reset-config", async () => {
+  const { response } = await dialog.showMessageBox({
+    type: "warning",
+    buttons: ["Cancel", "Reset"],
+    defaultId: 0,
+    cancelId: 0,
+    title: "Reset to Defaults",
+    message: "Are you sure you want to reset all settings to default?",
+    detail: "This will overwrite your current configuration and cannot be undone.",
+  });
+
+  return response === 1;
+});
+
+ipcMain.handle("reset-config", async () => {
+  const scriptPath = path.join(__dirname, "../../backend/src/output.py");
+  console.log("handle reset config clicked")
+  /*return runPython([scriptPath, "--generate-default-config"]);*/
+});
+
 });
 
 /**

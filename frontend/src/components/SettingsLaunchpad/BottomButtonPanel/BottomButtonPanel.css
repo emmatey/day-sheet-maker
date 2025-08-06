@@ -1,0 +1,15 @@
+.bottom-button-panel {
+  display: flex;
+  justify-content: space-between;
+  padding: 1rem;
+  background-color: #FEE6CB;
+}
+
+.left-side .blue-button {
+  background-color: #2d9cdb; /* Blue */
+  color: white;
+}
+
+.left-side .blue-button:hover {
+  background-color: #B61F11;
+}

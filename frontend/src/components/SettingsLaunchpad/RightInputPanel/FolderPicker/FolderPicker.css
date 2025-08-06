@@ -1,0 +1,38 @@
+.folder-picker {
+  display: flex;
+  align-items: center;
+  background-color: #fde6cb; /* Matches your palette */
+  padding: 0.5rem 1rem;
+  border-radius: 12px;
+  cursor: pointer;
+  border: 2px solid transparent;
+  transition: border-color 0.2s ease, background-color 0.2s ease;
+}
+
+.folder-picker:hover {
+  border-color: #ed3326; /* Hannaford red accent */
+  background-color: #fcd9b3; /* Slight hover change */
+}
+
+.folder-icon {
+  background-color: #00ACF8; 
+  border-radius: 50%;
+  padding: 0.3rem;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  margin-right: 0.8rem;
+  flex-shrink: 0;
+}
+
+.folder-icon img {
+  width: 20px;
+  height: 20px;
+}
+
+.folder-path {
+  font-size: 0.9rem;
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis; /* Avoids text overflow */
+}

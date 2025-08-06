@@ -1,0 +1,12 @@
+.left-button-panel {
+  display: flex;
+  flex-direction: column;
+  gap: 1rem; /* space between buttons */
+  padding: 1rem;
+  background-color: transparent; /* so it blends with settings background */
+}
+
+.left-button-panel .standard-button {
+  width: 100%;
+  font-size: 1rem;
+}
