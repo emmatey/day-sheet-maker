@@ -169,7 +169,7 @@ def detect_new_roles_and_departments(store_object, config_object):
                 if emp.role not in blacklist_role:
                     if emp.role not in extant_roles_set:
                         emp_objects_with_unseen_roles.append(emp)
-
+    
     return {
         "new_departments": sorted(list(unseen_departments)),
         "emp_objects_with_unseen_roles": list(emp_objects_with_unseen_roles)

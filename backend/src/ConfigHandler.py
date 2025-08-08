@@ -2,6 +2,7 @@ from pathlib import Path
 import sys
 import json
 from DefaultSettings import default_settings
+import re
 
 
 class ConfigHandler:
@@ -234,11 +235,17 @@ class ConfigHandler:
             new_role = emp.role
             new_dept = emp.dept
 
-            dict_key_dept_value_dict_of_dept_attributes[new_dept]["roles"].append(new_role)
-            dict_key_dept_value_dict_of_dept_attributes[new_dept]["clean_roles"].append(new_role)
-            dict_key_dept_value_dict_of_dept_attributes[new_dept]["labor_tracker_enabled"] = [1] * len(
-                dict_key_dept_value_dict_of_dept_attributes[new_dept]["clean_roles"]
-            )
+            dept_cfg = dict_key_dept_value_dict_of_dept_attributes.get(new_dept)
+
+            roles = dept_cfg.setdefault("roles", [])
+            clean_roles = dept_cfg.setdefault("clean_roles", [])
+            labor = dept_cfg.setdefault("labor_tracker_enabled", [1] * len(clean_roles))
+
+            # only add if truly new for this dept
+            if new_role not in roles:
+                roles.append(new_role)
+                clean_roles.append(new_role)
+                labor.append(1)  # keep lengths aligned
 
         self.save_config()
 
@@ -270,3 +277,58 @@ class ConfigHandler:
                 ]
 
         self.save_config()
+
+    def apply_react_setting(self, react_string):
+            """
+            Applies a single update from React in the format:
+            - "key1,key2,...^value^flag"
+            - If flag == 'delete', removes the key.
+            - If flag == 'update', sets the key to the value.
+            - If the string is 'RESET_TO_DEFAULT', resets config to default.
+
+            Args:
+                react_string (str): Update instruction from React.
+
+            Returns:
+                str: Status message.
+            """
+            if react_string.strip() == "RESET_TO_DEFAULT":
+                self.generate_default_config()
+                self.settings = self.read_config()
+                self.parse_config(self.settings)
+                return "Log: Configuration reset to default."
+
+            try:
+                path_str, raw_value, flag = react_string.strip().split("^")
+                path_str = path_str.strip()
+                norm = path_str.replace(".", ",")
+                norm = re.sub(r"\]\[", ",", norm)
+                norm = re.sub(r"[\[\]]", ",", norm)
+                key_hierarchy = [k.strip().strip("\"'") for k in norm.split(",") if k.strip()]
+                parsed_value = json.loads(raw_value)
+
+                current_level_dict = self.settings
+                for current_key in key_hierarchy[:-1]:
+                    if current_key not in current_level_dict or not isinstance(current_level_dict[current_key], dict):
+                        current_level_dict[current_key] = {}
+                    current_level_dict = current_level_dict[current_key]
+
+                final_key = key_hierarchy[-1]
+                if flag == "delete":
+                    if final_key in current_level_dict:
+                        del current_level_dict[final_key]
+                elif flag == "update":
+                    current_level_dict[final_key] = parsed_value
+                else:
+                    return f"Log: Unknown flag '{flag}'"
+
+                self.save_config()
+                self.parse_config(self.settings)
+                return f"Log: Setting {'deleted' if flag == 'delete' else 'updated'} at {' -> '.join(key_hierarchy)}"
+
+            except ValueError:
+                return "Log: Malformed string. Use 'key1,key2^value^flag'"
+            except json.JSONDecodeError:
+                return "Log: Malformed JSON value. Could not decode."
+            except Exception as e:
+                return f"Log: Failed to apply setting: {e}"

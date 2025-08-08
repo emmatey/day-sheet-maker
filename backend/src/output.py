@@ -241,10 +241,8 @@ if __name__ == "__main__":
         Usage:
             python output.py <input_file> <save_directory> --output <DEPT>:<MODE> [<DEPT>:<MODE> ...]
             python output.py <input_file> --preview
-
-        Positional Arguments:
-            input_file          Path to the input CSV file.
-            save_directory      Directory where output will be saved. Required for --output.
+            python output.py --update_config "<path,comma-separated>^<json>^<update|delete>" 
+            python output.py --update_config RESET_TO_DEFAULT
 
         Optional Arguments:
             --preview           Preview all available departments in the input file. Does not save output.
@@ -254,8 +252,9 @@ if __name__ == "__main__":
                                   <MODE>  = 0 = Table, 1 = Wall, 2 = Both
                                 Example:
                                   python output.py schedule.csv ./out --output Bakery:2 Deli:0 Produce:1
+            --update_config     Apply a single config change (no input file required). See usage above.
         """
-
+    
     config_handler_object = c.ConfigHandler()
 
     parser = argparse.ArgumentParser(
@@ -264,15 +263,32 @@ if __name__ == "__main__":
         usage=argparse.SUPPRESS
     )
 
-    parser.add_argument("input_file", type=str)
-    parser.add_argument("save_directory", type=str, default=config_handler_object.settings_save_loc, nargs="?")
-    parser.add_argument("--preview", action="store_true")
+    parser.add_argument("input_file", type = str, nargs = "?")
+    parser.add_argument("save_directory", type = str, default = config_handler_object.settings_save_loc, nargs = "?")
+    parser.add_argument("--preview", action = "store_true")
     parser.add_argument(
         "--output",
-        nargs='+',
-        help="Departments and orientation index in the form DeptName:Index (Index = 0=Table, 1=Wall, 2=Both)"
+        nargs = '+',
+        help = "Departments and orientation index in the form DeptName:Index (Index = 0=Table, 1=Wall, 2=Both)"
+    )
+    parser.add_argument(
+        "--update_config",
+        type=str,
+        help=(
+            "Apply a single config change from React. Format:\n"
+            "  key1,key2,...^<json_value>^<update|delete>\n"
+            "Examples:\n"
+            "  --update_config \"ROLE_MAP,Hannaford to Go,default^\\\"Shopper\\\"^update\"\n"
+            "  --update_config \"TIME_BLOCKS,Produce^[[\\\"04:00\\\",\\\"08:00\\\",\\\"Open\\\"]]^update\"\n"
+            "  --update_config RESET_TO_DEFAULT"
+        )
     )
     args = parser.parse_args()
+
+    if args.update_config:
+        msg = config_handler_object.apply_react_setting(args.update_config)
+        print(msg)
+        raise SystemExit(0)
 
     csv_path, input_file = ProcessInput(args.input_file)
     hrd = builder.build_store(csv_path, config_handler_object.settings_time_blocks, config_handler_object.settings_role_map)
@@ -326,7 +342,7 @@ if __name__ == "__main__":
             hrd
         )
         print(f"\nLog: Done! Files saved in:\n{output_path}")
-
+    
     if "_converted.csv" in csv_path and os.path.exists(csv_path):
         try:
             os.remove(csv_path)

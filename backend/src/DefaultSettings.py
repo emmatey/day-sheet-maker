@@ -145,6 +145,6 @@ default_settings = {
     },
     "OUTPUT_SETTINGS": {
     "copy_input_to_archive": True,
-    "enable_esh": False,
+    "enable_esh": True,
     }
 }
