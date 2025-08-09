@@ -1,7 +1,7 @@
 import "./BottomButtonPanel.css";
 import StandardButton from "../../StandardButton/StandardButton.jsx";
 
-export default function BottomButtonPanel({ onReset, onSave }) {
+export default function BottomButtonPanel({ onReset, onSave, saveLabel = "Save and Close" }) {
   return (
     <div className = "bottom-button-panel">
       {/* Left: Reset */}
@@ -16,7 +16,7 @@ export default function BottomButtonPanel({ onReset, onSave }) {
       {/* Right: Save and Close */}
       <div className = "right-side">
         <StandardButton
-          label = "Save and Close"
+          label = {saveLabel}
           onClick = {onSave}
         />
       </div>

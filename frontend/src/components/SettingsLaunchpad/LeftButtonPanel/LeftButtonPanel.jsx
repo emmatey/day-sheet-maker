@@ -1,25 +1,44 @@
 // src/components/SettingsLaunchpad/LeftButtonPanel/LeftButtonPanel.jsx
 import "./LeftButtonPanel.css";
-import StandardButton from "../../StandardButton/StandardButton.jsx";
+import StandardPlusInfoButtonPanel from "../../StandardPlusInfoButtonPanel/StandardPlusInfoButtonPanel";
 
-export default function LeftButtonPanel({ onSaveLocation, onRoleMap, onTimeBlocks, onESHAssumptions }) {
+export default function LeftButtonPanel({ onSaveLocation, onRoleMap, onTimeBlocks, onEshAssumptions }) {
   return (
-    <div className = "left-button-panel">
-      <StandardButton 
-        label = "Save Location" 
-        onClick = {onSaveLocation} 
+    <div className="left-button-panel">
+      <StandardPlusInfoButtonPanel
+        label="Save Location"
+        onClickMain={onSaveLocation}
+        onClickInfo={() => console.log("Save Location — info clicked")}
+        showInfo = {true}
+        buttonClassName="settings-launchpad-button"
+        infoClassName="settings-launchpad-info"   
       />
-      <StandardButton 
-        label = "Role Map" 
-        onClick = {onRoleMap} 
+
+      <StandardPlusInfoButtonPanel
+        label="Role Map"
+        onClickMain={onRoleMap}
+        onClickInfo={() => console.log("Role Map — info clicked")}
+        showInfo = {true}
+        buttonClassName="settings-launchpad-button"
+        infoClassName="settings-launchpad-info" 
       />
-      <StandardButton 
-        label = "Time Blocks" 
-        onClick = {onTimeBlocks} 
+
+      <StandardPlusInfoButtonPanel
+        label="Time Blocks"
+        onClickMain={onTimeBlocks}
+        onClickInfo={() => console.log("Time Blocks — info clicked")}
+        showInfo = {true}
+        buttonClassName="settings-launchpad-button"
+        infoClassName="settings-launchpad-info" 
       />
-      <StandardButton 
-        label = "ESH Assumptions" 
-        onClick = {onESHAssumptions} 
+
+       <StandardPlusInfoButtonPanel
+        label="ESH Assumptions"
+        onClickMain={onEshAssumptions}
+        onClickInfo={() => console.log("ESH Assumptions — info clicked")}
+        showInfo = {true}
+        buttonClassName="settings-launchpad-button"
+        infoClassName="settings-launchpad-info" 
       />
     </div>
   );

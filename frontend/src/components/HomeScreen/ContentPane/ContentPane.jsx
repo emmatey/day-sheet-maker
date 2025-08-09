@@ -2,7 +2,7 @@
 import { useState } from "react";
 import "./../HomeScreen.css";
 import SettingsLaunchpad from "../../SettingsLaunchpad/SettingsLaunchpad.jsx";
-import StandardPlusInfoButtonPanel from "./../../StandardPlusInfoButtonPannel/StandardPlusInfoButtonPannel.jsx";
+import StandardPlusInfoButtonPanel from "./../../StandardPlusInfoButtonPanel/StandardPlusInfoButtonPanel.jsx";
 import DepartmentSelect from "./../../DepartmentSelect/DepartmentSelect.jsx";
 import Modal from "./../../Modal/Modal.jsx";
 

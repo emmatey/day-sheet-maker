@@ -8,4 +8,6 @@ contextBridge.exposeInMainWorld("electronAPI", {
   openFolder: (path) => ipcRenderer.invoke("open-folder", path),
   confirmResetConfig: () => ipcRenderer.invoke("confirm-reset-config"),
   resetConfig: () => ipcRenderer.invoke("reset-config"), 
+  readSettings: () => ipcRenderer.invoke("read-settings"),
+  applyConfig: (updateString) => ipcRenderer.invoke("apply-config", updateString),
 });

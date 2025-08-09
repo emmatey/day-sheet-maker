@@ -1,0 +1,159 @@
+/* src/components/TimeBlocks/TimeBlocks.css */
+/* TimeBlocks — single source of truth for all tb-* styles */
+
+/* palette */
+:root {
+  --red: #B61F11;
+  --peach: #FED7AA;
+  --peach2: #FEE6CB;
+  --green: #59FF59;
+  --gray: #D4D4D8;
+  --tex: #C3D9D6;
+  --white: #FFFFFF;
+  --text: #000000;
+}
+
+/* card */
+.tb-card {
+  background: var(--peach);
+  border: 1px solid var(--gray);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  gap: 0px;
+  color: var(--text);
+}
+
+/* ensure header + accent stripe are flush */
+.tb-card .header-frame-alt { margin: 0; }
+.tb-card .accent-stripe {
+  margin: 0;
+  display: block;
+  width: 100%;
+}
+
+/* content padding */
+.tb-toolbar,
+.tb-rows,
+.tb-divider,
+.tb-footer {
+  padding-left: 10px;
+  padding-right: 10px;
+}
+
+.tb-toolbar {
+  margin-top: 8px;
+  margin-bottom: 0px;
+  padding: 10px 16px 16px;
+  display: flex;
+  flex-direction: center;
+}
+
+/* toolbar select */
+.tb-select {
+  width: 75%;
+  padding: 8px 10px;
+  border: 2px solid black;
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--text);
+  margin: 0 auto;
+}
+
+/* rows container */
+.tb-rows {
+  display: flex;
+  flex-direction: column;
+  gap: 8px;
+}
+
+/* base row style — applies to standard and add rows */
+.tb-row {
+  height: 40px;
+  display: grid;
+  grid-template-columns: minmax(220px, 1fr) auto 40px; /* name | time | +/- */
+  gap: 15px;
+  align-items: center;
+  background: var(--peach2);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+/* name input */
+.tb-name {
+  width: 100%;
+  box-sizing: border-box;
+  padding: 8px 10px;
+  border: 1px solid var(--gray);
+  border-radius: 8px;
+  background: var(--white);
+  min-width: 0;
+  color: var(--text);
+}
+
+/* time group */
+.tb-time { 
+  display: flex;
+  align-items: center;
+  gap: 6px;
+  margin: 0;
+}
+
+.num2 {
+  width: 2.6em;
+  text-align: center;
+  padding: 6px;
+  border: 1px solid var(--gray);
+  border-radius: 8px;
+  background: var(--white);
+  font-variant-numeric: tabular-nums;
+  color: var(--text);
+}
+
+.ampm {
+  padding: 6px 8px;
+  border: 1px solid var(--gray);
+  border-radius: 8px;
+  background: var(--white);
+  color: var(--text);
+}
+
+.dash { opacity: 0.6; margin: 0 6px; }
+
+/* mini buttons */
+.tb-mini {
+  width: 36px;
+  height: 36px;
+  border: none;
+  border-radius: 999px;
+  font-size: 18px;
+  line-height: 1;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  cursor: pointer;
+}
+.tb-mini.danger { background: var(--red); color: var(--white); }
+.tb-mini.success { background: var(--green); color: var(--text); }
+
+/* textured divider above the add panel */
+.tb-divider {
+  height: 42px;
+  border-radius: 8px;
+  background: var(--tex);
+  opacity: 1;
+  margin: 10px 0px 0px;
+}
+
+/* footer */
+.tb-footer {
+  margin: 16px 16px 14px;
+  display: flex;
+  justify-content: flex-end;
+
+}.tb-footer-text {
+  white-space: pre-line;
+  text-align: left;
+  margin-right: auto;
+  padding-left: 4px;
+}

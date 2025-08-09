@@ -26,5 +26,6 @@
 
 .info-button-panel-style {
   position: absolute;
-  right: -80px;                
+  right: -100px;
+  background-color: transparent;           
 }

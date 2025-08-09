@@ -1,13 +1,9 @@
-.info-button {
-  background: none;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-}
+/* InfoButton.css */
 
+/* Replace fixed sizes with variables */
 .outer-ring {
-  width: 60px;
-  height: 60px;
+  width: var(--outer-ring-size, 60px);  /* default 60px */
+  height: var(--outer-ring-size, 60px);
   border-radius: 50%;
   background-color: #93C5FD;
   display: flex;
@@ -15,25 +11,18 @@
   justify-content: center;
 }
 
-.outer-ring:hover {
-  background-color: #ED3326;
-  transition: all 0.2s ease;
-}
-
 .inner-circle {
-  width: 50px;
-  height: 50px;
+  width: var(--inner-circle-size, 50px); /* default 50px */
+  height: var(--inner-circle-size, 50px);
   border-radius: 50%;
-  background-color: #00ACF8; 
-  align-items: center;
-  justify-content: center;
+  background-color: #00ACF8;
   display: flex;
   align-items: center;
-  justify-content: center; 
+  justify-content: center;
 }
 
 .info-icon {
-  width: 14px;
-  height: 30px;
-  pointer-events: none; /* click passes through to button */
+  width: var(--icon-width, 14px); /* default 14px */
+  height: var(--icon-height, 30px); /* default 30px */
+  pointer-events: none;
 }

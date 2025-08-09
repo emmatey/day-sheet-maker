@@ -4,6 +4,7 @@ import path from "path";
 import { fileURLToPath } from "url";
 import { spawn } from "child_process";
 import { shell } from "electron";
+import fs from "fs"; 
 
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
@@ -112,6 +113,27 @@ ipcMain.handle("reset-config", async () => {
   /*return runPython([scriptPath, "--generate-default-config"]);*/
 });
 
+ipcMain.handle("read-settings", async () => {
+  const p = settingsPath();
+  const raw = fs.readFileSync(p, "utf-8");
+  return JSON.parse(raw);
+});
+
+ipcMain.handle("apply-config", async (_e, updateString) => {
+  const { cmd, args } = backendCmd();
+  const child = spawn(cmd, [...args, "--update_config", updateString], { windowsHide: true });
+
+  return await new Promise((resolve, reject) => {
+    let out = "", err = "";
+    child.stdout.on("data", d => out += d.toString());
+    child.stderr.on("data", d => err += d.toString());
+    child.on("close", code => {
+      if (code === 0) resolve(out.trim());
+      else reject(new Error(err || `backend exited ${code}`));
+    });
+  });
+});
+
 });
 
 /**
@@ -119,7 +141,8 @@ ipcMain.handle("reset-config", async () => {
  */
 function runPython(args) {
   return new Promise((resolve, reject) => {
-    const py = spawn("python", args);
+    const pyCmd = process.platform === "win32" ? "python.exe" : "python";
+    const py = spawn(pyCmd, args);
 
     let output = "";
     let errorOutput = "";
@@ -135,6 +158,31 @@ function runPython(args) {
       }
     });
   });
+}
+
+function isDev() {
+  return !app.isPackaged;
+}
+
+// Where settings.json lives (adjust if you copy it somewhere else later)
+function settingsPath() {
+  return path.join(__dirname, "../../backend/src/settings.json");
+}
+
+// How to launch the backend for --update_config
+function backendCmd() {
+  if (isDev()) {
+    // dev: run python + your script
+    const py = process.platform === "win32" ? "python.exe" : "python";
+    const script = path.join(__dirname, "../../backend/src/output.py");
+    return { cmd: py, args: [script] };
+  }
+  // packaged: point to your bundled exe in extraResources (change name/path as needed)
+  const exe =
+    process.platform === "win32"
+      ? path.join(process.resourcesPath, "daysheet-backend.exe")
+      : path.join(process.resourcesPath, "daysheet-backend");
+  return { cmd: exe, args: [] };
 }
 
 app.on("window-all-closed", () => {
