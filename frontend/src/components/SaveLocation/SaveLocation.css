@@ -1,0 +1,85 @@
+/* src/components/SaveLocation/SaveLocation.css */
+:root {
+  --peach: #FED7AA;
+  --peach2:#FEE6CB;
+  --gray:  #D4D4D8;
+  --tex:   #C3D9D6;
+  --text:  #000;
+  --white: #fff;
+}
+
+.sl-card {
+  background: var(--peach);
+  border: 1px solid var(--gray);
+  border-radius: 14px;
+  display: flex;
+  flex-direction: column;
+  color: var(--text);
+}
+
+/* keep header & stripe flush */
+.sl-card .header-frame-alt { margin: 0; }
+.sl-card .accent-stripe   { margin: 0; }
+
+/* body */
+.sl-body {
+  display: grid;
+  gap: 14px;
+  padding: 16px;
+}
+
+.sl-title {
+  display: grid;
+  place-items: center;
+  font-weight: 700;
+  background: var(--peach2);
+  border-radius: 10px;
+  padding: 10px;
+}
+
+/* clickable pill */
+.sl-pill {
+  display: grid;
+  grid-template-columns: auto 1fr;
+  align-items: center;
+  gap: 10px;
+  padding: 10px 14px;
+  border: 2px solid #0b0b0b;
+  border-radius: 999px;
+  background: var(--white);
+  cursor: pointer;
+}
+
+.sl-pill:hover { border-color: #ED3326; }
+
+.sl-icon {
+  display: grid;
+  place-items: center;
+  width: 30px;
+  height: 30px;
+  background: #C3D9D6;
+  border-radius: 8px;
+  font-size: 18px;
+}
+
+.sl-path {
+  min-width: 0;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  font-family: ui-monospace, SFMono-Regular, Menlo, Consolas, "Liberation Mono", monospace;
+  color: black;
+}
+
+/* footer */
+.sl-footer {
+  display: flex;
+  justify-content: flex-end;
+  padding: 12px 16px 16px;
+}
+
+.sl-row {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}

@@ -1,0 +1,76 @@
+:root{
+  --peach:#FED7AA; --peach2:#FEE6CB; --gray:#D4D4D8; --tex:#C3D9D6; --text:#000;
+  --white:#fff; --red:#B61F11; --green:#59FF59;
+}
+
+/* the modal’s internal scroll container */
+.esh-card{
+  background:var(--peach);
+  border:1px solid var(--gray);
+  border-radius:14px;
+  color:var(--text);
+  display:flex;
+  flex-direction:column;
+  /* allow header to be sticky relative to this container */
+  max-height: 80vh;
+  overflow: auto;
+}
+
+/* sticky header wrapper */
+.esh-sticky{
+  position: sticky;
+  top: 0;
+  z-index: 5;
+  background: var(--peach); /* cover content while sticking */
+}
+.esh-sticky .header-frame-alt{ margin:0; }
+.esh-sticky .accent-stripe{ margin:0; }
+
+/* list */
+.esh-list{
+  padding:12px 12px 0;
+  display:flex; flex-direction:column; gap:10px;
+  align-items: center;
+}
+.esh-row{
+  display:grid;
+  grid-template-columns: 1fr auto;
+  align-items:center;
+  background:var(--peach2);
+  border-radius:10px;
+  padding:10px;
+  gap:14px;
+  width: 45%;
+}
+.esh-hour{ font-weight:700; padding-left:6px; }
+.esh-input{
+  width:80px;
+  text-align:center;
+  padding:6px 8px;
+  border:1px solid var(--gray);
+  border-radius:8px;
+  background:var(--white);
+  color: black;
+}
+
+/* footer */
+.esh-footer{
+  display:flex; align-items:center; justify-content:space-between;
+  gap:12px; padding:12px;
+}
+.esh-note{ opacity:.8; }
+
+/* simple toast (inside card, bottom-right) */
+.esh-toast{
+  position: sticky;
+  bottom: 12px;                  /* stays near bottom while scrolling */
+  align-self: flex-end;          /* right side */
+  margin: 0 12px 12px 0;
+  padding: 8px 12px;
+  background: #1f2937;           /* dark gray */
+  color: white;
+  border-radius: 10px;
+  box-shadow: 0 6px 18px rgba(0,0,0,.2);
+  z-index: 6;
+  pointer-events: none;
+}

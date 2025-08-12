@@ -1,0 +1,100 @@
+/* src/components/RoleMap/RoleMap.css */
+
+:root{
+  --peach:#FED7AA; --peach2:#FEE6CB; --gray:#D4D4D8; --tex:#C3D9D6; --text:#000;
+  --white:#fff; --red:#B61F11; --green:#59FF59;
+  --ctl-h: 42px;   
+  --ctl-radius: 8px;
+}
+
+.rm-card{
+  background:var(--peach);
+  border:1px solid var(--gray);
+  border-radius:14px;
+  display:flex; flex-direction:column; gap:0;
+  color:var(--text);
+}
+
+.rm-card .header-frame-alt{ margin:0; }
+.rm-card .accent-stripe{ margin:0; }
+
+/* Toolbar wrapper: center the select */
+.rm-toolbar {
+  display: flex;
+  justify-content: center;   /* horizontal center */
+  align-items: center;       /* vertical center within the bar */
+  padding: 10px 16px 8px;
+}
+
+/* The dropdown itself */
+.rm-select {
+  height: var(--ctl-h);
+  line-height: var(--ctl-h);
+  padding: 0 12px;
+  border: 1px solid var(--gray);
+  border-radius: var(--ctl-radius);
+  background: var(--white);
+  color: var(--text);
+  box-sizing: border-box;
+  border: 1px solid black;
+
+  /* width + centering */
+  width: min(640px, 90%);    
+  margin: 0 auto;            
+}
+
+.rm-rows{
+  display:flex; flex-direction:column; gap:8px;
+  padding:10px;
+}
+
+/* share row styles via classnames used in row subcomponents */
+.rm-row{
+  display:grid;
+  grid-template-columns: minmax(220px,1fr) minmax(220px,1fr) auto auto 40px; /* raw | display | enabled | movers | +/- */
+  align-items:center;
+  background:var(--peach2);
+  border-radius:10px;
+  padding:10px;
+  gap:10px;
+}
+.rm-row.add{ margin:0 10px; }
+
+.rm-raw, .rm-display{
+  width:100%;
+  box-sizing:border-box;
+  padding:8px 10px;
+  border:1px solid var(--gray);
+  border-radius:8px;
+  background:var(--white);
+  color: black;
+}
+
+.rm-enabled{ display:flex; align-items:center; gap:6px; }
+
+.rm-movers{ display:flex; gap:6px; justify-content:flex-end; }
+.rm-mini{
+  width:36px; height:36px; border:none; border-radius:999px; cursor:pointer;
+  display:flex; align-items:center; justify-content:center; font-size:16px;
+}
+.rm-mini.danger{ background:var(--red); color:var(--white); }
+.rm-mini.success{ background:var(--green); color:#000; }
+
+.rm-divider{
+  height:42px; 
+  border-radius:8px; 
+  background:var(--tex); 
+  opacity:1; 
+  margin:0px 10px 10px 10px;
+}
+
+.rm-footer{
+  display:flex; align-items:center; justify-content:space-between; gap:12px;
+  padding:12px 16px 16px;
+}
+.rm-note{ opacity:.85; }
+.rm-actions{ display:flex; align-items:center; gap:10px; }
+.rm-saved{
+  background:#DCFCE7; border:1px solid #A7F3D0; color:#065F46;
+  padding:6px 10px; border-radius:8px; font-size:.9rem;
+}

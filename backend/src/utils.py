@@ -47,36 +47,26 @@ def department_row_map(csv_path):
 
 
 def column_day_map(csv_path):
-    """
-    Scans the schedule CSV file to find which columns correspond to which days of the week.
-    Returns a mapping from column index → weekday index (0 = Sunday, 6 = Saturday).
-    """
-
+    WEEKDAYS = ["Sun","Mon","Tue","Wed","Thu","Fri","Sat"]
     with open(csv_path, "r") as f:
         schedule = csv.reader(f)
         header_row = []
-
-        # Find the header row (should contain 'Name' in the first cell)
         for row in schedule:
             if row and row[0].strip() == "Name":
                 header_row = row
                 break
 
-        # Regex pattern to detect cells like "Sun 3/09", "Mon 3/10", etc.
-        regex = r'\w+\s+(\d+/\d+)'
-        matched_columns = []
-        dates = []
-
-        # Find all columns that match the day format
-        for col_index, cell in enumerate(header_row):
-            if re.match(regex, cell):
-                match = re.match(regex, cell)
-                if match:
-                    matched_columns.append(col_index)
-                    dates.append(match.group(1))
-
-        # Map column index → weekday index (0–6)
-        return {col: i for i, col in enumerate(sorted(matched_columns))}, dates
+    m = {}
+    dates = [None]*7
+    pat = re.compile(r'^(Sun|Mon|Tue|Wed|Thu|Fri|Sat)\s+(\d+/\d+)\b')
+    for col_idx, cell in enumerate(header_row):
+        mo = pat.match(cell.strip())
+        if mo:
+            wk_abbr, date_str = mo.groups()
+            day_index = WEEKDAYS.index(wk_abbr)
+            m[col_idx] = day_index
+            dates[day_index] = date_str
+    return m, dates
 
 
 def employee_group(dept, day_index, config_object_role_map):
@@ -98,36 +88,43 @@ def employee_group(dept, day_index, config_object_role_map):
 
     # Get the role mapping for this department (which defines header order)
     role_map = config_object_role_map.get(dept.dept_name, {})
+    raw_roles = role_map.get('roles', [])
     clean_roles = role_map.get('clean_roles', [])
     role_labor_tracker_enabled_bool_list = role_map.get('labor_tracker_enabled', [])
-    role_index = 0
 
     # This will track employees who were placed correctly in a role
     all_sorted = []
 
     # First, sort employees according to the preferred role order
-    for i in range(len(clean_roles)):
+    for role_index, clean_role in enumerate(clean_roles):
         for emp in dept.employees:
+            if emp in all_sorted:
+                continue
             for shift in emp.shifts:
-                if shift.day_index == day_index and emp.display_role == clean_roles[role_index] and emp not in all_sorted:
+                if shift.day_index == day_index and emp.display_role == clean_role:
                     if emp.display_role not in employee_group:
                         employee_group[emp.display_role] = ([emp], role_labor_tracker_enabled_bool_list[role_index])
                     else:
                         employee_group[emp.display_role][0].append(emp)
-
+                    
                     all_sorted.append(emp)
+                    break
 
-        role_index += 1
-
-    # After the preferred roles, assign any remaining employees
+    # After the preferred roles, assign any remaining employees to largest role
+    if employee_group:
+        most_populous_role = "Default"
+        role_len = 0
+        for role_name, values in employee_group.items():
+            if len(values[0]) > role_len:
+                role_len = len(values[0])
+                most_populous_role = role_name
+    
     for emp in dept.employees:
-        if emp not in all_sorted:
-            for shift in emp.shifts:
-                if shift.day_index == day_index:
-                    if emp.display_role not in employee_group:
-                        employee_group[emp.display_role] = ([emp], 1)
-                    else:
-                        employee_group[emp.display_role][0].append(emp)
+        if emp in all_sorted:
+            continue
+        if any(shift.day_index == day_index for shift in emp.shifts):
+            employee_group[most_populous_role][0].append(emp)
+            all_sorted.append(emp)
 
     return employee_group
 
@@ -356,31 +353,61 @@ def parse_shift_cell(shift_cell, index):
     return []
 
 
-def disambiguate_duplicate_names(store, debug = False):
-        """
-        Adds middle initials to employees who share the same name within the same department.
+def disambiguate_duplicate_names(store, debug=False):
+    """
+    Adds middle initials to employees who share the same name within the same department.
+    Only employees that 1) collide on name and 2) have a middle_initial are modified.
 
-        Args:
-            store (Store): The store object containing departments and employees.
-            debug (bool): If True, prints which names were disambiguated.
-        """
-        for department in store.department_list:
-            employees_by_name = defaultdict(list)
+    Returns:
+        int: count of updated employee names
+    """
+    updated = 0
 
-            # Group employees by their clean base name
-            for employee in department.employees:
-                employees_by_name[employee.name].append(employee)
+    for department in store.department_list:
+        by_name = defaultdict(list)
 
-            # Add middle initials where duplicates exist
-            for name, list_of_employee_objects_with_said_name in employees_by_name.items():
-                if len(list_of_employee_objects_with_said_name) > 1:
-                    for emp in list_of_employee_objects_with_said_name:
-                        # Only add middle initial if one exists
-                        if emp.middle_initial:
-                            first, last = emp.name.split(maxsplit=1)
-                            emp.name = f"{first} {emp.middle_initial.upper()} {last}"
-                            if debug:
-                                print(f"Log: Updated: {name} -> {emp.name}")
+        # Group employees by their current (cleaned) name string
+        for emp in department.employees:
+            base = (emp.name or "").strip()
+            if base:
+                by_name[base].append(emp)
+
+        # For any name that appears more than once, try to disambiguate
+        for base_name, emps in by_name.items():
+            if len(emps) <= 1:
+                continue
+
+            for emp in emps:
+                mi = (getattr(emp, "middle_initial", "") or "").strip()
+                if not mi:
+                    # No middle initial available → leave as-is
+                    continue
+
+                parts = emp.name.split()
+                # If it already has the same middle initial after the first name, skip (idempotent)
+                if len(parts) >= 3:
+                    mid_token = parts[1].rstrip(".").upper()
+                    if mid_token == mi.upper():
+                        continue
+
+                # Build the new name safely
+                if len(parts) >= 2:
+                    first = parts[0]
+                    last = " ".join(parts[1:])  # preserve multi-part last names
+                else:
+                    # Single token name; treat everything as "first"
+                    first = parts[0]
+                    last = ""
+
+                new_name = f"{first} {mi.upper()} {last}".strip()
+
+                if new_name != emp.name:
+                    if debug:
+                        print(f"Log: Updated: {emp.name} -> {new_name}")
+                    emp.name = new_name
+                    updated += 1
+
+    return updated
 
 
 # Rendering Funcitons

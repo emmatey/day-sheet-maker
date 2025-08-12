@@ -3,13 +3,15 @@ export default function StandardButton({
   label, 
   onClick, 
   className = "", 
-  disabled = false 
+  disabled = false, 
+  ...rest
 }) {
   return (
     <button 
       className={`standard-button ${className}`} 
       onClick = {onClick} 
       disabled = {disabled} 
+      {...rest}
     >
       {label}
     </button>

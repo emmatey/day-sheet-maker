@@ -26,6 +26,7 @@ class ConfigHandler:
         self.settings_role_map = {}
         self.settings_esh = {}
         self.settings_copy_input_to_archive = True
+        self.settings_daily_notes = False
         self.settings_enable_esh = True
         self.settings_save_loc = "DEFAULT_PLACEHOLDER"
         self.settings_blacklists = self.settings.get("Blacklists", {})
@@ -165,6 +166,7 @@ class ConfigHandler:
         settings_toggles_dict = settings.get("OUTPUT_SETTINGS", {})
         self.settings_copy_input_to_archive = settings_toggles_dict.get("copy_input_to_archive", True)
         self.settings_enable_esh = settings_toggles_dict.get("enable_esh", True)
+        self.settings_daily_notes = settings_toggles_dict.get("daily_notes_override", False)
 
         # Save Location
         try:

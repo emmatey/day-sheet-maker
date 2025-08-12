@@ -173,7 +173,7 @@ def populate_workbook(wb, dept, column_day_map, is_wall: bool = False):
                 role_enabled_notes_override_token = False
 
 
-        if "to go" in dept.dept_name.lower() and config_handler_object.settings_enable_esh == True:
+        if "to go" in dept.dept_name.lower() and config_handler_object.settings_enable_esh == True and config_handler_object.settings_daily_notes == False:
             time_blocks = config_handler_object.settings_time_blocks.get("Hannaford to Go ESH", [])
 
             u.insert_effective_shopper_table(ws, employee_group, config_handler_object.settings_esh, time_blocks, day)
@@ -183,8 +183,9 @@ def populate_workbook(wb, dept, column_day_map, is_wall: bool = False):
             ws.column_dimensions['M'].width = 5
             ws.column_dimensions['N'].width = 5
 
-        elif role_enabled_notes_override_token == True:
+        elif role_enabled_notes_override_token == True or config_handler_object.settings_daily_notes == True:
             u.insert_daily_notes(ws)
+
         else:
             u.insert_labor_trackers(ws, employee_group, time_blocks, day)
 
@@ -287,13 +288,18 @@ if __name__ == "__main__":
 
     if args.update_config:
         msg = config_handler_object.apply_react_setting(args.update_config)
-        print(msg)
         raise SystemExit(0)
 
     csv_path, input_file = ProcessInput(args.input_file)
     hrd = builder.build_store(csv_path, config_handler_object.settings_time_blocks, config_handler_object.settings_role_map)
     column_day_map = u.column_day_map(csv_path)
 
+    # detect_new_roles_and_departments ()
+    #    ...
+    #   return {
+    #    "new_departments": sorted(list(unseen_departments)),
+    #    "emp_objects_with_unseen_roles": list(emp_objects_with_unseen_roles)
+    #}
     new_roles_and_depts = u.detect_new_roles_and_departments(hrd, config_handler_object)
     new_depts = new_roles_and_depts["new_departments"]
     emp_objects_with_new_role = new_roles_and_depts["emp_objects_with_unseen_roles"]

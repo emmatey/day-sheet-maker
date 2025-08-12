@@ -1,5 +1,5 @@
 // src/components/SettingsLaunchpad/SettingsLaunchpad.jsx
-import { useState } from "react";
+import { useState, useEffect} from "react";
 import "./SettingsLaunchpad.css";
 
 import TitleCardHeader from "../DepartmentSelect/TitleCardHeader/TitleCardHeader.jsx";
@@ -10,27 +10,55 @@ import RightInputPanel from "./RightInputPanel/RightInputPanel.jsx";
 import BottomButtonPanel from "./BottomButtonPanel/BottomButtonPanel.jsx";
 
 import TimeBlocks from "../TimeBlocks/TimeBlocks.jsx";
+import ESHAssumptions from "../EshAssumptions/EshAssumptions.jsx";
+import RoleMap from "../RoleMap/RoleMap.jsx";
+import SaveLocation from "../SaveLocation/SaveLocation.jsx";
 import Modal from "../Modal/Modal.jsx";
+
+function buildUpdateString(segments, value, action = "update") {
+  const path = "[" + segments.map(String).join("][") + "]";
+  const payload = JSON.stringify(value);
+  return `${path}^${payload}^${action}`;
+}
 
 export default function SettingsLaunchpad({ onClose }) {
   // === STATE ===
-  const [saveLocation, setSaveLocation] = useState("/home/User/Documents/Schedule.xlsx");
+  const [activeModal, setActiveModal] = useState(null);
   const [enableEsh, setEnableEsh] = useState(true);
   const [dailyNotesOverride, setDailyNotesOverride] = useState(false);
-  const [showTimeBlocks, setShowTimeBlocks] = useState(false);
+  
+  // 1) Read current values on mount
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const cfg = await window.electronAPI.readSettings();
+        if (!alive) return;
+        setEnableEsh(!!cfg?.OUTPUT_SETTINGS?.enable_esh);
+        setDailyNotesOverride(!!cfg?.OUTPUT_SETTINGS?.daily_notes_override);
+      } catch (e) {
+        console.error("readSettings (SettingsLaunchpad) failed:", e);
+      }
+    })();
+    return () => { alive = false; };
+  }, []);
 
-  // === HANDLERS ===
-  const handlePickSaveLocation = async () => {
-    const newPath = await window.electronAPI.selectDirectory();
-    if (newPath) setSaveLocation(newPath);
-    console.log(newPath);
-  };
-
-  const handleCheckboxChange = (checkboxName) => {
-    if (checkboxName === "esh") {
-      setEnableEsh((prev) => !prev);
-    } else if (checkboxName === "dailyNotes") {
-      setDailyNotesOverride((prev) => !prev);
+  // 2) When a toggle changes, immediately persist
+  const handleCheckboxChange = async (which) => {
+    try {
+      if (which === "esh") {
+        const next = !enableEsh;
+        setEnableEsh(next);
+        const u = buildUpdateString(["OUTPUT_SETTINGS", "enable_esh"], next, "update");
+        await window.electronAPI.applyConfig(u);
+      } else if (which === "dailyNotes") {
+        const next = !dailyNotesOverride;
+        setDailyNotesOverride(next);
+        const u = buildUpdateString(["OUTPUT_SETTINGS", "daily_notes_override"], next, "update");
+        await window.electronAPI.applyConfig(u);
+      }
+    } catch (e) {
+      console.error("applyConfig (Settings toggles) failed:", e);
     }
   };
 
@@ -42,22 +70,21 @@ export default function SettingsLaunchpad({ onClose }) {
     // If you want, re-read settings.json here and update local state.
   };
 
-  // New: bottom-right button just closes this modal
   const handleClose = () => {
     onClose?.();
   };
 
   return (
     <div className="settings-launchpad-container">
-      <TitleCardHeader title="Settings" />
+      <TitleCardHeader title = "Settings" />
       <AccentStripe />
 
       <div className="settings-body">
         <LeftButtonPanel
-          onSaveLocation={handlePickSaveLocation}
-          onRoleMap={() => console.log("Role Map clicked")}
-          onTimeBlocks={() => setShowTimeBlocks(true)}
-          onEshAssumptions={() => console.log("Esh Assumptions clicked")}
+          onSaveLocation={() => setActiveModal("saveloc")}
+          onRoleMap={() => setActiveModal("rolemap")}
+          onTimeBlocks={() => setActiveModal("timeblocks")}
+          onEshAssumptions={() => setActiveModal("esh")}
         />
         <RightInputPanel
           enableEsh={enableEsh}
@@ -66,17 +93,33 @@ export default function SettingsLaunchpad({ onClose }) {
         />
       </div>
 
-      {/* If BottomButtonPanel supports custom labels, pass saveLabel="Close".
-         If not, tweak BottomButtonPanel to use the prop (fallback to default). */}
       <BottomButtonPanel
         onReset={handleResetConfig}
         onSave={handleClose}
         saveLabel="Close"
       />
 
-      {showTimeBlocks && (
-        <Modal onClose={() => setShowTimeBlocks(false)}>
-          <TimeBlocks onClose={() => setShowTimeBlocks(false)} />
+      {activeModal === "timeblocks" && (
+        <Modal onClose={() => setActiveModal(null)}>
+          <TimeBlocks onClose={() => setActiveModal(null)} />
+        </Modal>
+      )}
+      
+      {activeModal === "esh" && (
+        <Modal onClose={() => setActiveModal(null)}>
+          <ESHAssumptions onClose={() => setActiveModal(null)} />
+        </Modal>
+      )}
+
+      {activeModal === "rolemap" && (
+        <Modal onClose={() => setActiveModal(null)}>
+          <RoleMap onClose={() => setActiveModal(null)} />
+        </Modal>
+      )}
+
+      {activeModal === "saveloc" && (
+        <Modal onClose={() => setActiveModal(null)}>
+          <SaveLocation onClose={() => setActiveModal(null)} />
         </Modal>
       )}
     </div>

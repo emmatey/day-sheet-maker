@@ -1,4 +1,4 @@
-import { useState } from "react";
+import { useState, useEffect } from "react";
 import "./DepartmentSelect.css";
 import TitleCardHeader from "./TitleCardHeader/TitleCardHeader.jsx";
 import AccentStripe from "./../HomeScreen/AccentStripe/AccentStripe.jsx";
@@ -15,35 +15,33 @@ export default function DepartmentSelect({ deptList, inputFile, onClose }) {
   );
 
   const [loading, setLoading] = useState(false);
+  const [saveDir, setSaveDir] = useState("");
+
+  useEffect(() => {
+    let alive = true;
+    (async () => {
+      try {
+        const cfg = await window.electronAPI.readSettings();
+        if (!alive) return;
+        const path = cfg?.SAVE_LOCATION?.save_location_string || "";
+        setSaveDir(path);
+      } catch (e) {
+        console.error("readSettings (DepartmentSelect) failed:", e);
+      }
+    })();
+    return () => { alive = false; };
+  }, []);
 
   const toggleDepartment = (index) => {
-    setDepartments((previousDepartments) => {
-      const updatedDepartments = previousDepartments.map((department, currentIndex) => {
-        if (currentIndex === index) {
-          return {
-            ...department,
-            selected: !department.selected,
-          };
-        }
-        return department;
-      });
-      return updatedDepartments;
-    });
+    setDepartments((prev) =>
+      prev.map((d, i) => (i === index ? { ...d, selected: !d.selected } : d))
+    );
   };
 
   const changeMode = (index, newMode) => {
-    setDepartments((previousDepartments) => {
-      const updatedDepartments = previousDepartments.map((department, currentIndex) => {
-        if (currentIndex === index) {
-          return {
-            ...department,
-            mode: newMode,
-          };
-        }
-        return department;
-      });
-      return updatedDepartments;
-    });
+    setDepartments((prev) =>
+      prev.map((d, i) => (i === index ? { ...d, mode: newMode } : d))
+    );
   };
 
   const handleRunPython = async () => {
@@ -57,8 +55,16 @@ export default function DepartmentSelect({ deptList, inputFile, onClose }) {
         }
       });
 
-      const saveDir = "/tmp/daysheet_output"; // TODO: from settings.json
-
+      let outDir = saveDir;
+      if (!outDir) {
+        const picked = await window.electronAPI.selectDirectory();
+        if (!picked) {
+          setLoading(false);
+          return; // user canceled
+        }
+        outDir = picked;
+        setSaveDir(picked);
+      }
       console.log("Sending to Python:", { inputFile, saveDir, outputMap });
 
       await window.electronAPI.runPythonOutput({

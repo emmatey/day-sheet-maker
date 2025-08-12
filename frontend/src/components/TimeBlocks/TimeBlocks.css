@@ -53,7 +53,7 @@
 .tb-select {
   width: 75%;
   padding: 8px 10px;
-  border: 2px solid black;
+  border: 1px solid black;
   border-radius: 8px;
   background: var(--white);
   color: var(--text);
@@ -142,7 +142,7 @@
   border-radius: 8px;
   background: var(--tex);
   opacity: 1;
-  margin: 10px 0px 0px;
+  margin: 10px 10px 10px;
 }
 
 /* footer */
