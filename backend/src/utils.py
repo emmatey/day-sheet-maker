@@ -411,20 +411,35 @@ def disambiguate_duplicate_names(store, debug=False):
 
 
 # Rendering Funcitons
-def insert_title_cell(ws, day, column_day_map):
+def insert_title_cell(ws, day, column_day_map, dept_name=None, is_wall=False):
     _, dates = column_day_map
-    days = ["Sunday", "Monday", "Tuesday", "Wednesday", "Thursday", "Friday", "Saturday"]
+    days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
+    cell = ws.cell(row=1, column=1)
+    cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
-    template_cell = ws.cell(row=1, column=1)
+    try:
+        from openpyxl.cell.rich_text import TextBlock, CellRichText
+        from openpyxl.cell.text import InlineFont
 
-    # Copy the style from original cell (assuming row=1, col=1 is pre-styled)
-    template_cell.font = copy(template_cell.font)
-    template_cell.fill = copy(template_cell.fill)
-    template_cell.border = copy(template_cell.border)
-    template_cell.alignment = Alignment(horizontal="center", vertical="center")
+        top_sz = 16
+        sub_sz = 10
 
-    # Insert the value
-    template_cell.value = f"{days[day]} - {dates[day]}"
+        blocks = [
+            TextBlock(text=f"{days[day]} - {dates[day]}\n",
+                      font=InlineFont(sz=top_sz, b=True, rFont="Calibri")),
+        ]
+        if dept_name:
+            blocks.append(TextBlock(text=f"{dept_name}",
+                                    font=InlineFont(sz=sub_sz, b=False, rFont="Calibri")))
+
+        cell.value = CellRichText(blocks)
+
+    except Exception as e:
+        # Fallback to simple string if rich text fails
+        if dept_name:
+            cell.value = f"{days[day]} - {dates[day]} — {dept_name}"
+        else:
+            cell.value = f"{days[day]} - {dates[day]}"
 
 
 def insert_footer(ws, store_number):
@@ -467,7 +482,7 @@ def insert_role_header(ws, row_number, role_name):
 
         # Write role name or leave blank
         if col == 1:
-            target_cell.value = f"{role_name.upper()}:"
+            target_cell.value = f"{role_name.title()}:"
             target_cell.border = thin_border
 
         elif col == 2:
@@ -479,23 +494,24 @@ def insert_role_header(ws, row_number, role_name):
             target_cell.border = thin_border
 
         elif col == 4:
-            target_cell.value = 'B'
+            target_cell.value = 'Break 1'
             target_cell.border = thin_border
 
         elif col == 5:
-            target_cell.value = 'L'
+            target_cell.value = 'Lunch'
             target_cell.border = thin_border
 
         elif col == 6:
-            target_cell.value = 'B'
+            target_cell.value = 'Break 2'
             target_cell.border = thin_border
 
         elif col == 7:
-            target_cell.value = 'Length'
+            target_cell.value = 'Hours'
             target_cell.border = copy(template_cell.border)
 
         elif col == 8:
-            target_cell.value = 'Out'
+            target_cell.value = "Out"
+            target_cell.alignment = Alignment(horizontal="center", vertical="center")
             target_cell.border = copy(template_cell.border)
 
         else:
@@ -669,6 +685,8 @@ def insert_headers_and_employees(ws, employee_group_dict, day_index, start_row =
 
                 elif col == 7:
                     target_cell.value = shift.paid_hours
+                    target_cell.number_format = '0.##'  
+
 
                 else:
                     target_cell.value = ""
@@ -748,44 +766,55 @@ def insert_effective_shopper_table(ws, employee_group, expeditor_requirements, t
 
     # Borders
     thick_border = Border(
-        left = Side(style = "thick"),
-        right = Side(style = "thick"),
-        top = Side(style = "thick"),
-        bottom = Side(style = "thick")
+        left=Side(style="thick"),
+        right=Side(style="thick"),
+        top=Side(style="thick"),
+        bottom=Side(style="thick")
     )
-
     thin_border = Border(
-        left = Side(style = "thin"),
-        right = Side(style = "thin"),
-        top = Side(style = "thin"),
-        bottom = Side(style = "thin")
+        left=Side(style="thin"),
+        right=Side(style="thin"),
+        top=Side(style="thin"),
+        bottom=Side(style="thin")
     )
 
-    # --- 1. Write Header ---
-    ws.merge_cells(start_row = start_row, start_column = start_col, end_row = start_row + 1, end_column = start_col + 3)
+    # --- 1) Header block (merged 2 rows x 4 cols) ---
+    ws.merge_cells(
+        start_row=start_row,
+        start_column=start_col,
+        end_row=start_row + 1,
+        end_column=start_col + 3
+    )
+    header_cell = ws.cell(row=start_row, column=start_col)
+    header_cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
-    # Set up header
-    header_cell = ws.cell(row = start_row, column = start_col)
-    header_cell.alignment = Alignment(horizontal = "center", vertical = "center", wrap_text = True)
+    # Try rich text; fall back to plain text
+    try:
+        from openpyxl.cell.rich_text import TextBlock, CellRichText
+        from openpyxl.cell.text import InlineFont
 
-    # Define rich text font styles
-    title_font = InlineFont(sz = 12, b = True, rFont = "Calibri")
-    subtitle_font = InlineFont(sz = 8, b = False, rFont = "Calibri")
-    rich_text = CellRichText([
-        TextBlock(text="Effective Shopper Hours (ESH)\n", font = title_font),
-        TextBlock(text="Total Hours - [Estimated 'Non-Shopping' & Break Hours] = ESH", font = subtitle_font)
-    ])
-    header_cell.value = rich_text
+        title_font = InlineFont(sz=12, b=True, rFont="Calibri")
+        subtitle_font = InlineFont(sz=8, b=False, rFont="Calibri")
 
-    # Apply border to all merged cells manually
-    for row in ws.iter_rows(min_row = start_row, max_row = start_row+1, min_col = start_col, max_col = start_col + 3):
+        header_cell.value = CellRichText([
+            TextBlock(text="Effective Shopper Hours (ESH)\n", font=title_font),
+            TextBlock(text="Total Hours - [Estimated 'Non-Shopping' & Break Hours] = ESH", font=subtitle_font),
+        ])
+    except Exception:
+        # Safe fallback (still wrapped to show as 2 lines)
+        header_cell.value = (
+            "Effective Shopper Hours (ESH)\n"
+            "Total Hours - [Estimated 'Non-Shopping' & Break Hours] = ESH"
+        )
+
+    # Apply thick border to the whole merged header area
+    for row in ws.iter_rows(min_row=start_row, max_row=start_row + 1,
+                            min_col=start_col, max_col=start_col + 3):
         for cell in row:
             cell.border = thick_border
 
-    # Move to next row for column labels
+    # --- 2) Column labels ---
     current_row = start_row + 2
-
-    # --- 2. Write Table Column Headers ---
     headers = ["Time Range", "Non-Shopping Hrs", "ESH", ""]
     header_font = Font(name="Calibri", bold=True)
     header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
@@ -795,24 +824,26 @@ def insert_effective_shopper_table(ws, employee_group, expeditor_requirements, t
         cell.value = header_text
         cell.alignment = header_alignment
         cell.border = thin_border
-        if col_offset == 1:  # "Expo Hrs Req" column smaller font
+        if col_offset == 1:
             cell.font = Font(name="Calibri", bold=True, size=8)
         else:
             cell.font = header_font
 
-    current_row += 1  # move to first data row
+    current_row += 1
 
-    # --- 3. Calculate All Employee Overlaps ---
+    # --- 3) Aggregate overlaps for the day ---
     total_overlaps = defaultdict(float)
     for employees, _ in employee_group.values():
         for emp in employees:
             for shift in emp.shifts:
                 if shift.day_index == day_index:
-                    overlaps = calculate_block_overlaps(shift.start_time, shift.end_time, time_blocks)
+                    overlaps = calculate_block_overlaps(
+                        shift.start_time, shift.end_time, time_blocks
+                    )
                     for block_key, hours in overlaps.items():
                         total_overlaps[block_key] += hours
 
-    # --- 4. Write Data Rows ---
+    # --- 4) Write data rows ---
     for i, block in enumerate(time_blocks):
         block_start, block_end, _ = block
         block_name = f"{block[2]} = {block_start}-{block_end}"
@@ -821,44 +852,44 @@ def insert_effective_shopper_table(ws, employee_group, expeditor_requirements, t
         required_expo_hours = expeditor_requirements.get(i, 0)
         effective_hours = actual_total_hours - required_expo_hours
 
-        # Write time range
-        time_range_cell = ws.cell(row = current_row, column = start_col)
-        time_range_cell.value = f"{block_start} - {block_end}"
-        time_range_cell.alignment = header_alignment
-        time_range_cell.border = thin_border
+        # Time range
+        c = ws.cell(row=current_row, column=start_col)
+        c.value = f"{block_start} - {block_end}"
+        c.alignment = header_alignment
+        c.border = thin_border
 
-        # Write required expo hours
-        required_expo_cell = ws.cell(row=current_row, column = start_col + 1)
-        required_expo_cell.value = required_expo_hours
-        required_expo_cell.alignment = header_alignment
-        required_expo_cell.border = thin_border
+        # Non-shopping hours (requirement)
+        c = ws.cell(row=current_row, column=start_col + 1)
+        c.value = required_expo_hours
+        c.alignment = header_alignment
+        c.border = thin_border
 
-        # Write effective shopper hours
-        esh_cell = ws.cell(row = current_row, column = start_col + 2)
-        esh_cell.value = round(effective_hours, 2)
-        esh_cell.alignment = header_alignment
-        esh_cell.border = thin_border
+        # ESH
+        c = ws.cell(row=current_row, column=start_col + 2)
+        c.value = round(effective_hours, 2)
+        c.alignment = header_alignment
+        c.border = thin_border
 
         current_row += 1
 
-    # --- 5. Merge and sum every 3-hour chunk ---
+    # --- 5) Merge and sum every 3-hour chunk in last column ---
     for group_start_row in range(start_row + 3, current_row, 3):
         sum_value = sum(
-            ws.cell(row = r, column = start_col + 2).value
+            ws.cell(row=r, column=start_col + 2).value
             for r in range(group_start_row, min(group_start_row + 3, current_row))
         )
+
         ws.merge_cells(
             start_row=group_start_row,
-            start_column = start_col + 3,
+            start_column=start_col + 3,
             end_row=min(group_start_row + 2, current_row - 1),
             end_column=start_col + 3
         )
-        merged_cell = ws.cell(row = group_start_row, column = start_col + 3)
+        merged_cell = ws.cell(row=group_start_row, column=start_col + 3)
         merged_cell.value = round(sum_value, 2)
         merged_cell.alignment = header_alignment
         merged_cell.border = thin_border
 
-        # Fill borders for empty cells too
+        # Borders for the merged cells below the top
         for r in range(group_start_row + 1, min(group_start_row + 3, current_row)):
-            empty_cell = ws.cell(row = r, column = start_col + 3)
-            empty_cell.border = thin_border
+            ws.cell(row=r, column=start_col + 3).border = thin_border

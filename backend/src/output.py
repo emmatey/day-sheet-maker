@@ -146,6 +146,7 @@ def populate_workbook(wb, dept, column_day_map, is_wall: bool = False):
     Returns:
         bool: The is_wall flag, unchanged
     """
+
     def print_region_width_adjust(col_num_int):
             last_row = ws.max_row
             last_col_letter = openpyxl.utils.get_column_letter(col_num_int)
@@ -157,7 +158,7 @@ def populate_workbook(wb, dept, column_day_map, is_wall: bool = False):
         employee_group = u.employee_group(dept, day, config_handler_object.settings_role_map)
         time_blocks = config_handler_object.settings_time_blocks.get(dept.dept_name, [])
 
-        u.insert_title_cell(ws, day, column_day_map)
+        u.insert_title_cell(ws, day, column_day_map, dept.dept_name)
         u.insert_headers_and_employees(ws, employee_group, day)
         u.insert_footer(ws, hrd.store_number)
 
@@ -207,8 +208,8 @@ def populate_workbook(wb, dept, column_day_map, is_wall: bool = False):
 
         # Column widths
         column_widths = {
-            'A': 30.0, 'B': 12.0, 'C': 12.0, 'D': 5.0, 'E': 5.0,
-            'F': 5.0, 'G': 8.0, 'H': 5.0, 'I': 3.0, 'J': 3.0,
+            'A': 30.0, 'B': 12.0, 'C': 12.0, 'D': 8, 'E': 8,
+            'F': 8, 'G': 8, 'H': 5.0, 'I': 1.5, 'J': 1.5,
         }
         for col, width in column_widths.items():
             ws.column_dimensions[col].width = width
