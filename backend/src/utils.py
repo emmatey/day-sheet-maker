@@ -5,8 +5,6 @@ import datetime
 from copy import copy
 from collections import defaultdict
 from openpyxl.styles import Border, Side, Font, Alignment
-from openpyxl.cell.rich_text import TextBlock, CellRichText
-from openpyxl.cell.text import InlineFont
 
 
 # Helper Functions
@@ -411,7 +409,7 @@ def disambiguate_duplicate_names(store, debug=False):
 
 
 # Rendering Funcitons
-def insert_title_cell(ws, day, column_day_map, dept_name=None, is_wall=False):
+def insert_title_cell(ws, day, column_day_map, dept_name=None):
     _, dates = column_day_map
     days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
     cell = ws.cell(row=1, column=1)
@@ -685,8 +683,8 @@ def insert_headers_and_employees(ws, employee_group_dict, day_index, start_row =
 
                 elif col == 7:
                     target_cell.value = shift.paid_hours
-                    target_cell.number_format = '0.##'  
-
+                    if type(target_cell.value) == float:
+                        target_cell.number_format = '0.##'  
 
                 else:
                     target_cell.value = ""
@@ -759,137 +757,216 @@ def insert_labor_trackers(ws, employee_group_dict, time_blocks, day_index, start
     return current_row
 
 
-def insert_effective_shopper_table(ws, employee_group, expeditor_requirements, time_blocks, day_index, start_row=4, start_col=11):
+def insert_effective_shopper_table(
+    ws,
+    employee_group,
+    expeditor_requirements,
+    time_blocks,
+    day_index,
+    start_row = 4,
+    start_col = 11
+):
     """
-    Insert a table showing effective shopper hours into a worksheet.
+    Render the ESH table.
+
+    Interface matches:
+      u.insert_effective_shopper_table(ws, employee_group, config_handler_object.settings_esh, time_blocks, day)
+
+    Emphasis rules (no new UI):
+      • Hourly cell is emphasized if:
+          A) Operational shortage: ESH < requirement AND gap ≥ ABS_GAP_MIN
+         OR
+          B) Local dip: not a shortage, but ≥ PCT_DROP below a rolling 3-hour average (edge-safe)
+      • 3-hour merged total is never bolded.
     """
+    from collections import defaultdict
+    from openpyxl.styles import Alignment, Font, Border, Side, PatternFill
+    from openpyxl.cell.rich_text import TextBlock, CellRichText
+    from openpyxl.cell.text import InlineFont
 
-    # Borders
-    thick_border = Border(
-        left=Side(style="thick"),
-        right=Side(style="thick"),
-        top=Side(style="thick"),
-        bottom=Side(style="thick")
-    )
-    thin_border = Border(
-        left=Side(style="thin"),
-        right=Side(style="thin"),
-        top=Side(style="thin"),
-        bottom=Side(style="thin")
-    )
+    # ---------- knobs (no UI) ----------
+    ABS_GAP_MIN = 0.5    # need at least this many hours short to count as a "real" shortage
+    PCT_DROP    = 0.25   # 25% below local average counts as a dip
+    EDGE_PROTECT = True  # don't flag the first/last hour as a "dip"
+    SHOW_SHORTAGE_SHADE = False  # flip to True if you want the gray fill
 
-    # --- 1) Header block (merged 2 rows x 4 cols) ---
-    ws.merge_cells(
-        start_row=start_row,
-        start_column=start_col,
-        end_row=start_row + 1,
-        end_column=start_col + 3
+    # ----------------------------
+    # Shared styles and utilities
+    # ----------------------------
+    thick_border_all_sides = Border(
+        left=Side(style="thick"), right=Side(style="thick"),
+        top=Side(style="thick"),   bottom=Side(style="thick")
     )
-    header_cell = ws.cell(row=start_row, column=start_col)
-    header_cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    thin_border_all_sides = Border(
+        left=Side(style="thin"), right=Side(style="thin"),
+        top=Side(style="thin"),  bottom=Side(style="thin")
+    )
+    centered_wrapped = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    shortage_fill_gray = PatternFill(fill_type="solid", fgColor="DDDDDD")  # prints fine on B/W
 
-    # Try rich text; fall back to plain text
+    def rolling_avg(seq, i):
+        # centered window (i-1, i, i+1) where possible
+        idxs = []
+        if i - 1 >= 0: idxs.append(i - 1)
+        idxs.append(i)
+        if i + 1 < len(seq): idxs.append(i + 1)
+        if not idxs: return seq[i]
+        return sum(seq[j] for j in idxs) / len(idxs)
+
+    def is_local_dip(esh_list, i):
+        if EDGE_PROTECT and (i == 0 or i == len(esh_list) - 1):
+            return False
+        avg_local = rolling_avg(esh_list, i)
+        if avg_local <= 1e-6:
+            return False
+        return esh_list[i] < (1.0 - PCT_DROP) * avg_local
+
+    # -----------------------------------
+    # 1) Header block (merged, 2 rows x 4 cols)
+    # -----------------------------------
+    header_first_row = start_row
+    header_first_col = start_col
+    header_last_row  = start_row + 1
+    header_last_col  = start_col + 3
+
+    ws.merge_cells(start_row=header_first_row, start_column=header_first_col,
+                   end_row=header_last_row,  end_column=header_last_col)
+
+    header_cell = ws.cell(row=header_first_row, column=header_first_col)
+
     try:
-        from openpyxl.cell.rich_text import TextBlock, CellRichText
-        from openpyxl.cell.text import InlineFont
-
-        title_font = InlineFont(sz=12, b=True, rFont="Calibri")
-        subtitle_font = InlineFont(sz=8, b=False, rFont="Calibri")
-
         header_cell.value = CellRichText([
-            TextBlock(text="Effective Shopper Hours (ESH)\n", font=title_font),
-            TextBlock(text="Total Hours - [Estimated 'Non-Shopping' & Break Hours] = ESH", font=subtitle_font),
+            TextBlock(text="Effective Shopper Hours (ESH)\n",
+                      font=InlineFont(sz=12, b=True, rFont="Calibri")),
+            TextBlock(text="Total Hours - [Estimated 'Non-Shopping' & Break Hours] = ESH",
+                      font=InlineFont(sz=8, b=False, rFont="Calibri")),
         ])
     except Exception:
-        # Safe fallback (still wrapped to show as 2 lines)
         header_cell.value = (
             "Effective Shopper Hours (ESH)\n"
             "Total Hours - [Estimated 'Non-Shopping' & Break Hours] = ESH"
         )
 
-    # Apply thick border to the whole merged header area
-    for row in ws.iter_rows(min_row=start_row, max_row=start_row + 1,
-                            min_col=start_col, max_col=start_col + 3):
+    # Apply border + alignment to ALL merged cells (helps vertical centering)
+    for row in ws.iter_rows(min_row=header_first_row, max_row=header_last_row,
+                            min_col=header_first_col, max_col=header_last_col):
         for cell in row:
-            cell.border = thick_border
+            cell.border = thick_border_all_sides
+            cell.alignment = centered_wrapped
 
-    # --- 2) Column labels ---
+    # ----------------------
+    # 2) Column label row
+    # ----------------------
     current_row = start_row + 2
-    headers = ["Time Range", "Non-Shopping Hrs", "ESH", ""]
-    header_font = Font(name="Calibri", bold=True)
-    header_alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
-
-    for col_offset, header_text in enumerate(headers):
-        cell = ws.cell(row=current_row, column=start_col + col_offset)
-        cell.value = header_text
-        cell.alignment = header_alignment
-        cell.border = thin_border
-        if col_offset == 1:
-            cell.font = Font(name="Calibri", bold=True, size=8)
+    column_headers = ["Time Range", "Non-Shopping Hrs", "ESH", ""]
+    for offset, header_text in enumerate(column_headers):
+        hc = ws.cell(row=current_row, column=start_col + offset)
+        hc.value = header_text
+        hc.alignment = centered_wrapped
+        hc.border = thin_border_all_sides
+        # Header fonts: keep "Non-Shopping Hrs" header small/bold; others normal bold
+        if header_text == "Non-Shopping Hrs":
+            hc.font = Font(name="Calibri", bold=True, size=8)
         else:
-            cell.font = header_font
+            hc.font = Font(name="Calibri", bold=True)
 
-    current_row += 1
+    current_row += 1  # first data row follows
+    first_data_row_index = current_row
 
-    # --- 3) Aggregate overlaps for the day ---
-    total_overlaps = defaultdict(float)
-    for employees, _ in employee_group.values():
-        for emp in employees:
-            for shift in emp.shifts:
+    # ------------------------------------------------
+    # 3) Aggregate total overlap hours for this day
+    # ------------------------------------------------
+    total_overlap_hours_by_block_key = defaultdict(float)
+    for employees_in_role, _tracker_enabled in employee_group.values():
+        for employee in employees_in_role:
+            for shift in employee.shifts:
                 if shift.day_index == day_index:
-                    overlaps = calculate_block_overlaps(
-                        shift.start_time, shift.end_time, time_blocks
-                    )
-                    for block_key, hours in overlaps.items():
-                        total_overlaps[block_key] += hours
+                    block_overlaps = calculate_block_overlaps(shift.start_time, shift.end_time, time_blocks)
+                    for block_key, overlap_hours in block_overlaps.items():
+                        total_overlap_hours_by_block_key[block_key] += overlap_hours
 
-    # --- 4) Write data rows ---
-    for i, block in enumerate(time_blocks):
-        block_start, block_end, _ = block
-        block_name = f"{block[2]} = {block_start}-{block_end}"
+    # ---------------------------------------------------------
+    # 4) First pass: compute all hourly req & esh 
+    # ---------------------------------------------------------
+    req_per_hour = []
+    esh_per_hour = []
+    for hour_index, time_block in enumerate(time_blocks):
+        start_str, end_str, label = time_block
+        key = f"{label} = {start_str}-{end_str}"
+        actual_total = total_overlap_hours_by_block_key.get(key, 0.0)
+        req = int(expeditor_requirements.get(hour_index, 0))
+        esh = round(actual_total - req, 2)
+        req_per_hour.append(req)
+        esh_per_hour.append(esh)
 
-        actual_total_hours = total_overlaps.get(block_name, 0)
-        required_expo_hours = expeditor_requirements.get(i, 0)
-        effective_hours = actual_total_hours - required_expo_hours
+    # ---------------------------------------------------------
+    # 4b) Second pass: render rows with combined emphasis rule
+    # ---------------------------------------------------------
+    current_row = first_data_row_index
+    for hour_index, time_block in enumerate(time_blocks):
+        start_str, end_str, _ = time_block
+        req = req_per_hour[hour_index]
+        esh = esh_per_hour[hour_index]
 
-        # Time range
+        # Time Range
         c = ws.cell(row=current_row, column=start_col)
-        c.value = f"{block_start} - {block_end}"
-        c.alignment = header_alignment
-        c.border = thin_border
+        c.value = f"{start_str} - {end_str}"
+        c.alignment = centered_wrapped
+        c.border = thin_border_all_sides
 
-        # Non-shopping hours (requirement)
+        # Requirement (values now normal-sized, bold — fixes “small numbers” look)
         c = ws.cell(row=current_row, column=start_col + 1)
-        c.value = required_expo_hours
-        c.alignment = header_alignment
-        c.border = thin_border
+        c.value = req
+        c.number_format = '0'  # integer display
+        c.alignment = centered_wrapped
+        c.border = thin_border_all_sides
+        c.font = Font(name="Calibri", bold=True)   # <— removed size=8 on the VALUES
 
-        # ESH
-        c = ws.cell(row=current_row, column=start_col + 2)
-        c.value = round(effective_hours, 2)
-        c.alignment = header_alignment
-        c.border = thin_border
+        # ESH value
+        esh_cell = ws.cell(row=current_row, column=start_col + 2)
+        esh_cell.value = esh
+        esh_cell.number_format = '0.#'
+        esh_cell.alignment = centered_wrapped
+        esh_cell.border = thin_border_all_sides
+
+        # Combined rule: shortage OR local dip
+        gap = (req - esh)  # positive means short vs requirement
+        is_operational_shortage = (esh < req) and (gap >= ABS_GAP_MIN)
+        is_dip = (not is_operational_shortage) and is_local_dip(esh_per_hour, hour_index)
+
+        emphasize = is_operational_shortage or is_dip
+        esh_cell.font = Font(name="Calibri", bold=emphasize)
+        if emphasize:
+            esh_cell.border = thick_border_all_sides
+            if SHOW_SHORTAGE_SHADE:
+                esh_cell.fill = shortage_fill_gray
 
         current_row += 1
 
-    # --- 5) Merge and sum every 3-hour chunk in last column ---
-    for group_start_row in range(start_row + 3, current_row, 3):
-        sum_value = sum(
-            ws.cell(row=r, column=start_col + 2).value
-            for r in range(group_start_row, min(group_start_row + 3, current_row))
-        )
+    # ------------------------------------------------
+    # 5) 3-hour merged totals 
+    # ------------------------------------------------
+    total_rows = len(esh_per_hour)
+    merge_col = start_col + 3
+    row_ptr = first_data_row_index
 
-        ws.merge_cells(
-            start_row=group_start_row,
-            start_column=start_col + 3,
-            end_row=min(group_start_row + 2, current_row - 1),
-            end_column=start_col + 3
-        )
-        merged_cell = ws.cell(row=group_start_row, column=start_col + 3)
-        merged_cell.value = round(sum_value, 2)
-        merged_cell.alignment = header_alignment
-        merged_cell.border = thin_border
+    while row_ptr < first_data_row_index + total_rows:
+        merge_end_row = min(row_ptr + 2, first_data_row_index + total_rows - 1)
+        ws.merge_cells(start_row=row_ptr, start_column=merge_col,
+                       end_row=merge_end_row, end_column=merge_col)
 
-        # Borders for the merged cells below the top
-        for r in range(group_start_row + 1, min(group_start_row + 3, current_row)):
-            ws.cell(row=r, column=start_col + 3).border = thin_border
+        idx0 = row_ptr - first_data_row_index
+        idx_end = min(idx0 + 3, total_rows)
+        three_hr_sum_esh = round(sum(esh_per_hour[idx0:idx_end]), 2)
+
+        merged_total_cell = ws.cell(row=row_ptr, column=merge_col)
+        merged_total_cell.value = three_hr_sum_esh
+        merged_total_cell.number_format = '0.#'
+        merged_total_cell.alignment = centered_wrapped
+        merged_total_cell.border = thin_border_all_sides
+        merged_total_cell.font = Font(name="Calibri", bold=False)  # never bold
+
+        for inner in range(row_ptr + 1, merge_end_row + 1):
+            ws.cell(row=inner, column=merge_col).border = thin_border_all_sides
+
+        row_ptr += 3
