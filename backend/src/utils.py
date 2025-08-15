@@ -581,6 +581,144 @@ def insert_labor_tracker(ws, labor_data, title, start_row, start_col = 10):
         current_row += 1
 
 
+def insert_labor_trackers(ws, employee_group_dict, time_blocks, day_index, start_row = 4, start_col = 10):
+
+
+    """
+
+
+    Inserts a labor tracker for each role in the employee group dict.
+
+
+
+
+
+    Args:
+
+
+        ws (Worksheet): The Excel worksheet.
+
+
+        employee_group_dict (dict): display_role -> (list of Employee objects, tracker_enabled).
+
+
+        time_blocks (list): The list of time blocks to calculate coverage.
+
+
+        day_index (int): Which day to calculate (0=Sunday, 6=Saturday).
+
+
+        start_row (int): The row to start inserting trackers.
+
+
+        start_col (int): The column to insert trackers (default 10).
+
+
+
+
+
+    Returns:
+
+
+        int: The next empty row after all trackers.
+
+
+    """
+
+
+    role_display_names = list(employee_group_dict.keys())
+
+
+    grouped_employees_by_role = list(employee_group_dict.values())
+
+
+    current_row = start_row
+
+
+
+
+
+    for i, role_name in enumerate(role_display_names):
+
+
+        employees_with_shifts_today, tracker_enabled = grouped_employees_by_role[i]
+
+
+
+
+
+        if tracker_enabled == 0:
+
+
+            continue #return to start of loop without rendering labor tracker.
+
+
+
+
+
+        if tracker_enabled == 1 and len(employees_with_shifts_today) > 1:
+
+
+            block_hours_total = defaultdict(int)
+
+
+
+
+
+            for emp in employees_with_shifts_today:
+
+
+                for shift in emp.shifts:
+
+
+                    if shift.day_index == day_index:
+
+
+                        overlaps = calculate_block_overlaps(shift.start_time, shift.end_time, time_blocks)
+
+
+                        for block, hours in overlaps.items():
+
+
+                            block_hours_total[block] += hours
+
+
+
+
+
+            insert_labor_tracker(
+
+
+                ws,
+
+
+                block_hours_total,
+
+
+                f"Labor Coverage: {role_name}",
+
+
+                start_row = current_row,
+
+
+                start_col = start_col
+
+
+            )
+
+
+
+
+
+            current_row += 5  # move down after each tracker
+
+
+
+
+
+    return current_row
+
+
 def insert_daily_notes(ws, start_row = 4, start_col = 10, height = 20, width = 5):
     """
     Inserts 'Daily Notes', a blank space to write, in place of labor trackers if chosen by user.
@@ -755,12 +893,12 @@ def insert_effective_shopper_table(
         req_list, esh_list = [], []
         for i, (start_str, end_str, label) in enumerate(time_blocks):
             key = _block_key(start_str, end_str, label)
-            actual_total = float(total_overlap_by_key.get(key, 0.0))
+            actual_total = total_overlap_by_key.get(key, 0.0)
             if isinstance(expeditor_requirements, (list, tuple)):
-                req = int(expeditor_requirements[i] if i < len(expeditor_requirements) else 0)
+                req = expeditor_requirements[i] if i < len(expeditor_requirements) else 0
             else:
-                req = int(expeditor_requirements.get(i, 0))
-            esh = round(actual_total - req, 2)
+                req = expeditor_requirements.get(i, 0)
+            esh = actual_total - req
             req_list.append(req)
             esh_list.append(esh)
         return req_list, esh_list
@@ -838,7 +976,7 @@ def insert_effective_shopper_table(
         # Requirement
         c = ws.cell(row=current_row, column=start_col + 1)
         c.value = req
-        c.number_format = '0'
+        c.number_format = '0.*'
         c.alignment = centered_wrapped
         c.border = thin_border_all
         c.font = Font(name="Calibri", bold=True)
