@@ -709,54 +709,6 @@ def insert_headers_and_employees(ws, employee_group_dict, day_index, start_row =
     return current_row
 
 
-def insert_labor_trackers(ws, employee_group_dict, time_blocks, day_index, start_row = 4, start_col = 10):
-    """
-    Inserts a labor tracker for each role in the employee group dict.
-
-    Args:
-        ws (Worksheet): The Excel worksheet.
-        employee_group_dict (dict): display_role -> (list of Employee objects, tracker_enabled).
-        time_blocks (list): The list of time blocks to calculate coverage.
-        day_index (int): Which day to calculate (0=Sunday, 6=Saturday).
-        start_row (int): The row to start inserting trackers.
-        start_col (int): The column to insert trackers (default 10).
-
-    Returns:
-        int: The next empty row after all trackers.
-    """
-    role_display_names = list(employee_group_dict.keys())
-    grouped_employees_by_role = list(employee_group_dict.values())
-    current_row = start_row
-
-    for i, role_name in enumerate(role_display_names):
-        employees_with_shifts_today, tracker_enabled = grouped_employees_by_role[i]
-
-        if tracker_enabled == 0:
-            continue #return to start of loop without rendering labor tracker.
-
-        if tracker_enabled == 1 and len(employees_with_shifts_today) > 1:
-            block_hours_total = defaultdict(int)
-
-            for emp in employees_with_shifts_today:
-                for shift in emp.shifts:
-                    if shift.day_index == day_index:
-                        overlaps = calculate_block_overlaps(shift.start_time, shift.end_time, time_blocks)
-                        for block, hours in overlaps.items():
-                            block_hours_total[block] += hours
-
-            insert_labor_tracker(
-                ws,
-                block_hours_total,
-                f"Labor Coverage: {role_name}",
-                start_row = current_row,
-                start_col = start_col
-            )
-
-            current_row += 5  # move down after each tracker
-
-    return current_row
-
-
 def insert_effective_shopper_table(
     ws,
     employee_group,
@@ -767,73 +719,64 @@ def insert_effective_shopper_table(
     start_col = 11
 ):
     """
-    Render the ESH table.
-
-    Interface matches:
-      u.insert_effective_shopper_table(ws, employee_group, config_handler_object.settings_esh, time_blocks, day)
-
-    Emphasis rules (no new UI):
-      • Hourly cell is emphasized if:
-          A) Operational shortage: ESH < requirement AND gap ≥ ABS_GAP_MIN
-         OR
-          B) Local dip: not a shortage, but ≥ PCT_DROP below a rolling 3-hour average (edge-safe)
-      • 3-hour merged total is never bolded.
+    Render the ESH table without conditional formatting.
     """
     from collections import defaultdict
-    from openpyxl.styles import Alignment, Font, Border, Side, PatternFill
+    from openpyxl.styles import Alignment, Font, Border, Side
     from openpyxl.cell.rich_text import TextBlock, CellRichText
     from openpyxl.cell.text import InlineFont
 
-    # ---------- knobs (no UI) ----------
-    ABS_GAP_MIN = 0.5    # need at least this many hours short to count as a "real" shortage
-    PCT_DROP    = 0.25   # 25% below local average counts as a dip
-    EDGE_PROTECT = True  # don't flag the first/last hour as a "dip"
-    SHOW_SHORTAGE_SHADE = False  # flip to True if you want the gray fill
-
-    # ----------------------------
-    # Shared styles and utilities
-    # ----------------------------
-    thick_border_all_sides = Border(
+    # Styles
+    thick_border_all = Border(
         left=Side(style="thick"), right=Side(style="thick"),
         top=Side(style="thick"),   bottom=Side(style="thick")
     )
-    thin_border_all_sides = Border(
+    thin_border_all = Border(
         left=Side(style="thin"), right=Side(style="thin"),
         top=Side(style="thin"),  bottom=Side(style="thin")
     )
     centered_wrapped = Alignment(horizontal="center", vertical="center", wrap_text=True)
-    shortage_fill_gray = PatternFill(fill_type="solid", fgColor="DDDDDD")  # prints fine on B/W
 
-    def rolling_avg(seq, i):
-        # centered window (i-1, i, i+1) where possible
-        idxs = []
-        if i - 1 >= 0: idxs.append(i - 1)
-        idxs.append(i)
-        if i + 1 < len(seq): idxs.append(i + 1)
-        if not idxs: return seq[i]
-        return sum(seq[j] for j in idxs) / len(idxs)
+    def _block_key(start_str, end_str, label):
+        return f"{label} = {start_str}-{end_str}"
 
-    def is_local_dip(esh_list, i):
-        if EDGE_PROTECT and (i == 0 or i == len(esh_list) - 1):
-            return False
-        avg_local = rolling_avg(esh_list, i)
-        if avg_local <= 1e-6:
-            return False
-        return esh_list[i] < (1.0 - PCT_DROP) * avg_local
+    def build_hourly_headcount(employee_group, time_blocks, day_index):
+        totals = defaultdict(float)
+        for employees_in_role, _enabled in employee_group.values():
+            for employee in employees_in_role:
+                for shift in getattr(employee, "shifts", []):
+                    if shift.day_index == day_index:
+                        overlaps = calculate_block_overlaps(shift.start_time, shift.end_time, time_blocks)
+                        for k, hours in overlaps.items():
+                            totals[k] += hours
+        return totals
 
-    # -----------------------------------
-    # 1) Header block (merged, 2 rows x 4 cols)
-    # -----------------------------------
+    def compute_effective_shoppers(total_overlap_by_key, time_blocks, expeditor_requirements):
+        req_list, esh_list = [], []
+        for i, (start_str, end_str, label) in enumerate(time_blocks):
+            key = _block_key(start_str, end_str, label)
+            actual_total = float(total_overlap_by_key.get(key, 0.0))
+            if isinstance(expeditor_requirements, (list, tuple)):
+                req = int(expeditor_requirements[i] if i < len(expeditor_requirements) else 0)
+            else:
+                req = int(expeditor_requirements.get(i, 0))
+            esh = round(actual_total - req, 2)
+            req_list.append(req)
+            esh_list.append(esh)
+        return req_list, esh_list
+
+    # ---------------------------
+    # 1) Header block
+    # ---------------------------
     header_first_row = start_row
     header_first_col = start_col
     header_last_row  = start_row + 1
     header_last_col  = start_col + 3
 
-    ws.merge_cells(start_row=header_first_row, start_column=header_first_col,
-                   end_row=header_last_row,  end_column=header_last_col)
+    ws.merge_cells(start_row = header_first_row, start_column = header_first_col,
+                   end_row=  header_last_row,  end_column = header_last_col)
 
     header_cell = ws.cell(row=header_first_row, column=header_first_col)
-
     try:
         header_cell.value = CellRichText([
             TextBlock(text="Effective Shopper Hours (ESH)\n",
@@ -847,11 +790,10 @@ def insert_effective_shopper_table(
             "Total Hours - [Estimated 'Non-Shopping' & Break Hours] = ESH"
         )
 
-    # Apply border + alignment to ALL merged cells (helps vertical centering)
-    for row in ws.iter_rows(min_row=header_first_row, max_row=header_last_row,
-                            min_col=header_first_col, max_col=header_last_col):
+    for row in ws.iter_rows(min_row = header_first_row, max_row = header_last_row,
+                            min_col = header_first_col, max_col = header_last_col):
         for cell in row:
-            cell.border = thick_border_all_sides
+            cell.border = thick_border_all
             cell.alignment = centered_wrapped
 
     # ----------------------
@@ -863,48 +805,27 @@ def insert_effective_shopper_table(
         hc = ws.cell(row=current_row, column=start_col + offset)
         hc.value = header_text
         hc.alignment = centered_wrapped
-        hc.border = thin_border_all_sides
-        # Header fonts: keep "Non-Shopping Hrs" header small/bold; others normal bold
+        hc.border = thin_border_all
         if header_text == "Non-Shopping Hrs":
             hc.font = Font(name="Calibri", bold=True, size=8)
         else:
             hc.font = Font(name="Calibri", bold=True)
 
-    current_row += 1  # first data row follows
+    current_row += 1
     first_data_row_index = current_row
 
-    # ------------------------------------------------
-    # 3) Aggregate total overlap hours for this day
-    # ------------------------------------------------
-    total_overlap_hours_by_block_key = defaultdict(float)
-    for employees_in_role, _tracker_enabled in employee_group.values():
-        for employee in employees_in_role:
-            for shift in employee.shifts:
-                if shift.day_index == day_index:
-                    block_overlaps = calculate_block_overlaps(shift.start_time, shift.end_time, time_blocks)
-                    for block_key, overlap_hours in block_overlaps.items():
-                        total_overlap_hours_by_block_key[block_key] += overlap_hours
+    # --------------------------
+    # 3) Build totals & ESH
+    # --------------------------
+    total_overlap_by_key = build_hourly_headcount(employee_group, time_blocks, day_index)
+    req_per_hour, esh_per_hour = compute_effective_shoppers(
+        total_overlap_by_key, time_blocks, expeditor_requirements
+    )
 
-    # ---------------------------------------------------------
-    # 4) First pass: compute all hourly req & esh 
-    # ---------------------------------------------------------
-    req_per_hour = []
-    esh_per_hour = []
-    for hour_index, time_block in enumerate(time_blocks):
-        start_str, end_str, label = time_block
-        key = f"{label} = {start_str}-{end_str}"
-        actual_total = total_overlap_hours_by_block_key.get(key, 0.0)
-        req = int(expeditor_requirements.get(hour_index, 0))
-        esh = round(actual_total - req, 2)
-        req_per_hour.append(req)
-        esh_per_hour.append(esh)
-
-    # ---------------------------------------------------------
-    # 4b) Second pass: render rows with combined emphasis rule
-    # ---------------------------------------------------------
-    current_row = first_data_row_index
-    for hour_index, time_block in enumerate(time_blocks):
-        start_str, end_str, _ = time_block
+    # --------------------------
+    # 4) Render rows
+    # --------------------------
+    for hour_index, (start_str, end_str, _label) in enumerate(time_blocks):
         req = req_per_hour[hour_index]
         esh = esh_per_hour[hour_index]
 
@@ -912,40 +833,28 @@ def insert_effective_shopper_table(
         c = ws.cell(row=current_row, column=start_col)
         c.value = f"{start_str} - {end_str}"
         c.alignment = centered_wrapped
-        c.border = thin_border_all_sides
+        c.border = thin_border_all
 
-        # Requirement (values now normal-sized, bold — fixes “small numbers” look)
+        # Requirement
         c = ws.cell(row=current_row, column=start_col + 1)
         c.value = req
-        c.number_format = '0'  # integer display
+        c.number_format = '0'
         c.alignment = centered_wrapped
-        c.border = thin_border_all_sides
-        c.font = Font(name="Calibri", bold=True)   # <— removed size=8 on the VALUES
+        c.border = thin_border_all
+        c.font = Font(name="Calibri", bold=True)
 
         # ESH value
         esh_cell = ws.cell(row=current_row, column=start_col + 2)
         esh_cell.value = esh
         esh_cell.number_format = '0.#'
         esh_cell.alignment = centered_wrapped
-        esh_cell.border = thin_border_all_sides
-
-        # Combined rule: shortage OR local dip
-        gap = (req - esh)  # positive means short vs requirement
-        is_operational_shortage = (esh < req) and (gap >= ABS_GAP_MIN)
-        is_dip = (not is_operational_shortage) and is_local_dip(esh_per_hour, hour_index)
-
-        emphasize = is_operational_shortage or is_dip
-        esh_cell.font = Font(name="Calibri", bold=emphasize)
-        if emphasize:
-            esh_cell.border = thick_border_all_sides
-            if SHOW_SHORTAGE_SHADE:
-                esh_cell.fill = shortage_fill_gray
+        esh_cell.border = thin_border_all
 
         current_row += 1
 
-    # ------------------------------------------------
-    # 5) 3-hour merged totals 
-    # ------------------------------------------------
+    # --------------------------
+    # 5) 3-hour merged totals
+    # --------------------------
     total_rows = len(esh_per_hour)
     merge_col = start_col + 3
     row_ptr = first_data_row_index
@@ -963,10 +872,10 @@ def insert_effective_shopper_table(
         merged_total_cell.value = three_hr_sum_esh
         merged_total_cell.number_format = '0.#'
         merged_total_cell.alignment = centered_wrapped
-        merged_total_cell.border = thin_border_all_sides
-        merged_total_cell.font = Font(name="Calibri", bold=False)  # never bold
+        merged_total_cell.border = thin_border_all
+        merged_total_cell.font = Font(name="Calibri", bold=False)
 
         for inner in range(row_ptr + 1, merge_end_row + 1):
-            ws.cell(row=inner, column=merge_col).border = thin_border_all_sides
+            ws.cell(row=inner, column=merge_col).border = thin_border_all
 
         row_ptr += 3

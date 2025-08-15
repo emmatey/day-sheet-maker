@@ -173,7 +173,6 @@ def populate_workbook(wb, dept, column_day_map, is_wall: bool = False):
             if i != 0:
                 role_enabled_notes_override_token = False
 
-
         if "to go" in dept.dept_name.lower() and config_handler_object.settings_enable_esh == True and config_handler_object.settings_daily_notes == False:
             time_blocks = config_handler_object.settings_time_blocks.get("Hannaford to Go ESH", [])
 
@@ -208,8 +207,8 @@ def populate_workbook(wb, dept, column_day_map, is_wall: bool = False):
 
         # Column widths
         column_widths = {
-            'A': 30.0, 'B': 12.0, 'C': 12.0, 'D': 8, 'E': 8,
-            'F': 8, 'G': 8, 'H': 5.0, 'I': 1.5, 'J': 1.5,
+            'A': 37.0, 'B': 10.0, 'C': 10.0, 'D': 8, 'E': 8,
+            'F': 8, 'G': 7, 'H': 5.0, 'I': 1.5, 'J': 1.5,
         }
         for col, width in column_widths.items():
             ws.column_dimensions[col].width = width
