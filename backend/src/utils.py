@@ -288,20 +288,6 @@ def parse_shift_cell(shift_cell, index):
         second_shift_duration = (second_shift_end - second_shift_start)
         second_shift_duration_in_seconds = second_shift_duration.total_seconds()
 
-#        if first_shift_duration_in_seconds >= (6 * 60 * 60):
-#            # Subtract Half Hour for Lunch if Shift Duration is Greater Than
-#            first_shift_duration_in_seconds = (
-#                first_shift_duration_in_seconds - (0.5 * 60 * 60)
-#            )
-#            first_shift_duration_in_seconds = int(first_shift_duration_in_seconds)
-#
-#        if second_shift_duration_in_seconds >= (6 * 60 * 60):
-#            # Subtract Half Hour for Lunch if Shift Duration is Greater Than
-#            second_shift_duration_in_seconds = (
-#                second_shift_duration_in_seconds - (0.5 * 60 * 60)
-#            )
-#            second_shift_duration_in_seconds = int(second_shift_duration_in_seconds)
-
         if total_paid_hours_across_both_shifts_in_seconds != (
             first_shift_duration_in_seconds + second_shift_duration_in_seconds
         ):
@@ -404,12 +390,29 @@ def disambiguate_duplicate_names(store, debug=False):
     return updated
 
 
+def dept_scope_time_blocks(dept_name, employee_group, config_object, day_index):
+  time_blocks_master = config_object.settings_time_blocks
+  time_blocks = time_blocks_master[dept_name]
+  
+  totals = defaultdict(float)
+
+  for employee_list, _bool in employee_group.values():
+    for employee in employee_list:
+      for shift in employee.shifts:
+        if shift.day_index == day_index:
+          overlaps = calculate_block_overlaps(shift.start_time, shift.end_time, time_blocks)
+          for name, hours in overlaps.items():
+            totals[name] += hours
+
+  return(totals)
+
+
 # Rendering Funcitons
 def insert_title_cell(ws, day, column_day_map, dept_name=None):
     _, dates = column_day_map
     days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
     cell = ws.cell(row=1, column=1)
-    cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
+    cell.alignment = Alignment(horizontal="center", vertical="center")
 
     try:
         from openpyxl.cell.rich_text import TextBlock, CellRichText
@@ -513,7 +516,7 @@ def insert_role_header(ws, row_number, role_name):
             target_cell.border = copy(template_cell.border)
 
 
-def insert_labor_tracker(ws, employee_group, title, start_row, start_col = 10):
+def insert_labor_tracker(ws, calculate_overlaps_output, title, start_row, start_col = 10):
     """
     Inserts a small labor tracker table into the worksheet.
     """
@@ -541,7 +544,7 @@ def insert_labor_tracker(ws, employee_group, title, start_row, start_col = 10):
         cell = ws.cell(row = start_row, column = col)
         cell.border = thick_border
         cell.font = Font(bold = True, size = 12, name='Calibri')
-        cell.alignment = Alignment(horizontal="center", vertical = "center")
+        cell.alignment = Alignment(horizontal="center", vertical = "center", wrap_text = True) 
 
     title_cell = ws.cell(row = start_row, column = start_col)
     title_cell.value = title
@@ -549,7 +552,7 @@ def insert_labor_tracker(ws, employee_group, title, start_row, start_col = 10):
     # 2. Data rows
     current_row = start_row + 1
 
-    for block_name, hours in employee_group.items():
+    for block_name, hours in calculate_overlaps_output.items():
         ws.merge_cells(
             start_row = current_row,
             start_column = start_col,
@@ -568,7 +571,7 @@ def insert_labor_tracker(ws, employee_group, title, start_row, start_col = 10):
         block_cell.value = block_name
 
         # Format the hours cell
-        hours_cell = ws.cell(row=current_row, column=start_col+4)
+        hours_cell = ws.cell(row = current_row, column = start_col+4)
         hours_cell.value = round(hours, 2)
         hours_cell.border = thin_border
         hours_cell.font = Font(bold = True, size = 12, name = 'Calibri')
@@ -583,32 +586,21 @@ def insert_labor_trackers(ws, employee_group_dict, time_blocks, day_index, start
 
 
     Args:
-
         ws (Worksheet): The Excel worksheet.
-
         employee_group_dict (dict): display_role -> (list of Employee objects, tracker_enabled).
-
         time_blocks (list): The list of time blocks to calculate coverage.
-
         day_index (int): Which day to calculate (0=Sunday, 6=Saturday).
-
         start_row (int): The row to start inserting trackers.
-
         start_col (int): The column to insert trackers (default 10).
-
 
     Returns:
 
 
         int: The next empty row after all trackers.
-
-
     """
-
     role_display_names = list(employee_group_dict.keys())
     grouped_employees_by_role = list(employee_group_dict.values())
     current_row = start_row
-
 
     for i, role_name in enumerate(role_display_names):
 
@@ -629,12 +621,11 @@ def insert_labor_trackers(ws, employee_group_dict, time_blocks, day_index, start
             insert_labor_tracker(
                 ws,
                 block_hours_total,
-                f"Labor Coverage: {role_name}",
+                f"{role_name} - Scheduled Hours",
                 start_row = current_row,
                 start_col = start_col
             )
             current_row += 5  # move down after each tracker
-
 
     return current_row
 

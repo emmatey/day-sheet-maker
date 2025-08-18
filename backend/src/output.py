@@ -193,6 +193,11 @@ def populate_workbook(wb, dept, column_day_map, store_number, is_wall = False, c
         elif role_enabled_notes_override_token == True or config_handler_object.settings_daily_notes == True:
             u.insert_daily_notes(ws)
 
+        elif config_handler_object.settings_combined_labor_tracker == True:
+            dept_scope_time_block_overlaps = u.dept_scope_time_blocks(dept.dept_name, employee_group, config_handler_object, day)
+            title = f'Scheduled Hours'
+            u.insert_labor_tracker(ws, dept_scope_time_block_overlaps, title, start_row = 4)
+
         else:
             u.insert_labor_trackers(ws, employee_group, time_blocks, day)
 
