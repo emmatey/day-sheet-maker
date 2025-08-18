@@ -412,7 +412,7 @@ def insert_title_cell(ws, day, column_day_map, dept_name=None):
     _, dates = column_day_map
     days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"]
     cell = ws.cell(row=1, column=1)
-    cell.alignment = Alignment(horizontal="center", vertical="center")
+    cell.alignment = Alignment(horizontal="center", vertical="center", wrap_text=True)
 
     try:
         from openpyxl.cell.rich_text import TextBlock, CellRichText
