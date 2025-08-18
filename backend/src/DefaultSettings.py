@@ -146,6 +146,7 @@ default_settings = {
     "OUTPUT_SETTINGS": {
     "copy_input_to_archive": True,
     "enable_esh": True,
-    "daily_notes_override": False
+    "daily_notes_override": False,
+    "combined_labor_tracker": False
     }
 }

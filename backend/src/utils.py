@@ -288,19 +288,19 @@ def parse_shift_cell(shift_cell, index):
         second_shift_duration = (second_shift_end - second_shift_start)
         second_shift_duration_in_seconds = second_shift_duration.total_seconds()
 
-        if first_shift_duration_in_seconds >= (6 * 60 * 60):
-            # Subtract Half Hour for Lunch if Shift Duration is Greater Than or Equal to Six Hours
-            first_shift_duration_in_seconds = (
-                first_shift_duration_in_seconds - (0.5 * 60 * 60)
-            )
-            first_shift_duration_in_seconds = int(first_shift_duration_in_seconds)
-
-        if second_shift_duration_in_seconds >= (6 * 60 * 60):
-            # Subtract Half Hour for Lunch if Shift Duration is Greater Than or Equal to Six Hours
-            second_shift_duration_in_seconds = (
-                second_shift_duration_in_seconds - (0.5 * 60 * 60)
-            )
-            second_shift_duration_in_seconds = int(second_shift_duration_in_seconds)
+#        if first_shift_duration_in_seconds >= (6 * 60 * 60):
+#            # Subtract Half Hour for Lunch if Shift Duration is Greater Than
+#            first_shift_duration_in_seconds = (
+#                first_shift_duration_in_seconds - (0.5 * 60 * 60)
+#            )
+#            first_shift_duration_in_seconds = int(first_shift_duration_in_seconds)
+#
+#        if second_shift_duration_in_seconds >= (6 * 60 * 60):
+#            # Subtract Half Hour for Lunch if Shift Duration is Greater Than
+#            second_shift_duration_in_seconds = (
+#                second_shift_duration_in_seconds - (0.5 * 60 * 60)
+#            )
+#            second_shift_duration_in_seconds = int(second_shift_duration_in_seconds)
 
         if total_paid_hours_across_both_shifts_in_seconds != (
             first_shift_duration_in_seconds + second_shift_duration_in_seconds
@@ -316,12 +316,8 @@ def parse_shift_cell(shift_cell, index):
                     - first_shift_duration_in_seconds
                 )
 
-        final_paid_time_first_shift = round(
-            (first_shift_duration_in_seconds / 60 / 60)
-        )
-        final_paid_time_second_shift = round(
-            (second_shift_duration_in_seconds / 60 / 60)
-        )
+        final_paid_time_first_shift = first_shift_duration_in_seconds / 60 / 60
+        final_paid_time_second_shift = second_shift_duration_in_seconds / 60 / 60
 
         return [
             m.Shift(
@@ -517,7 +513,7 @@ def insert_role_header(ws, row_number, role_name):
             target_cell.border = copy(template_cell.border)
 
 
-def insert_labor_tracker(ws, labor_data, title, start_row, start_col = 10):
+def insert_labor_tracker(ws, employee_group, title, start_row, start_col = 10):
     """
     Inserts a small labor tracker table into the worksheet.
     """
@@ -539,7 +535,7 @@ def insert_labor_tracker(ws, labor_data, title, start_row, start_col = 10):
     )
 
     # 1. Title row
-    ws.merge_cells(start_row = start_row, start_column=start_col, end_row = start_row, end_column = start_col + 4)
+    ws.merge_cells(start_row = start_row, start_column = start_col, end_row = start_row, end_column = start_col + 4)
 
     for col in range(start_col, start_col + 5):
         cell = ws.cell(row = start_row, column = col)
@@ -553,68 +549,52 @@ def insert_labor_tracker(ws, labor_data, title, start_row, start_col = 10):
     # 2. Data rows
     current_row = start_row + 1
 
-    for block_name, hours in labor_data.items():
+    for block_name, hours in employee_group.items():
         ws.merge_cells(
-            start_row=current_row,
-            start_column=start_col,
-            end_row=current_row,
-            end_column=start_col+3
+            start_row = current_row,
+            start_column = start_col,
+            end_row = current_row,
+            end_column = start_col + 3
         )
 
         # Format merged block name cells
-        for col in range(start_col, start_col+4):
-            block_cell = ws.cell(row=current_row, column=col)
+        for col in range(start_col, start_col + 4):
+            block_cell = ws.cell(row = current_row, column = col)
             block_cell.border = thin_border
-            block_cell.font = Font(bold=False, size=12, name='Calibri')
-            block_cell.alignment = Alignment(horizontal="left", vertical="center")
+            block_cell.font = Font(bold = False, size = 12, name = 'Calibri')
+            block_cell.alignment = Alignment(horizontal = "left", vertical = "center")
 
-        block_cell = ws.cell(row=current_row, column=start_col)
+        block_cell = ws.cell(row = current_row, column = start_col)
         block_cell.value = block_name
 
         # Format the hours cell
         hours_cell = ws.cell(row=current_row, column=start_col+4)
         hours_cell.value = round(hours, 2)
         hours_cell.border = thin_border
-        hours_cell.font = Font(bold=True, size=12, name='Calibri')
-        hours_cell.alignment = Alignment(horizontal="center", vertical="center")
+        hours_cell.font = Font(bold = True, size = 12, name = 'Calibri')
+        hours_cell.alignment = Alignment(horizontal = "center", vertical = "center")
 
         current_row += 1
 
 
 def insert_labor_trackers(ws, employee_group_dict, time_blocks, day_index, start_row = 4, start_col = 10):
-
-
     """
-
-
     Inserts a labor tracker for each role in the employee group dict.
-
-
-
 
 
     Args:
 
-
         ws (Worksheet): The Excel worksheet.
-
 
         employee_group_dict (dict): display_role -> (list of Employee objects, tracker_enabled).
 
-
         time_blocks (list): The list of time blocks to calculate coverage.
-
 
         day_index (int): Which day to calculate (0=Sunday, 6=Saturday).
 
-
         start_row (int): The row to start inserting trackers.
 
-
         start_col (int): The column to insert trackers (default 10).
-
-
-
 
 
     Returns:
@@ -625,95 +605,35 @@ def insert_labor_trackers(ws, employee_group_dict, time_blocks, day_index, start
 
     """
 
-
     role_display_names = list(employee_group_dict.keys())
-
-
     grouped_employees_by_role = list(employee_group_dict.values())
-
-
     current_row = start_row
-
-
-
 
 
     for i, role_name in enumerate(role_display_names):
 
-
         employees_with_shifts_today, tracker_enabled = grouped_employees_by_role[i]
 
-
-
-
-
         if tracker_enabled == 0:
-
-
             continue #return to start of loop without rendering labor tracker.
 
-
-
-
-
         if tracker_enabled == 1 and len(employees_with_shifts_today) > 1:
-
-
             block_hours_total = defaultdict(int)
-
-
-
-
-
             for emp in employees_with_shifts_today:
-
-
                 for shift in emp.shifts:
-
-
                     if shift.day_index == day_index:
-
-
                         overlaps = calculate_block_overlaps(shift.start_time, shift.end_time, time_blocks)
-
-
                         for block, hours in overlaps.items():
-
-
                             block_hours_total[block] += hours
 
-
-
-
-
             insert_labor_tracker(
-
-
                 ws,
-
-
                 block_hours_total,
-
-
                 f"Labor Coverage: {role_name}",
-
-
                 start_row = current_row,
-
-
                 start_col = start_col
-
-
             )
-
-
-
-
-
             current_row += 5  # move down after each tracker
-
-
-
 
 
     return current_row
@@ -850,8 +770,8 @@ def insert_headers_and_employees(ws, employee_group_dict, day_index, start_row =
 def insert_effective_shopper_table(
     ws,
     employee_group,
-    expeditor_requirements,
     time_blocks,
+    expeditor_requirements,
     day_index,
     start_row = 4,
     start_col = 11
@@ -956,9 +876,7 @@ def insert_effective_shopper_table(
     # 3) Build totals & ESH
     # --------------------------
     total_overlap_by_key = build_hourly_headcount(employee_group, time_blocks, day_index)
-    req_per_hour, esh_per_hour = compute_effective_shoppers(
-        total_overlap_by_key, time_blocks, expeditor_requirements
-    )
+    req_per_hour, esh_per_hour = compute_effective_shoppers(total_overlap_by_key, time_blocks, expeditor_requirements)
 
     # --------------------------
     # 4) Render rows

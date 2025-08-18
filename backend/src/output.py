@@ -57,7 +57,7 @@ def FindValidDepts(hrd):
     return valid_depts
 
 
-def CreateWorkbook(wall_mode_list, output_depts, column_day_map, outPath):
+def CreateWorkbook(wall_mode_list, output_depts, column_day_map, outPath, store_number, config_handler_object):
     """
     Creates and saves Excel workbooks for each department in specified wall/table format(s).
 
@@ -76,7 +76,9 @@ def CreateWorkbook(wall_mode_list, output_depts, column_day_map, outPath):
                 wb,
                 dept,
                 column_day_map,
-                is_wall = wall_mode
+                is_wall = wall_mode,
+                store_number = store_number,
+                config_handler_object = config_handler_object
             )
 
             save_name = dept.dept_name.replace(" ", "_")
@@ -128,12 +130,14 @@ def ProcessOutput(save_location_path, WEEK_ENDING_DATE, STORE_NUMBER, settings_o
             [dept_obj],
             column_day_map,
             outPath,
+            hrd.store_number,
+            settings_object
         )
 
     return outPath
 
 
-def populate_workbook(wb, dept, column_day_map, is_wall: bool = False):
+def populate_workbook(wb, dept, column_day_map, store_number, is_wall = False, config_handler_object = None):
     """
     Populates a workbook with scheduling data for a department.
 
@@ -146,6 +150,11 @@ def populate_workbook(wb, dept, column_day_map, is_wall: bool = False):
     Returns:
         bool: The is_wall flag, unchanged
     """
+    if config_handler_object is None:
+        config_handler_object = c.ConfigHandler() 
+
+    time_blocks_master = config_handler_object.settings_time_blocks
+    time_blocks = time_blocks_master.get(dept.dept_name, [])
 
     def print_region_width_adjust(col_num_int):
             last_row = ws.max_row
@@ -156,11 +165,10 @@ def populate_workbook(wb, dept, column_day_map, is_wall: bool = False):
         ws = wb[sheetname]
 
         employee_group = u.employee_group(dept, day, config_handler_object.settings_role_map)
-        time_blocks = config_handler_object.settings_time_blocks.get(dept.dept_name, [])
 
         u.insert_title_cell(ws, day, column_day_map, dept.dept_name)
         u.insert_headers_and_employees(ws, employee_group, day)
-        u.insert_footer(ws, hrd.store_number)
+        u.insert_footer(ws, store_number)
 
         # If at least one 'labor tracker table' is enabled, don't draw the 'daily notes'
         # Employee group = ({dict}, bool)
@@ -174,9 +182,7 @@ def populate_workbook(wb, dept, column_day_map, is_wall: bool = False):
                 role_enabled_notes_override_token = False
 
         if "to go" in dept.dept_name.lower() and config_handler_object.settings_enable_esh == True and config_handler_object.settings_daily_notes == False:
-            time_blocks = config_handler_object.settings_time_blocks.get("Hannaford to Go ESH", [])
-
-            u.insert_effective_shopper_table(ws, employee_group, config_handler_object.settings_esh, time_blocks, day)
+            u.insert_effective_shopper_table(ws, employee_group, time_blocks, config_handler_object.settings_esh, day)
 
             ws.column_dimensions['K'].width = 20
             ws.column_dimensions['L'].width = 10

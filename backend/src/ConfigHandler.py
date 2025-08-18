@@ -28,6 +28,7 @@ class ConfigHandler:
         self.settings_copy_input_to_archive = True
         self.settings_daily_notes = False
         self.settings_enable_esh = True
+        self.settings_combined_labor_tracker = False
         self.settings_save_loc = "DEFAULT_PLACEHOLDER"
         self.settings_blacklists = self.settings.get("Blacklists", {})
         self.settings_new_dept_or_role_blacklist = {
@@ -167,6 +168,7 @@ class ConfigHandler:
         self.settings_copy_input_to_archive = settings_toggles_dict.get("copy_input_to_archive", True)
         self.settings_enable_esh = settings_toggles_dict.get("enable_esh", True)
         self.settings_daily_notes = settings_toggles_dict.get("daily_notes_override", False)
+        self.settings_combined_labor_tracker = settings_toggles_dict.get("combined_labor_tracker", False)
 
         # Save Location
         try:
