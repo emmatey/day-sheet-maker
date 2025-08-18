@@ -777,7 +777,7 @@ def insert_effective_shopper_table(
     start_col = 11
 ):
     """
-    Render the ESH table without conditional formatting.
+    Render the ESH table.
     """
     from collections import defaultdict
     from openpyxl.styles import Alignment, Font, Border, Side

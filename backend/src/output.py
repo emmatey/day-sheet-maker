@@ -155,6 +155,7 @@ def populate_workbook(wb, dept, column_day_map, store_number, is_wall = False, c
 
     time_blocks_master = config_handler_object.settings_time_blocks
     time_blocks = time_blocks_master.get(dept.dept_name, [])
+    esh_time_blocks = time_blocks_master.get("Hannaford to Go ESH", {})
 
     def print_region_width_adjust(col_num_int):
             last_row = ws.max_row
@@ -182,7 +183,7 @@ def populate_workbook(wb, dept, column_day_map, store_number, is_wall = False, c
                 role_enabled_notes_override_token = False
 
         if "to go" in dept.dept_name.lower() and config_handler_object.settings_enable_esh == True and config_handler_object.settings_daily_notes == False:
-            u.insert_effective_shopper_table(ws, employee_group, time_blocks, config_handler_object.settings_esh, day)
+            u.insert_effective_shopper_table(ws, employee_group, esh_time_blocks, config_handler_object.settings_esh, day)
 
             ws.column_dimensions['K'].width = 20
             ws.column_dimensions['L'].width = 10
