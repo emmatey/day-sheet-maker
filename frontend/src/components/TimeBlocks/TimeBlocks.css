@@ -144,16 +144,3 @@
   opacity: 1;
   margin: 10px 10px 10px;
 }
-
-/* footer */
-.tb-footer {
-  margin: 16px 16px 14px;
-  display: flex;
-  justify-content: flex-end;
-
-}.tb-footer-text {
-  white-space: pre-line;
-  text-align: left;
-  margin-right: auto;
-  padding-left: 4px;
-}

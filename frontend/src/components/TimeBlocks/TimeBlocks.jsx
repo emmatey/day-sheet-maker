@@ -1,6 +1,7 @@
 // src/components/TimeBlocks/TimeBlocks.jsx
 import React from "react";
 import "./TimeBlocks.css";
+import "./../EshAssumptions/EshAssumptions.css"
 
 import TitleCardHeader from "../DepartmentSelect/TitleCardHeader/TitleCardHeader.jsx";
 import AccentStripe from "../HomeScreen/AccentStripe/AccentStripe.jsx";
@@ -147,20 +148,11 @@ export default function TimeBlocks({ onClose }) {
         <AddTimeBlockPanel onAdd={addRow} />
       </div>
 
-      <div className="tb-footer">
-        <div className="tb-footer-text">
-          Click away from the window to close without saving,<br />
-          “Save &amp; Close” updates settings.
-        </div>
-        <StandardButton
-          label="Save & Close"
-          onMouseDown={() => {
-            if (document.activeElement) document.activeElement.blur();
-          }}
-          onClick={save}
-        />
+      <div className="settings-footer">
+        <StandardButton label="Cancel" onClick={onClose} />
+        <div className="settings-spacer" />
+        <StandardButton label="Save & Close" onClick={save} />
       </div>
-      
       {showToast && <div className="esh-toast">Saved ✓</div>}
     </div>
   );

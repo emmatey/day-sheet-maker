@@ -71,7 +71,7 @@
 }
 
 /* sticky footer with buttons split: Cancel left, Save right */
-.esh-footer{
+.settings-footer{
   position: sticky;
   bottom: 0;
   z-index: 5;
@@ -84,7 +84,7 @@
 }
 
 /* flexible spacer to push the Save button to the right */
-.esh-spacer{
+.settings-spacer{
   flex: 1 1 auto;
 }
 

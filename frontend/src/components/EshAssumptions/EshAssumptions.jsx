@@ -104,9 +104,9 @@ export default function ESHAssumptions({ onClose }) {
         ))}
       </div>
 
-      <div className="esh-footer">
+      <div className="settings-footer">
         <StandardButton label="Cancel" onClick={onClose} />
-        <div className="esh-spacer" />
+        <div className="settings-spacer" />
         <StandardButton label="Save & Close" onClick={save} />
       </div>
 

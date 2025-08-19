@@ -1,6 +1,7 @@
 // src/components/RoleMap/RoleMap.jsx
 import React from "react";
 import "./RoleMap.css";
+import "./../EshAssumptions/EshAssumptions.css"
 
 import TitleCardHeader from "../DepartmentSelect/TitleCardHeader/TitleCardHeader.jsx";
 import AccentStripe from "../HomeScreen/AccentStripe/AccentStripe.jsx";
@@ -151,14 +152,10 @@ export default function RoleMap({ onClose }) {
 
       <AddRoleRow onAdd={addRow} />
 
-      <div className="rm-footer">
-        <div className="rm-note">
-          Order determines how roles appear in output. “Enabled” toggles the labor tracker.
-        </div>
-        <div className="rm-actions">
-          {saved && <div className="rm-saved">Saved</div>}
-          <StandardButton label="Save & Close" onClick={save} />
-        </div>
+      <div className="settings-footer">
+              <StandardButton label="Cancel" onClick={onClose} />
+              <div className="settings-spacer" />
+              <StandardButton label="Save & Close" onClick={save} />
       </div>
     </div>
   );
