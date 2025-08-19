@@ -81,7 +81,6 @@ def employee_group(dept, day_index, config_object_role_map):
                            and values are lists of employee names under that role.
     """
 
-    # Start with a defaultdict so every role key auto-creates a list
     employee_group = {}
 
     # Get the role mapping for this department (which defines header order)
@@ -143,7 +142,7 @@ def detect_new_roles_and_departments(store_object, config_object):
     """
     role_map = config_object.settings_role_map
     extant_roles_set = set()
-    departments_aleady_in_settings = set(role_map.keys())
+    departments_already_in_settings = set(role_map.keys())
     blacklist_dept = config_object.settings_new_dept_or_role_blacklist.get("departments", [])
     blacklist_role = config_object.settings_new_dept_or_role_blacklist.get("roles", [])
 
@@ -157,7 +156,7 @@ def detect_new_roles_and_departments(store_object, config_object):
 
     for dept in store_object.department_list:
         if dept.dept_name not in blacklist_dept:
-            if dept.dept_name not in departments_aleady_in_settings:
+            if dept.dept_name not in departments_already_in_settings:
                 unseen_departments.append(dept.dept_name)
 
             for emp in dept.employees:

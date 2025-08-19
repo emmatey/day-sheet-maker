@@ -22,7 +22,11 @@ class NameFormatter:
 
         # Clean redundant last name
         if self.raw_last.lower() in self.raw_first_middle.lower():
-            self.raw_first_middle = self.raw_first_middle.replace(self.raw_last, "").strip()
+                self.raw_first_middle = re.sub(
+                re.escape(self.raw_last),
+                "",
+                self.raw_first_middle,
+                flags=re.IGNORECASE,).strip()
 
         # Capitalize
         self.raw_last = re.sub(r"\s*-\s*", "-", self.raw_last) # Clean up spaces around hyphens in last name
