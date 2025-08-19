@@ -151,7 +151,7 @@ def populate_workbook(wb, dept, column_day_map, store_number, is_wall = False, c
         bool: The is_wall flag, unchanged
     """
     if config_handler_object is None:
-        config_handler_object = c.ConfigHandler() 
+        config_handler_object = c.ConfigHandler()
 
     time_blocks_master = config_handler_object.settings_time_blocks
     time_blocks = time_blocks_master.get(dept.dept_name, [])
@@ -195,7 +195,7 @@ def populate_workbook(wb, dept, column_day_map, store_number, is_wall = False, c
 
         elif config_handler_object.settings_combined_labor_tracker == True:
             dept_scope_time_block_overlaps = u.dept_scope_time_blocks(dept.dept_name, employee_group, config_handler_object, day)
-            title = f'Scheduled Hours'
+            title = "Scheduled Hours"
             u.insert_labor_tracker(ws, dept_scope_time_block_overlaps, title, start_row = 4)
 
         else:
@@ -254,7 +254,7 @@ if __name__ == "__main__":
         Usage:
             python output.py <input_file> <save_directory> --output <DEPT>:<MODE> [<DEPT>:<MODE> ...]
             python output.py <input_file> --preview
-            python output.py --update_config "<path,comma-separated>^<json>^<update|delete>" 
+            python output.py --update_config "<path,comma-separated>^<json>^<update|delete>"
             python output.py --update_config RESET_TO_DEFAULT
 
         Optional Arguments:
@@ -267,7 +267,7 @@ if __name__ == "__main__":
                                   python output.py schedule.csv ./out --output Bakery:2 Deli:0 Produce:1
             --update_config     Apply a single config change (no input file required). See usage above.
         """
-    
+
     config_handler_object = c.ConfigHandler()
 
     parser = argparse.ArgumentParser(
@@ -286,7 +286,7 @@ if __name__ == "__main__":
     )
     parser.add_argument(
         "--update_config",
-        type=str,
+        type = str,
         help=(
             "Apply a single config change from React. Format:\n"
             "  key1,key2,...^<json_value>^<update|delete>\n"
@@ -327,7 +327,7 @@ if __name__ == "__main__":
         config_handler_object.add_time_blocks_for_new_depts(new_depts)
         hrd = builder.build_store(csv_path, config_handler_object.settings_time_blocks, config_handler_object.settings_role_map)
 
-    if args.preview:
+    elif args.preview:
         preview_depts = FindValidDepts(hrd)
         for dept in preview_depts:
             print(dept)
@@ -360,7 +360,7 @@ if __name__ == "__main__":
             hrd
         )
         print(f"\nLog: Done! Files saved in:\n{output_path}")
-    
+
     if "_converted.csv" in csv_path and os.path.exists(csv_path):
         try:
             os.remove(csv_path)

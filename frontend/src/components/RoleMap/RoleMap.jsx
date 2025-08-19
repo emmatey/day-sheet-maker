@@ -99,22 +99,23 @@ export default function RoleMap({ onClose }) {
   }
 
   // save
-  const [saved, setSaved] = React.useState(false);
   async function save() {
     const payload = fromRows(rows);
     const update = buildUpdateString(["ROLE_MAP", dept], payload, "update");
-    await window.electronAPI.applyConfig(update);
 
-    setShowToast(true);
-    const fresh = await window.electronAPI.readSettings();
-    setSettings(fresh);
-    setSaved(true);
-
-    setTimeout(() =>{
-      setShowToast(false);
-      setSaved(false);
-      onClose?.();
-    }, 1000); 
+    try {
+      const fresh = await window.electronAPI.readSettings();
+      await window.electronAPI.applyConfig(update);
+      setSettings(fresh);
+      
+      setShowToast(true);
+      setTimeout(() =>{
+        setShowToast(false);
+        onClose?.();
+      }, 1000); 
+    } catch (e) {
+      console.error("applyConfig (RoleMap) failed:", e);
+    }
   }
 
   if (!settings) return null;
@@ -157,6 +158,7 @@ export default function RoleMap({ onClose }) {
               <div className="settings-spacer" />
               <StandardButton label="Save & Close" onClick={save} />
       </div>
+      {showToast && <div className="esh-toast">Saved ✓</div>}
     </div>
   );
 }

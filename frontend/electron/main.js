@@ -1,165 +1,24 @@
-import { app, BrowserWindow, ipcMain, dialog } from "electron";
+// ==============================
+// Imports
+// ==============================
+import { app, BrowserWindow, ipcMain, dialog, shell } from "electron";
 import os from "os";
 import path from "path";
 import { fileURLToPath } from "url";
 import { spawn } from "child_process";
-import { shell } from "electron";
-import fs from "fs"; 
+import fs from "fs";
 
+// ==============================
+// Globals & Constants
+// ==============================
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
-let mainWindow;
+let mainWindow = null;
 
-function createWindow() {
-  mainWindow = new BrowserWindow({
-    width: 1920,
-    height: 1080,
-    webPreferences: {
-      preload: path.join(__dirname, "preload.js"),
-    },
-  });
-
-  if (process.env.VITE_DEV_SERVER_URL) {
-    mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
-  } else {
-    mainWindow.loadFile(path.join(__dirname, "../dist/index.html"));
-  }
-}
-
-app.whenReady().then(() => {
-  createWindow();
-
-  /**
-   * Open File Picker
-   */
-  ipcMain.handle("select-file", async () => {
-    const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
-      properties: ["openFile"],
-      defaultPath: path.join(os.homedir(), "Desktop"),
-      filters: [{ name: "Spreadsheets",
-        extensions: ["csv", "xlsx", "xls"]
-      },]
-    });
-    if (canceled) return null;
-    return filePaths[0];
-  });
-
-  /**
-   * Open Dir Picker
-   */
-  ipcMain.handle("select-directory", async () => {
-    const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
-      properties: ["openDirectory"],
-      defaultPath: path.join(os.homedir(), "Desktop"),
-    });
-    if (canceled) return null;
-    return filePaths[0];
-  });
-
-  /**
-   * Run Python in --preview mode
-   */
-  ipcMain.handle("run-python-preview", 
-    async (_event, inputFilePath) => {
-      const scriptPath = path.join(__dirname, "../../backend/src/output.py");
-      
-      return runPython([scriptPath, inputFilePath, "--preview"]);
-});
-
-  /**
-   * Run Python with --output
-   */
-  ipcMain.handle(
-    "run-python-output",
-    async (_event, { inputFile, saveDir, outputMap }) => {
-      const scriptPath = path.join(__dirname, "../../backend/src/output.py");
-      const outputArgs = Object.entries(outputMap).map(
-        ([dept, mode]) => `${dept}:${mode}`
-      );
-
-      return runPython([
-        scriptPath,
-        inputFile,
-        saveDir,
-        "--output",
-        ...outputArgs,
-      ]);
-    }
-  );
-
-  ipcMain.handle("open-folder", async (_event, folderPath) => {
-  await shell.openPath(folderPath);
-  });
-
-
-  ipcMain.handle("confirm-reset-config", async () => {
-  const { response } = await dialog.showMessageBox({
-    type: "warning",
-    buttons: ["Cancel", "Reset"],
-    defaultId: 0,
-    cancelId: 0,
-    title: "Reset to Defaults",
-    message: "Are you sure you want to reset all settings to default?",
-    detail: "This will overwrite your current configuration and cannot be undone.",
-  });
-
-  return response === 1;
-});
-
-ipcMain.handle("reset-config", async () => {
-  const scriptPath = path.join(__dirname, "../../backend/src/output.py");
-  console.log("handle reset config clicked")
-  /*return runPython([scriptPath, "--generate-default-config"]);*/
-});
-
-ipcMain.handle("read-settings", async () => {
-  const p = settingsPath();
-  const raw = fs.readFileSync(p, "utf-8");
-  return JSON.parse(raw);
-});
-
-ipcMain.handle("apply-config", async (_e, updateString) => {
-  const { cmd, args } = backendCmd();
-  const child = spawn(cmd, [...args, "--update_config", updateString], { windowsHide: true });
-
-  return await new Promise((resolve, reject) => {
-    let out = "", err = "";
-    child.stdout.on("data", d => out += d.toString());
-    child.stderr.on("data", d => err += d.toString());
-    child.on("close", code => {
-      if (code === 0) resolve(out.trim());
-      else reject(new Error(err || `backend exited ${code}`));
-    });
-  });
-});
-
-});
-
-/**
- * Utility: Run Python and return stdout or throw on error
- */
-function runPython(args) {
-  return new Promise((resolve, reject) => {
-    const pyCmd = process.platform === "win32" ? "python.exe" : "python";
-    const py = spawn(pyCmd, args);
-
-    let output = "";
-    let errorOutput = "";
-
-    py.stdout.on("data", (data) => (output += data.toString()));
-    py.stderr.on("data", (data) => (errorOutput += data.toString()));
-
-    py.on("close", (code) => {
-      if (code === 0) {
-        resolve(output.trim());
-      } else {
-        reject(new Error(`Python exited with code ${code}:\n${errorOutput}`));
-      }
-    });
-  });
-}
-
+// ==============================
+// Small Helpers
+// ==============================
 function isDev() {
   return !app.isPackaged;
 }
@@ -184,6 +43,160 @@ function backendCmd() {
       : path.join(process.resourcesPath, "daysheet-backend");
   return { cmd: exe, args: [] };
 }
+
+// ==============================
+//
+// Backend runner (shared)
+// ==============================
+/**
+ * Utility: Run Python and return stdout or throw on error
+ */
+function runPython(args) {
+  return new Promise((resolve, reject) => {
+    const pyCmd = process.platform === "win32" ? "python.exe" : "python";
+    const py = spawn(pyCmd, args, { windowsHide: true });
+
+    let output = "";
+    let errorOutput = "";
+
+    py.stdout.on("data", (data) => (output += data.toString()));
+    py.stderr.on("data", (data) => (errorOutput += data.toString()));
+
+    py.on("close", (code) => {
+      if (code === 0) resolve(output.trim());
+      else reject(new Error(`Python exited with code ${code}:\n${errorOutput}`));
+    });
+  });
+}
+
+// ==============================
+// Window creation
+// ==============================
+function createWindow() {
+  mainWindow = new BrowserWindow({
+    width: 1920,
+    height: 1080,
+    webPreferences: {
+      preload: path.join(__dirname, "preload.js"),
+      // If you later harden:
+      // contextIsolation: true,
+      // sandbox: true,
+      // nodeIntegration: false,
+    },
+  });
+
+  if (process.env.VITE_DEV_SERVER_URL) {
+    mainWindow.loadURL(process.env.VITE_DEV_SERVER_URL);
+  } else {
+    mainWindow.loadFile(path.join(__dirname, "../dist/index.html"));
+  }
+}
+
+// ==============================
+// IPC registration (all handlers live here)
+// ==============================
+function registerIpcHandlers() {
+  if (!mainWindow) throw new Error("Main window not ready");
+
+  // Open File Picker
+  ipcMain.handle("select-file", async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
+      properties: ["openFile"],
+      defaultPath: path.join(os.homedir(), "Desktop"),
+      filters: [{ name: "Spreadsheets", extensions: ["csv", "xlsx", "xls"] }],
+    });
+    if (canceled) return null;
+    return filePaths[0];
+  });
+
+  // Open Dir Picker
+  ipcMain.handle("select-directory", async () => {
+    const { canceled, filePaths } = await dialog.showOpenDialog(mainWindow, {
+      properties: ["openDirectory"],
+      defaultPath: path.join(os.homedir(), "Desktop"),
+    });
+    if (canceled) return null;
+    return filePaths[0];
+  });
+
+  // Run Python in --preview mode
+  ipcMain.handle("run-python-preview", async (_event, inputFilePath) => {
+    const scriptPath = path.join(__dirname, "../../backend/src/output.py");
+    return runPython([scriptPath, inputFilePath, "--preview"]);
+  });
+
+  // Run Python with --output
+  ipcMain.handle(
+    "run-python-output",
+    async (_event, { inputFile, saveDir, outputMap }) => {
+      const scriptPath = path.join(__dirname, "../../backend/src/output.py");
+      const outputArgs = Object.entries(outputMap).map(
+        ([dept, mode]) => `${dept}:${mode}`
+      );
+      return runPython([scriptPath, inputFile, saveDir, "--output", ...outputArgs]);
+    }
+  );
+
+  // Open a folder in the OS file manager
+  ipcMain.handle("open-folder", async (_event, folderPath) => {
+    await shell.openPath(folderPath);
+  });
+
+  // Confirm reset config dialog
+  ipcMain.handle("confirm-reset-config", async () => {
+    const { response } = await dialog.showMessageBox({
+      type: "warning",
+      buttons: ["Cancel", "Reset"],
+      defaultId: 0,
+      cancelId: 0,
+      title: "Reset to Defaults",
+      message: "Are you sure you want to reset all settings to default?",
+      detail: "This will overwrite your current configuration and cannot be undone.",
+    });
+    return response === 1;
+  });
+
+  // Reset config (generate default)
+  ipcMain.handle("reset-config", async () => {
+    const scriptPath = path.join(__dirname, "../../backend/src/output.py");
+    console.log("handle reset config clicked");
+    return runPython([scriptPath, "--update_config", "RESET_TO_DEFAULT"]);
+  });
+
+  // Read settings.json
+  ipcMain.handle("read-settings", async () => {
+    const p = settingsPath();
+    const raw = fs.readFileSync(p, "utf-8");
+    return JSON.parse(raw);
+  });
+
+  // Apply config update (delegates to backend --update_config)
+  ipcMain.handle("apply-config", async (_e, updateString) => {
+    const { cmd, args } = backendCmd();
+    const child = spawn(cmd, [...args, "--update_config", updateString], {
+      windowsHide: true,
+    });
+
+    return await new Promise((resolve, reject) => {
+      let out = "";
+      let err = "";
+      child.stdout.on("data", (d) => (out += d.toString()));
+      child.stderr.on("data", (d) => (err += d.toString()));
+      child.on("close", (code) => {
+        if (code === 0) resolve(out.trim());
+        else reject(new Error(err || `backend exited ${code}`));
+      });
+    });
+  });
+}
+
+// ==============================
+// App lifecycle
+// ==============================
+app.whenReady().then(() => {
+  createWindow();
+  registerIpcHandlers();
+});
 
 app.on("window-all-closed", () => {
   if (process.platform !== "darwin") app.quit();

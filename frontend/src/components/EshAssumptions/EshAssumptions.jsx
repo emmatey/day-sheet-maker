@@ -61,6 +61,7 @@ export default function ESHAssumptions({ onClose }) {
     setValues((v) => ({ ...v, [idx]: cleaned }));
   }
 
+  // save
   async function save() {
     const clean = {};
     for (const { idx } of RANGES) clean[idx] = Number(values[idx] || 0);
@@ -69,7 +70,6 @@ export default function ESHAssumptions({ onClose }) {
       const update = buildUpdateString(["EXPEDITOR_REQUIREMENTS"], clean, "update");
       await window.electronAPI.applyConfig(update);
 
-      // brief success feedback, then close
       setShowToast(true);
       setTimeout(() => {
         setShowToast(false);
@@ -109,7 +109,6 @@ export default function ESHAssumptions({ onClose }) {
         <div className="settings-spacer" />
         <StandardButton label="Save & Close" onClick={save} />
       </div>
-
       {showToast && <div className="esh-toast">Saved ✓</div>}
     </div>
   );
