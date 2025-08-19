@@ -63,7 +63,7 @@ export default function ContentPane() {
 
       {/* Department Select Modal */}
       {showDeptSelect && (
-        <Modal onClose={() => setShowDeptSelect(false)}>
+        <Modal onClose={() => setShowDeptSelect(false)} allowClickAway = {true}>
           <DepartmentSelect
             deptList = {departments}
             inputFile = {filePath}
@@ -74,7 +74,7 @@ export default function ContentPane() {
 
       {/* Settings Modal */}
       {showSettingsLaunchpad && (
-        <Modal onClose={() => setShowSettingsLaunchpad(false)}>
+        <Modal onClose={() => setShowSettingsLaunchpad(false)} allowClickAway = {true}>
           <SettingsLaunchpad onClose={() => setShowSettingsLaunchpad(false)} />
         </Modal>
       )}

@@ -100,26 +100,26 @@ export default function SettingsLaunchpad({ onClose }) {
       />
 
       {activeModal === "timeblocks" && (
-        <Modal onClose={() => setActiveModal(null)}>
-          <TimeBlocks onClose={() => setActiveModal(null)} />
+        <Modal onClose={() => setActiveModal(null)} allowClickAway = {false}>
+          <TimeBlocks onClose={() => setActiveModal(null)}/>
         </Modal>
       )}
       
       {activeModal === "esh" && (
-        <Modal onClose={() => setActiveModal(null)}>
-          <ESHAssumptions onClose={() => setActiveModal(null)} />
+        <Modal onClose={() => setActiveModal(null)} allowClickAway = {false}>
+          <ESHAssumptions onClose={() => setActiveModal(null)}/>
         </Modal>
       )}
 
       {activeModal === "rolemap" && (
-        <Modal onClose={() => setActiveModal(null)}>
-          <RoleMap onClose={() => setActiveModal(null)} />
+        <Modal onClose={() => setActiveModal(null)} allowClickAway = {false}>
+          <RoleMap onClose={() => setActiveModal(null)}/>
         </Modal>
       )}
 
       {activeModal === "saveloc" && (
-        <Modal onClose={() => setActiveModal(null)}>
-          <SaveLocation onClose={() => setActiveModal(null)} />
+        <Modal onClose={() => setActiveModal(null)} allowClickAway = {true}>
+          <SaveLocation onClose={() => setActiveModal(null)}/>
         </Modal>
       )}
     </div>
