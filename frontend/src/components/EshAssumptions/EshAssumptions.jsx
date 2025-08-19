@@ -84,11 +84,9 @@ export default function ESHAssumptions({ onClose }) {
 
   return (
     <div className="esh-card">
-      {/* sticky header container */}
-      <div className="esh-sticky">
-        <TitleCardHeader title="ESH Assumptions" />
-        <AccentStripe />
-      </div>
+      <TitleCardHeader title = "ESH Assumptions" />
+
+      <AccentStripe />
 
       {/* scrollable body */}
       <div className="esh-list">
@@ -107,10 +105,8 @@ export default function ESHAssumptions({ onClose }) {
       </div>
 
       <div className="esh-footer">
-        <div className="esh-note">
-          Values are the hourly non-shopping assumptions<br />
-          used to estimate shopper coverage.
-        </div>
+        <StandardButton label="Cancel" onClick={onClose} />
+        <div className="esh-spacer" />
         <StandardButton label="Save & Close" onClick={save} />
       </div>
 

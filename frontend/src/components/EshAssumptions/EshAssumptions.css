@@ -11,17 +11,34 @@
   color:var(--text);
   display:flex;
   flex-direction:column;
-  /* allow header to be sticky relative to this container */
-  max-height: 80vh;
+  max-height: 80vh;     /* scroll context for sticky footer */
   overflow: auto;
 }
 
-/* sticky header wrapper */
+.esh-card .accent-stripe{
+  display: block;
+  min-height: 6px;
+  background: var(--red);
+  margin: 0;
+  border-radius: 0px;
+
+  position: relative;   /* <-- creates a positioned element */
+  z-index: 1;           /* <-- paints above the header box */
+}
+
+/* make the header a lower layer so it can't cover the stripe */
+.esh-card .header-frame-alt{
+  margin: 0;
+  position: relative;   /* ensure z-index applies */
+  z-index: 0;
+}
+
+/* (optional/now-unused) sticky header */
 .esh-sticky{
   position: sticky;
   top: 0;
   z-index: 5;
-  background: var(--peach); /* cover content while sticking */
+  background: var(--peach);
 }
 .esh-sticky .header-frame-alt{ margin:0; }
 .esh-sticky .accent-stripe{ margin:0; }
@@ -53,21 +70,32 @@
   color: black;
 }
 
-/* footer */
+/* sticky footer with buttons split: Cancel left, Save right */
 .esh-footer{
-  display:flex; align-items:center; justify-content:space-between;
-  gap:12px; padding:12px;
+  position: sticky;
+  bottom: 0;
+  z-index: 5;
+  background: var(--peach);
+  display:flex;
+  align-items:center;
+  padding:12px;
+  gap:16px;                 /* a bit more space than before */
+  border-top: 1px solid var(--gray);
 }
-.esh-note{ opacity:.8; }
+
+/* flexible spacer to push the Save button to the right */
+.esh-spacer{
+  flex: 1 1 auto;
+}
 
 /* simple toast (inside card, bottom-right) */
 .esh-toast{
   position: sticky;
-  bottom: 12px;                  /* stays near bottom while scrolling */
-  align-self: flex-end;          /* right side */
+  bottom: 12px;
+  align-self: flex-end;
   margin: 0 12px 12px 0;
   padding: 8px 12px;
-  background: #1f2937;           /* dark gray */
+  background: #1f2937;
   color: white;
   border-radius: 10px;
   box-shadow: 0 6px 18px rgba(0,0,0,.2);
