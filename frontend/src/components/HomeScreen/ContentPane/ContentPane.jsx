@@ -12,7 +12,7 @@ export default function ContentPane() {
   const [showSettingsLaunchpad, setShowSettingsLaunchpad] = useState(false);
   const [departments, setDepartments] = useState([]);
   const [filePath, setFilePath] = useState("");
-  //const setshowinfo? 
+  const [showStartInfo, setShowStartInfo] = useState(false);
 
   const handleSelectFile = async () => {
     try {
@@ -41,10 +41,9 @@ export default function ContentPane() {
   };
   
   const handleAboutClick = () => {
-    //URL = "https://github.com/emmatey/day-sheet-maker";
     const windowFeatures = "width = 1000, height = 900";
-    URL = "https://github.com/";
-    onclick(window.open(URL, "_blank", windowFeatures));
+    const URL = "https://github.com/emmatey/day-sheet-maker";
+    window.open(URL, "_blank", windowFeatures);
   };
 
   return (
@@ -53,7 +52,7 @@ export default function ContentPane() {
         <StandardPlusInfoButtonPanel
           label = "Start"
           onClickMain = {handleSelectFile}
-          onClickInfo = {() => console.log("Info clicked")}
+          onClickInfo = {() => {setShowStartInfo(true)}}
           showInfo = {true}
         />
         <StandardPlusInfoButtonPanel
@@ -87,6 +86,14 @@ export default function ContentPane() {
           <SettingsLaunchpad onClose={() => setShowSettingsLaunchpad(false)} />
         </Modal>
       )}
+  
+      {/* Info Modal - Start Button */}
+      <InfoModal
+        docUrl = "public/storeLogo.png"
+        open = {showStartInfo}
+        onClose = {() => setShowStartInfo(false)}
+      />
+    
     </>
   );
 }
