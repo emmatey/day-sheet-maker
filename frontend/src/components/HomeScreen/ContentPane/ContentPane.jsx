@@ -5,12 +5,14 @@ import SettingsLaunchpad from "../../SettingsLaunchpad/SettingsLaunchpad.jsx";
 import StandardPlusInfoButtonPanel from "./../../StandardPlusInfoButtonPanel/StandardPlusInfoButtonPanel.jsx";
 import DepartmentSelect from "./../../DepartmentSelect/DepartmentSelect.jsx";
 import Modal from "./../../Modal/Modal.jsx";
+import InfoModal from "../../InfoModal/InfoModal.jsx";
 
 export default function ContentPane() {
   const [showDeptSelect, setShowDeptSelect] = useState(false);
   const [showSettingsLaunchpad, setShowSettingsLaunchpad] = useState(false);
   const [departments, setDepartments] = useState([]);
   const [filePath, setFilePath] = useState("");
+  //const setshowinfo? 
 
   const handleSelectFile = async () => {
     try {
@@ -37,6 +39,13 @@ export default function ContentPane() {
       console.error("Error selecting file or running preview:", err);
     }
   };
+  
+  const handleAboutClick = () => {
+    //URL = "https://github.com/emmatey/day-sheet-maker";
+    const windowFeatures = "width = 1000, height = 900";
+    URL = "https://github.com/";
+    onclick(window.open(URL, "_blank", windowFeatures));
+  };
 
   return (
     <>
@@ -55,7 +64,7 @@ export default function ContentPane() {
         />
         <StandardPlusInfoButtonPanel
           label = "About"
-          onClickMain = {() => console.log("About clicked")}
+          onClickMain = {handleAboutClick}
           onClickInfo = {() => console.log("Info clicked")}
           showInfo = {false}
         />
