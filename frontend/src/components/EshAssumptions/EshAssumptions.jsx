@@ -51,15 +51,25 @@ export default function ESHAssumptions({ onClose }) {
     return () => { alive = false; };
   }, []);
 
-  // Only allow non-negative integers; allow blank while typing
-  function updateHour(idx, raw) {
-    if (raw === "") {
-      setValues((v) => ({ ...v, [idx]: "" }));
-      return;
-    }
-    const cleaned = raw.replace(/\D/g, "");
-    setValues((v) => ({ ...v, [idx]: cleaned }));
+function updateHour(idx, raw) {
+  if (raw === "") {
+    setValues((v) => ({ ...v, [idx]: "" }));
+    return;
   }
+  let cleaned = raw.replace(/[^0-9.]/g, ""); 
+
+  const parts = cleaned.split(".");
+  if (parts.length > 2) {
+    cleaned = parts[0] + "." + parts.slice(1).join(""); // collapse multiple dots
+  }
+
+  if (cleaned.includes(".")) {
+    const [intPart, decPart] = cleaned.split(".");
+    cleaned = intPart + "." + decPart.slice(0, 1);
+  }
+
+  setValues((v) => ({ ...v, [idx]: cleaned }));
+}
 
   // save
   async function save() {

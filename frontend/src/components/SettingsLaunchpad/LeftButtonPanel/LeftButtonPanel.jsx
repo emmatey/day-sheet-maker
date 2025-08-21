@@ -1,45 +1,67 @@
 // src/components/SettingsLaunchpad/LeftButtonPanel/LeftButtonPanel.jsx
 import "./LeftButtonPanel.css";
 import StandardPlusInfoButtonPanel from "../../StandardPlusInfoButtonPanel/StandardPlusInfoButtonPanel";
+import { useState } from "react";
+import InfoModal from "../../InfoModal/InfoModal";
+
+
 
 export default function LeftButtonPanel({ onSaveLocation, onRoleMap, onTimeBlocks, onEshAssumptions }) {
+  const [showInfo, setShowInfo] = useState(false);
+  const [docUrl, setDocUrl] = useState("");
+
+  function handleInfoClick(docUrl){
+    setDocUrl(docUrl);
+    setShowInfo(true);
+  };
+
   return (
+    <>
     <div className="left-button-panel">
       <StandardPlusInfoButtonPanel
-        label="Save Location"
-        onClickMain={onSaveLocation}
-        onClickInfo={() => console.log("Save Location — info clicked")}
+        label = "Save Location"
+        onClickMain = {onSaveLocation}
+        onClickInfo = {() => {handleInfoClick("/background.jpg")}}
         showInfo = {true}
-        buttonClassName="settings-launchpad-button"
-        infoClassName="settings-launchpad-info"   
+        buttonClassName = "settings-launchpad-button"
+        infoClassName = "settings-launchpad-info"   
       />
 
       <StandardPlusInfoButtonPanel
-        label="Role Map"
-        onClickMain={onRoleMap}
-        onClickInfo={() => console.log("Role Map — info clicked")}
+        label = "Role Map"
+        onClickMain = {onRoleMap}
+        onClickInfo = {() => {handleInfoClick("/background.jpg")}}
         showInfo = {true}
-        buttonClassName="settings-launchpad-button"
-        infoClassName="settings-launchpad-info" 
+        buttonClassName = "settings-launchpad-button"
+        infoClassName = "settings-launchpad-info" 
       />
 
       <StandardPlusInfoButtonPanel
-        label="Time Blocks"
-        onClickMain={onTimeBlocks}
-        onClickInfo={() => console.log("Time Blocks — info clicked")}
+        label = "Time Blocks"
+        onClickMain = {onTimeBlocks}
+        onClickInfo = {() => {handleInfoClick("/background.jpg")}}
         showInfo = {true}
-        buttonClassName="settings-launchpad-button"
-        infoClassName="settings-launchpad-info" 
+        buttonClassName = "settings-launchpad-button"
+        infoClassName = "settings-launchpad-info" 
       />
 
        <StandardPlusInfoButtonPanel
-        label="ESH Assumptions"
-        onClickMain={onEshAssumptions}
-        onClickInfo={() => console.log("ESH Assumptions — info clicked")}
+        label = "ESH Assumptions"
+        onClickMain = {onEshAssumptions}
+        onClickInfo = {() => {handleInfoClick("/background.jpg")}}
         showInfo = {true}
-        buttonClassName="settings-launchpad-button"
-        infoClassName="settings-launchpad-info" 
+        buttonClassName = "settings-launchpad-button"
+        infoClassName = "settings-launchpad-info" 
       />
     </div>
+
+    {/* Info Modal*/}
+    <InfoModal
+    docUrl = {docUrl}
+    open = {showInfo}
+    onClose = {() => {setShowInfo(false)}}
+    />
+
+    </>
   );
 }

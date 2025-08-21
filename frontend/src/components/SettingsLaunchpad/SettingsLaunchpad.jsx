@@ -26,8 +26,8 @@ export default function SettingsLaunchpad({ onClose }) {
   const [activeModal, setActiveModal] = useState(null);
   const [enableEsh, setEnableEsh] = useState(true);
   const [dailyNotesOverride, setDailyNotesOverride] = useState(false);
-  
-  // 1) Read current values on mount
+  const [combineLaborTrackers, setCombineLaborTrackers] = useState(false); // NEW
+
   useEffect(() => {
     let alive = true;
     (async () => {
@@ -36,6 +36,7 @@ export default function SettingsLaunchpad({ onClose }) {
         if (!alive) return;
         setEnableEsh(!!cfg?.OUTPUT_SETTINGS?.enable_esh);
         setDailyNotesOverride(!!cfg?.OUTPUT_SETTINGS?.daily_notes_override);
+        setCombineLaborTrackers(!!cfg?.OUTPUT_SETTINGS?.combined_labor_tracker); 
       } catch (e) {
         console.error("readSettings (SettingsLaunchpad) failed:", e);
       }
@@ -43,7 +44,6 @@ export default function SettingsLaunchpad({ onClose }) {
     return () => { alive = false; };
   }, []);
 
-  // 2) When a toggle changes, immediately persist
   const handleCheckboxChange = async (which) => {
     try {
       if (which === "esh") {
@@ -62,34 +62,44 @@ export default function SettingsLaunchpad({ onClose }) {
     }
   };
 
+  const handleLaborScopeChange = async (scope) => {
+    const combined = scope === "dept";
+    setCombineLaborTrackers(combined);
+    try {
+      const u = buildUpdateString(["OUTPUT_SETTINGS", "combined_labor_tracker"], combined, "update");
+      await window.electronAPI.applyConfig(u);
+    } catch (e) {
+      console.error("applyConfig (combined_labor_tracker) failed:", e);
+    }
+  };
+
   const handleResetConfig = async () => {
     const confirmed = await window.electronAPI.confirmResetConfig();
     if (!confirmed) return;
     await window.electronAPI.resetConfig();
     console.log("Config reset to default.");
-    // If you want, re-read settings.json here and update local state.
   };
 
-  const handleClose = () => {
-    onClose?.();
-  };
+  const handleClose = () => { onClose?.(); };
 
   return (
     <div className="settings-launchpad-container">
-      <TitleCardHeader title = "Settings" />
+      <TitleCardHeader title="Settings" />
       <AccentStripe />
 
       <div className="settings-body">
+        <RightInputPanel
+          enableEsh={enableEsh}
+          dailyNotesOverride={dailyNotesOverride}
+          combineLaborTrackers={combineLaborTrackers}          
+          onCheckboxChange={handleCheckboxChange}
+          onLaborScopeChange={handleLaborScopeChange}           
+        />
         <LeftButtonPanel
           onSaveLocation={() => setActiveModal("saveloc")}
           onRoleMap={() => setActiveModal("rolemap")}
           onTimeBlocks={() => setActiveModal("timeblocks")}
           onEshAssumptions={() => setActiveModal("esh")}
-        />
-        <RightInputPanel
-          enableEsh={enableEsh}
-          dailyNotesOverride={dailyNotesOverride}
-          onCheckboxChange={handleCheckboxChange}
         />
       </div>
 
@@ -100,26 +110,26 @@ export default function SettingsLaunchpad({ onClose }) {
       />
 
       {activeModal === "timeblocks" && (
-        <Modal onClose={() => setActiveModal(null)} allowClickAway = {false}>
-          <TimeBlocks onClose={() => setActiveModal(null)}/>
+        <Modal onClose={() => setActiveModal(null)} allowClickAway={false}>
+          <TimeBlocks onClose={() => setActiveModal(null)} />
         </Modal>
       )}
-      
+
       {activeModal === "esh" && (
-        <Modal onClose={() => setActiveModal(null)} allowClickAway = {false}>
-          <ESHAssumptions onClose={() => setActiveModal(null)}/>
+        <Modal onClose={() => setActiveModal(null)} allowClickAway={false}>
+          <ESHAssumptions onClose={() => setActiveModal(null)} />
         </Modal>
       )}
 
       {activeModal === "rolemap" && (
-        <Modal onClose={() => setActiveModal(null)} allowClickAway = {false}>
-          <RoleMap onClose={() => setActiveModal(null)}/>
+        <Modal onClose={() => setActiveModal(null)} allowClickAway={false}>
+          <RoleMap onClose={() => setActiveModal(null)} />
         </Modal>
       )}
 
       {activeModal === "saveloc" && (
-        <Modal onClose={() => setActiveModal(null)} allowClickAway = {true}>
-          <SaveLocation onClose={() => setActiveModal(null)}/>
+        <Modal onClose={() => setActiveModal(null)} allowClickAway={true}>
+          <SaveLocation onClose={() => setActiveModal(null)} />
         </Modal>
       )}
     </div>
