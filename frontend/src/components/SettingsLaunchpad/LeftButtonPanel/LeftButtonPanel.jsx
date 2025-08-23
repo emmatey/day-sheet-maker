@@ -37,7 +37,7 @@ export default function LeftButtonPanel({ onSaveLocation, onRoleMap, onTimeBlock
       />
 
       <StandardPlusInfoButtonPanel
-        label = "Time Blocks"
+        label = "Labor Trackers"
         onClickMain = {onTimeBlocks}
         onClickInfo = {() => {handleInfoClick("/background.jpg")}}
         showInfo = {true}
@@ -55,7 +55,6 @@ export default function LeftButtonPanel({ onSaveLocation, onRoleMap, onTimeBlock
       />
     </div>
 
-    {/* Info Modal*/}
     <InfoModal
     docUrl = {docUrl}
     open = {showInfo}

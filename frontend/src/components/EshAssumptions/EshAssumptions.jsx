@@ -6,7 +6,6 @@ import TitleCardHeader from "../DepartmentSelect/TitleCardHeader/TitleCardHeader
 import AccentStripe from "../HomeScreen/AccentStripe/AccentStripe.jsx";
 import StandardButton from "../StandardButton/StandardButton.jsx";
 
-/** Build the CLI update string for the backend updater */
 function buildUpdateString(segments, value, action = "update") {
   const path = "[" + segments.map(String).join("][") + "]";
   const payload = JSON.stringify(value);
@@ -24,11 +23,11 @@ const RANGES = Array.from({ length: 15 }, (_, idx) => {
 
 export default function ESHAssumptions({ onClose }) {
   const [settings, setSettings] = React.useState(null);
-  // store by index as strings, e.g. { "0": "1", "1": "1", ... }
+  const [enableEsh, setEnableEsh] = React.useState(true);
   const [values, setValues] = React.useState({});
   const [showToast, setShowToast] = React.useState(false);
 
-  // Load settings once
+  // Load settings
   React.useEffect(() => {
     let alive = true;
     (async () => {
@@ -36,7 +35,7 @@ export default function ESHAssumptions({ onClose }) {
         const cfg = await window.electronAPI.readSettings();
         if (!alive) return;
         setSettings(cfg);
-
+        setEnableEsh(!!cfg?.OUTPUT_SETTINGS?.enable_esh);
         const src = cfg?.EXPEDITOR_REQUIREMENTS || {};
         const seeded = {};
         for (const { idx } of RANGES) {
@@ -50,6 +49,13 @@ export default function ESHAssumptions({ onClose }) {
     })();
     return () => { alive = false; };
   }, []);
+
+  async function toggleEnableEsh() {
+    const next = !enableEsh;
+    setEnableEsh(next);
+    const u = buildUpdateString(["OUTPUT_SETTINGS", "enable_esh"], next, "update");
+    try { await window.electronAPI.applyConfig(u); } catch (e) { console.error(e); }
+}
 
 function updateHour(idx, raw) {
   if (raw === "") {
@@ -97,8 +103,7 @@ function updateHour(idx, raw) {
       <TitleCardHeader title = "ESH Assumptions" />
 
       <AccentStripe />
-
-      {/* scrollable body */}
+    
       <div className="esh-list">
         {RANGES.map(({ idx, label }) => (
           <div className="esh-row" key={idx}>
@@ -116,6 +121,11 @@ function updateHour(idx, raw) {
 
       <div className="settings-footer">
         <StandardButton label="Cancel" onClick={onClose} />
+        <div className="settings-spacer" />
+        <label className = "esh-toggle">
+          <input type = "checkbox" checked = {enableEsh} onChange = {toggleEnableEsh}/>
+          Enable ESH
+        </label>
         <div className="settings-spacer" />
         <StandardButton label="Save & Close" onClick={save} />
       </div>

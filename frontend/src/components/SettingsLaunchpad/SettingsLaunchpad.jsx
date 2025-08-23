@@ -1,5 +1,5 @@
 // src/components/SettingsLaunchpad/SettingsLaunchpad.jsx
-import { useState, useEffect} from "react";
+import { useState, useEffect } from "react";
 import "./SettingsLaunchpad.css";
 
 import TitleCardHeader from "../DepartmentSelect/TitleCardHeader/TitleCardHeader.jsx";
@@ -9,11 +9,12 @@ import LeftButtonPanel from "./LeftButtonPanel/LeftButtonPanel.jsx";
 import RightInputPanel from "./RightInputPanel/RightInputPanel.jsx";
 import BottomButtonPanel from "./BottomButtonPanel/BottomButtonPanel.jsx";
 
-import TimeBlocks from "../TimeBlocks/TimeBlocks.jsx";
 import ESHAssumptions from "../EshAssumptions/EshAssumptions.jsx";
 import RoleMap from "../RoleMap/RoleMap.jsx";
 import SaveLocation from "../SaveLocation/SaveLocation.jsx";
+import LaborTrackers from "../LaborTrackers/LaborTrackers.jsx";
 import Modal from "../Modal/Modal.jsx";
+import TimeBlocks from "../TimeBlocks/TimeBlocks.jsx";
 
 function buildUpdateString(segments, value, action = "update") {
   const path = "[" + segments.map(String).join("][") + "]";
@@ -22,11 +23,9 @@ function buildUpdateString(segments, value, action = "update") {
 }
 
 export default function SettingsLaunchpad({ onClose }) {
-  // === STATE ===
   const [activeModal, setActiveModal] = useState(null);
-  const [enableEsh, setEnableEsh] = useState(true);
   const [dailyNotesOverride, setDailyNotesOverride] = useState(false);
-  const [combineLaborTrackers, setCombineLaborTrackers] = useState(false); // NEW
+  const navigate = (name) => setActiveModal(name);
 
   useEffect(() => {
     let alive = true;
@@ -34,9 +33,7 @@ export default function SettingsLaunchpad({ onClose }) {
       try {
         const cfg = await window.electronAPI.readSettings();
         if (!alive) return;
-        setEnableEsh(!!cfg?.OUTPUT_SETTINGS?.enable_esh);
         setDailyNotesOverride(!!cfg?.OUTPUT_SETTINGS?.daily_notes_override);
-        setCombineLaborTrackers(!!cfg?.OUTPUT_SETTINGS?.combined_labor_tracker); 
       } catch (e) {
         console.error("readSettings (SettingsLaunchpad) failed:", e);
       }
@@ -45,31 +42,14 @@ export default function SettingsLaunchpad({ onClose }) {
   }, []);
 
   const handleCheckboxChange = async (which) => {
+    if (which !== "dailyNotes") return;
     try {
-      if (which === "esh") {
-        const next = !enableEsh;
-        setEnableEsh(next);
-        const u = buildUpdateString(["OUTPUT_SETTINGS", "enable_esh"], next, "update");
-        await window.electronAPI.applyConfig(u);
-      } else if (which === "dailyNotes") {
-        const next = !dailyNotesOverride;
-        setDailyNotesOverride(next);
-        const u = buildUpdateString(["OUTPUT_SETTINGS", "daily_notes_override"], next, "update");
-        await window.electronAPI.applyConfig(u);
-      }
-    } catch (e) {
-      console.error("applyConfig (Settings toggles) failed:", e);
-    }
-  };
-
-  const handleLaborScopeChange = async (scope) => {
-    const combined = scope === "dept";
-    setCombineLaborTrackers(combined);
-    try {
-      const u = buildUpdateString(["OUTPUT_SETTINGS", "combined_labor_tracker"], combined, "update");
+      const next = !dailyNotesOverride;
+      setDailyNotesOverride(next);
+      const u = buildUpdateString(["OUTPUT_SETTINGS", "daily_notes_override"], next, "update");
       await window.electronAPI.applyConfig(u);
     } catch (e) {
-      console.error("applyConfig (combined_labor_tracker) failed:", e);
+      console.error("applyConfig (Settings toggles) failed:", e);
     }
   };
 
@@ -80,56 +60,56 @@ export default function SettingsLaunchpad({ onClose }) {
     console.log("Config reset to default.");
   };
 
-  const handleClose = () => { onClose?.(); };
-
   return (
     <div className="settings-launchpad-container">
       <TitleCardHeader title="Settings" />
       <AccentStripe />
 
       <div className="settings-body">
-        <RightInputPanel
-          enableEsh={enableEsh}
-          dailyNotesOverride={dailyNotesOverride}
-          combineLaborTrackers={combineLaborTrackers}          
-          onCheckboxChange={handleCheckboxChange}
-          onLaborScopeChange={handleLaborScopeChange}           
-        />
         <LeftButtonPanel
-          onSaveLocation={() => setActiveModal("saveloc")}
-          onRoleMap={() => setActiveModal("rolemap")}
-          onTimeBlocks={() => setActiveModal("timeblocks")}
-          onEshAssumptions={() => setActiveModal("esh")}
+          onSaveLocation={() => navigate("saveloc")}
+          onRoleMap={() => navigate("rolemap")}
+          onTimeBlocks={() => navigate("labor")} 
+          onEshAssumptions={() => navigate("esh")}
+        />
+        <RightInputPanel
+          dailyNotesOverride={dailyNotesOverride}
+          onCheckboxChange={handleCheckboxChange}
         />
       </div>
 
-      <BottomButtonPanel
-        onReset={handleResetConfig}
-        onSave={handleClose}
-        saveLabel="Close"
-      />
+      <BottomButtonPanel onReset={handleResetConfig} onSave={() => onClose?.()} saveLabel="Close" />
+
+      {activeModal === "labor" && (
+        <Modal onClose={() => navigate(null)} allowClickAway={true}>
+          <LaborTrackers 
+          onClose={() => navigate(null)} 
+          onEditTimeBlocks={() => navigate("timeblocks")}
+          />
+        </Modal>
+      )}
 
       {activeModal === "timeblocks" && (
-        <Modal onClose={() => setActiveModal(null)} allowClickAway={false}>
-          <TimeBlocks onClose={() => setActiveModal(null)} />
+        <Modal onClose={() => navigate("labor")} allowClickAway={false}>
+          <TimeBlocks onClose={() => navigate("labor")}/>
         </Modal>
       )}
 
       {activeModal === "esh" && (
-        <Modal onClose={() => setActiveModal(null)} allowClickAway={false}>
-          <ESHAssumptions onClose={() => setActiveModal(null)} />
+        <Modal onClose={() => navigate(null)} allowClickAway={false}>
+          <ESHAssumptions onClose={() => navigate(null)} />
         </Modal>
       )}
 
       {activeModal === "rolemap" && (
-        <Modal onClose={() => setActiveModal(null)} allowClickAway={false}>
-          <RoleMap onClose={() => setActiveModal(null)} />
+        <Modal onClose={() => navigate(null)} allowClickAway={false}>
+          <RoleMap onClose={() => navigate(null)} />
         </Modal>
       )}
 
       {activeModal === "saveloc" && (
-        <Modal onClose={() => setActiveModal(null)} allowClickAway={true}>
-          <SaveLocation onClose={() => setActiveModal(null)} />
+        <Modal onClose={() => navigate(null)} allowClickAway>
+          <SaveLocation onClose={() => navigate(null)} />
         </Modal>
       )}
     </div>

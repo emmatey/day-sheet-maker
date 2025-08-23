@@ -11,10 +11,5 @@
   display: flex;
   flex-direction: column;
   padding: 1rem;
-  gap: 0.1rem;
-}
-
-.settings-body-right {
-  display: flex;
-  flex-direction: row;
+  gap: 1rem;
 }

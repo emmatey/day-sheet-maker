@@ -1,55 +1,17 @@
-/* column container */
 .right-input-panel{
   display: flex;
-  flex-direction: column-reverse;     
-  align-items: center;         /* center the cards */
-  gap: 12px;
-  position: relative;          /* anchor the divider */
-  padding-right: 18px;         /* space before divider */
+  flex-direction: column;     
+  align-items: center;       
 }
-
-/* each “card” fills the column but keeps a tidy width */
-.scope-group,
 .checkbox-group{
-  width: 75%;
-  max-width: 340px;            /* tweak to taste */
-  display: flex;
-  flex-direction: right;
-  align-items: center;         /* center inner content */
-}
-
-/* radios centered under legend */
-.scope-group{
-  gap: 6px;
-  padding: 10px 12px;
-  border: 1px solid #D4D4D8;
-  border-radius: 10px;
-  background: #FEE6CB;
-  color: black;
-}
-.scope-group legend{
-  text-align: center;
-  font-weight: 700;
-  margin: 0 0 6px 0;
-  padding: 6px 10px;
-  background: #F5F5F5;
-  border: 1px solid gray;
-  border-radius: 12px;
-  line-height: 1.2;
-}
-.radio-row{
-  width: 100%;
   display: flex;
   justify-content: center;
-  gap: 6px;
-}
-
-/* checkbox pill centered */
-.checkbox-group{
+  align-items: center;
+  width: 50%;
+  max-width: 340px;             
   gap: .6rem;
   padding: .35rem 1rem;
   background: #FEE6CB;
   border-radius: 15px;
   color: black;
-  align-items: center;         /* center the labels */
 }

@@ -1,0 +1,44 @@
+/* src/components/LaborTrackers/LaborTrackers.css */
+.labor-card{
+  background: var(--peach);
+  border: 1px solid var(--gray);
+  border-radius: 14px;
+  color: var(--text);
+  display: flex;
+  flex-direction: column;
+  max-height: 80vh;
+  overflow: auto;
+  padding-bottom: 8px;
+}
+
+.scope-group{
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 6px;
+  margin: 12px auto 8px;
+  padding: 10px 12px;
+  border: 1px solid var(--gray);
+  border-radius: 10px;
+  background: var(--peach2);
+  width: min(380px, 90%);
+}
+.scope-group legend{
+  font-weight: 700;
+  margin-bottom: 6px;
+}
+
+.radio-row{
+  width: 100%;
+  display: flex;
+  justify-content: center;
+  gap: 6px;
+}
+
+.labor-actions{
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 12px;
+}
+.labor-spacer{ flex: 1 1 auto; }
