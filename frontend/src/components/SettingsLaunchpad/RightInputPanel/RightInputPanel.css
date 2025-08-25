@@ -1,7 +1,8 @@
 .right-input-panel{
   display: flex;
   flex-direction: column;     
-  align-items: center;       
+  align-items: center;
+  padding-bottom: 4px;   
 }
 .checkbox-group{
   display: flex;

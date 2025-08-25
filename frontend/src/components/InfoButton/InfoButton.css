@@ -1,6 +1,5 @@
 /* InfoButton.css */
 
-/* Replace fixed sizes with variables */
 .outer-ring {
   width: var(--outer-ring-size, 60px);  /* default 60px */
   height: var(--outer-ring-size, 60px);

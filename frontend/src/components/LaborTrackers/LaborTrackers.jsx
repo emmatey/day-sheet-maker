@@ -6,6 +6,7 @@ import TitleCardHeader from "../DepartmentSelect/TitleCardHeader/TitleCardHeader
 import AccentStripe from "../HomeScreen/AccentStripe/AccentStripe.jsx";
 import StandardButton from "../StandardButton/StandardButton.jsx";
 import TimeBlocks from "../TimeBlocks/TimeBlocks.jsx";
+import InfoButton from "../InfoButton/InfoButton.jsx"
 
 function buildUpdateString(segments, value, action = "update") {
   const path = "[" + segments.map(String).join("][") + "]";
@@ -64,13 +65,18 @@ export default function LaborTrackers({ onClose, onEditTimeBlocks }) {
           Per department
         </label>
       </fieldset>
-
-      <StandardButton 
-      label = "Edit Time Blocks…" 
-      onClick={onEditTimeBlocks}
-      />
-
+      
+      <div className="std-button-container">
+        <StandardButton 
+        label = "Edit Time Blocks…" 
+        onClick={onEditTimeBlocks}
+        className="labor-trackers-std-button"
+        />
+      </div>
       <div className="labor-actions">
+        <div className="info-button-lt">
+          <InfoButton />
+        </div>
         <div className="labor-spacer" />
         <StandardButton label="Close" onClick={onClose} />
       </div>
