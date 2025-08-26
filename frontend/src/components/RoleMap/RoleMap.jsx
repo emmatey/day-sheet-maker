@@ -8,9 +8,8 @@ import AccentStripe from "../HomeScreen/AccentStripe/AccentStripe.jsx";
 import StandardButton from "../StandardButton/StandardButton.jsx";
 
 import RoleRow from "./RoleRow/RoleRow.jsx";
-import AddRoleRow from "./AddRoleRow/AddRoleRow.jsx";
 
-// helper to build backend update string
+
 function buildUpdateString(segments, value, action = "update") {
   const path = "[" + segments.map(String).join("][") + "]";
   return `${path}^${JSON.stringify(value)}^${action}`;
@@ -23,13 +22,11 @@ export default function RoleMap({ onClose }) {
   const [showToast, setShowToast] = React.useState(false);
   
 
-  // derive department list from ROLE_MAP (excluding "Blacklists")
   const deptList = React.useMemo(() => {
     if (!settings?.ROLE_MAP) return [];
     return Object.keys(settings.ROLE_MAP).filter((k) => k !== "Blacklists");
   }, [settings]);
 
-  // zip settings arrays -> rows
   function toRows(roleMapDept) {
     const roles = roleMapDept?.roles || [];
     const clean = roleMapDept?.clean_roles || [];
@@ -46,7 +43,6 @@ export default function RoleMap({ onClose }) {
     return out;
   }
 
-  // unzip rows -> parallel arrays
   function fromRows(rs) {
     return {
       roles: rs.map(r => r.raw),
@@ -55,7 +51,6 @@ export default function RoleMap({ onClose }) {
     };
   }
 
-  // initial load
   React.useEffect(() => {
     let alive = true;
     (async () => {
@@ -69,13 +64,11 @@ export default function RoleMap({ onClose }) {
     return () => { alive = false; };
   }, []);
 
-  // when dept changes, swap rows
   React.useEffect(() => {
     if (!settings || !dept) return;
     setRows(toRows(settings.ROLE_MAP?.[dept]));
   }, [settings, dept]);
 
-  // row ops
   function updateRow(index, next) {
     setRows(rows.map((r, i) => (i === index ? next : r)));
   }
@@ -150,8 +143,6 @@ export default function RoleMap({ onClose }) {
           />
         ))}
       </div>
-
-      <AddRoleRow onAdd={addRow} />
 
       <div className="settings-footer">
               <StandardButton label="Cancel" onClick={onClose} />

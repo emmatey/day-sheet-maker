@@ -1,4 +1,7 @@
 // src/components/RoleMap/AddRoleRow/AddRoleRow.jsx
+
+// ** DEPRECIATED, NOT IN USE **
+
 import React from "react";
 import "./../RoleMap.css";
 

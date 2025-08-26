@@ -37,7 +37,7 @@ export default function LaborTrackers({ onClose, onEditTimeBlocks }) {
 
   return (
     <div className="labor-card">
-      <TitleCardHeader title="Labor Trackers" />
+      <TitleCardHeader title="Labor Tracking" />
       <AccentStripe />
 
       <fieldset className="scope-group">

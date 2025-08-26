@@ -26,10 +26,12 @@ export default function RoleRow({ data, onChange, onRemove, onUp, onDown }) {
         onChange={(e) => updateDisplay(e.target.value)}
         aria-label="Display role"
         placeholder="Display role…"
+        title = "Display role…"
       />
       <label className="rm-enabled">
         <input
           type="checkbox"
+          title = "Show or hide this role's 'labor tracker' in the daysheets."
           checked={enabled}
           onChange={(e) => updateEnabled(e.target.checked)}
         />

@@ -22,25 +22,25 @@ export default function LeftButtonPanel({ onSaveLocation, onRoleMap, onTimeBlock
         label = "Save Location"
         onClickMain = {onSaveLocation}
         onClickInfo = {() => {handleInfoClick("/background.jpg")}}
-        showInfo = {true}
+        showInfo = {false}
         buttonClassName = "settings-launchpad-button"
         infoClassName = "settings-launchpad-info"   
       />
 
       <StandardPlusInfoButtonPanel
-        label = "Role Map"
+        label = "Role Setup"
         onClickMain = {onRoleMap}
-        onClickInfo = {() => {handleInfoClick("/background.jpg")}}
+        onClickInfo = {() => {handleInfoClick("/HelpIconDocs/RoleSetup.pdf")}}
         showInfo = {true}
         buttonClassName = "settings-launchpad-button"
         infoClassName = "settings-launchpad-info" 
       />
 
       <StandardPlusInfoButtonPanel
-        label = "Labor Trackers"
+        label = "Labor Tracking"
         onClickMain = {onTimeBlocks}
         onClickInfo = {() => {handleInfoClick("/background.jpg")}}
-        showInfo = {true}
+        showInfo = {false}
         buttonClassName = "settings-launchpad-button"
         infoClassName = "settings-launchpad-info" 
       />
@@ -48,7 +48,7 @@ export default function LeftButtonPanel({ onSaveLocation, onRoleMap, onTimeBlock
        <StandardPlusInfoButtonPanel
         label = "ESH Assumptions"
         onClickMain = {onEshAssumptions}
-        onClickInfo = {() => {handleInfoClick("/background.jpg")}}
+        onClickInfo = {() => {handleInfoClick("/HelpIconDocs/EshAssumptions.pdf")}}
         showInfo = {true}
         buttonClassName = "settings-launchpad-button"
         infoClassName = "settings-launchpad-info" 

@@ -60,13 +60,23 @@
 }
 .rm-row.add{ margin:0 10px; }
 
-.rm-raw, .rm-display{
+.rm-display{
   width:100%;
   box-sizing:border-box;
   padding:8px 10px;
   border:1px solid var(--gray);
   border-radius:8px;
   background:var(--white);
+  color: black;
+}
+
+.rm-raw{
+  width:100%;
+  box-sizing:border-box;
+  padding:8px 10px;
+  border:0px solid black;
+  border-radius:8px;
+  background: #D3D3D3;
   color: black;
 }
 
