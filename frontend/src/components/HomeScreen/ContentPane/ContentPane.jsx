@@ -12,7 +12,13 @@ export default function ContentPane() {
   const [showSettingsLaunchpad, setShowSettingsLaunchpad] = useState(false);
   const [departments, setDepartments] = useState([]);
   const [filePath, setFilePath] = useState("");
-  const [showStartInfo, setShowStartInfo] = useState(false);
+  const [showInfo, setShowInfo] = useState(false);
+  const [docUrl, setDocUrl] = useState("");
+
+  function handleInfoClick(docUrl){
+    setDocUrl(docUrl);
+    setShowInfo(true);
+  };
 
   const handleSelectFile = async () => {
     try {
@@ -52,7 +58,7 @@ export default function ContentPane() {
         <StandardPlusInfoButtonPanel
           label = "Start"
           onClickMain = {handleSelectFile}
-          onClickInfo = {() => {setShowStartInfo(true)}}
+          onClickInfo = {() => {handleInfoClick("/HelpIconDocs/StartButton.pdf")}}
           showInfo = {true}
         />
         <StandardPlusInfoButtonPanel
@@ -89,9 +95,9 @@ export default function ContentPane() {
   
       {/* Info Modal - Start Button */}
       <InfoModal
-        docUrl = "public/storeLogo.png"
-        open = {showStartInfo}
-        onClose = {() => setShowStartInfo(false)}
+        docUrl = {docUrl}
+        open = {showInfo}
+        onClose = {() => setShowInfo(false)}
       />
     
     </>

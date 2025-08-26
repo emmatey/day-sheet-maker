@@ -6,7 +6,8 @@ import TitleCardHeader from "../DepartmentSelect/TitleCardHeader/TitleCardHeader
 import AccentStripe from "../HomeScreen/AccentStripe/AccentStripe.jsx";
 import StandardButton from "../StandardButton/StandardButton.jsx";
 import TimeBlocks from "../TimeBlocks/TimeBlocks.jsx";
-import InfoButton from "../InfoButton/InfoButton.jsx"
+import InfoButton from "../InfoButton/InfoButton.jsx";
+import InfoModal from "../InfoModal/InfoModal.jsx";
 
 function buildUpdateString(segments, value, action = "update") {
   const path = "[" + segments.map(String).join("][") + "]";
@@ -17,6 +18,8 @@ function buildUpdateString(segments, value, action = "update") {
 export default function LaborTrackers({ onClose, onEditTimeBlocks }) {
   const [combined, setCombined] = React.useState(false);  // OUTPUT_SETTINGS.combined_labor_tracker
   const [showTimeBlocks, setShowTimeBlocks] = React.useState(false);
+  const [showInfo, setShowInfo] = React.useState(false);
+  
 
   React.useEffect(() => {
     let alive = true;
@@ -36,6 +39,7 @@ export default function LaborTrackers({ onClose, onEditTimeBlocks }) {
   };
 
   return (
+    <>
     <div className="labor-card">
       <TitleCardHeader title="Labor Tracking" />
       <AccentStripe />
@@ -75,7 +79,9 @@ export default function LaborTrackers({ onClose, onEditTimeBlocks }) {
       </div>
       <div className="labor-actions">
         <div className="info-button-lt">
-          <InfoButton />
+          <InfoButton
+          onClick={() => {setShowInfo(true)}}
+           />
         </div>
         <div className="labor-spacer" />
         <StandardButton label="Close" onClick={onClose} />
@@ -87,5 +93,13 @@ export default function LaborTrackers({ onClose, onEditTimeBlocks }) {
         </div>
       )}
     </div>
+
+    <InfoModal
+    docUrl={"/HelpIconDocs/LaborTrackers.pdf"}
+    open={showInfo}
+    onClose={() => {setShowInfo(false)}}
+    />
+
+    </>
   );
 }
