@@ -2,11 +2,11 @@ import argparse
 import openpyxl
 import shutil
 import os
+import sys
 import pandas as pd
 import builder
 import utils as u
-import ConfigHandler as c
-
+from ConfigHandler import ConfigHandler
 
 def ProcessInput(input_file):
     """
@@ -69,7 +69,7 @@ def CreateWorkbook(wall_mode_list, output_depts, column_day_map, outPath, store_
     """
     for dept in output_depts:
         for wall_mode in wall_mode_list:
-            templatePath = c.ConfigHandler.get_project_root() / "assets" / "Day Sheet Master.xlsx"
+            templatePath = ConfigHandler.get_app_root() / "assets" / "Day Sheet Master.xlsx"
             wb = openpyxl.load_workbook(templatePath)
 
             is_wall = populate_workbook(
@@ -151,7 +151,7 @@ def populate_workbook(wb, dept, column_day_map, store_number, is_wall = False, c
         bool: The is_wall flag, unchanged
     """
     if config_handler_object is None:
-        config_handler_object = c.ConfigHandler()
+        config_handler_object = ConfigHandler()
 
     time_blocks_master = config_handler_object.settings_time_blocks
     time_blocks = time_blocks_master.get(dept.dept_name, [])
@@ -268,7 +268,7 @@ if __name__ == "__main__":
             --update_config     Apply a single config change (no input file required). See usage above.
         """
 
-    config_handler_object = c.ConfigHandler()
+    config_handler_object = ConfigHandler()
 
     parser = argparse.ArgumentParser(
         description = desc,
@@ -299,8 +299,10 @@ if __name__ == "__main__":
     args = parser.parse_args()
 
     if args.update_config:
-        msg = config_handler_object.apply_react_setting(args.update_config)
-        raise SystemExit(0)
+        h = ConfigHandler()
+        msg = h.apply_react_setting(args.update_config)
+        print(msg)
+        sys.exit(0)
 
     csv_path, input_file = ProcessInput(args.input_file)
     hrd = builder.build_store(csv_path, config_handler_object.settings_time_blocks, config_handler_object.settings_role_map)

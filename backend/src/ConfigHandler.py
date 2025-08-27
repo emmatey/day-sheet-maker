@@ -1,338 +1,337 @@
+from __future__ import annotations
+
 from pathlib import Path
+import os
 import sys
 import json
-from DefaultSettings import default_settings
 import re
+import platform
 
+# default_settings is a dict defined in backend/src/DefaultSettings.py
+from DefaultSettings import default_settings
 
 class ConfigHandler:
     """
-    Handles configuration loading, generation, and parsing for the application.
+    Handles configuration loading, generation, parsing, and live updates from the UI.
     """
 
     DEFAULT_FILE_NAME = "settings.json"
 
-    def __init__(self, cfg_file_name = DEFAULT_FILE_NAME):
-        """
-        Initializes the config handler.
-        Loads or creates a settings file and parses its content into internal attributes.
-        """
+    # -------------------------
+    # Init / boot
+    # -------------------------
+    def __init__(self, cfg_file_name: str = DEFAULT_FILE_NAME) -> None:
         self.cfg_file_name = cfg_file_name
-        self.working_dir = self.get_working_dir()
-        self.config_path = self.working_dir / self.cfg_file_name
 
-        self.settings = {}
-        self.settings_time_blocks = {}
-        self.settings_role_map = {}
-        self.settings_esh = {}
-        self.settings_copy_input_to_archive = True
-        self.settings_daily_notes = False
-        self.settings_enable_esh = True
-        self.settings_combined_labor_tracker = False
-        self.settings_save_loc = "DEFAULT_PLACEHOLDER"
-        self.settings_blacklists = self.settings.get("Blacklists", {})
-        self.settings_new_dept_or_role_blacklist = {
-            "departments": self.settings_blacklists.get("departments", []),
-            "roles": self.settings_blacklists.get("roles", [])
-        }
+        # Where the app code/assets live (read-only when frozen)
+        self.app_root = self.get_app_root()
 
+        # Where the user's config lives (Electron passes this via env)
+        self.config_dir = self.get_config_dir()
+        self.config_dir.mkdir(parents=True, exist_ok=True)
+        self.config_path = self.config_dir / self.cfg_file_name
+
+        # Parsed settings (populated by parse_config)
+        self.settings: dict = {}
+        self.settings_time_blocks: dict = {}
+        self.settings_role_map: dict = {}
+        self.settings_esh: dict[int, int] = {}
+
+        self.settings_copy_input_to_archive: bool = True
+        self.settings_daily_notes: bool = False
+        self.settings_enable_esh: bool = True
+        self.settings_combined_labor_tracker: bool = False
+        self.settings_save_loc: str = "DEFAULT_PLACEHOLDER"
+
+        # Blacklists
+        self.settings_blacklists: dict = {}
+        self.settings_new_dept_or_role_blacklist: dict = {"departments": [], "roles": []}
+
+        # load or create config
         if self.detect_config():
-            self.settings = self.read_config()
-            self.parse_config(self.settings)
+            try:
+                self.settings = self.read_config()
+                if not self._is_valid_config(self.settings):
+                    raise ValueError("Invalid config schema; regenerating.")
+            except Exception as _:
+                # invalid or unreadable → regenerate
+                self.generate_default_config()
+                self.settings = self.read_config()
         else:
-            self.generate_default_config()
+            self.generate_default_config(force=True)
             self.settings = self.read_config()
-            self.parse_config(self.settings)
 
+        self.parse_config(self.settings)
+
+
+    # -------------------------
+    # Paths
+    # -------------------------
     @staticmethod
-    def get_project_root():
+    def get_app_root() -> Path:
         """
-        Returns the root directory of the project.
-        Adjusts if the script is frozen into an executable.
+        Folder where code/assets live.
+        If frozen by PyInstaller, this is the temp extraction dir (read-only).
         """
-        if getattr(sys, 'frozen', False):
-            return Path(sys._MEIPASS)
+        if getattr(sys, "frozen", False):
+            return Path(sys._MEIPASS)  # pyright: ignore[reportAttributeAccessIssue]
+        # .../backend/src -> project root is two parents up
         return Path(__file__).resolve().parents[2]
 
     @staticmethod
-    def get_working_dir():
-        """
-        Returns the base working directory.
-        If the script is frozen (e.g., packaged as an .exe),
-        it returns the temp directory used by the bundled app.
-        Otherwise, it returns the directory of the current script file.
-        """
-        if getattr(sys, 'frozen', False):
-            return Path(sys._MEIPASS)
-        return Path(__file__).parent
+    def _user_docs_dir() -> Path:
+        home = Path.home()
+        if platform.system() == "Windows":
+            return home / "Documents"
+        if platform.system() == "Darwin":
+            return home / "Documents"
+        # Linux
+        xdg = os.environ.get("XDG_DOCUMENTS_DIR")
+        return Path(xdg) if xdg else (home / "Documents")
 
-    def generate_default_config(self):
+    @staticmethod
+    def _default_config_dir() -> Path:
         """
-        Writes the default settings to a JSON file in the working directory.
+        Sensible per-user config dir if Electron doesn't pass DAYSHEET_CONFIG_DIR.
+        """
+        home = Path.home()
+        if platform.system() == "Windows":
+            base = Path(os.environ.get("APPDATA", home / "AppData" / "Roaming"))
+            return base / "DaySheet Maker"
+        if platform.system() == "Darwin":
+            return home / "Library" / "Application Support" / "DaySheet Maker"
+        # Linux
+        base = Path(os.environ.get("XDG_CONFIG_HOME", home / ".config"))
+        return base / "day-sheet-maker"
+
+    @classmethod
+    def get_config_dir(cls) -> Path:
+        """
+        Prefer Electron-provided userData path via env.
+        """
+        env_dir = os.environ.get("DAYSHEET_CONFIG_DIR")
+        if env_dir:
+            return Path(env_dir)
+        return cls._default_config_dir()
+
+    # -------------------------
+    # Config I/O
+    # -------------------------
+    def generate_default_config(self, *, force: bool = False) -> None:
+        """
+        Write default_settings to settings.json.
         """
         try:
-            with open(self.config_path, 'w', encoding='utf-8') as config_file:
-                json.dump(default_settings, config_file, indent=4)
+            self.config_dir.mkdir(parents=True, exist_ok=True)
+            with self.config_path.open("w", encoding="utf-8") as f:
+                json.dump(default_settings, f, indent=4)
             print(f"Log: Default config written to: {self.config_path}")
         except Exception as e:
             print(f"Log: Failed to write default config: {e}")
 
-    def set_default_archive(self):
-        """
-        Sets the default save location to a folder named 'Daysheet Archive'
-        inside the project root if it hasn't been customized yet.
+    def detect_config(self) -> bool:
+        exists = self.config_path.exists()
+        print("Log:", "Config found." if exists else "Config not found; will create defaults.")
+        return exists
 
-        Returns:
-            str: The resolved save path for confirmation/logging.
-        """
-        if self.settings_save_loc == "DEFAULT_PLACEHOLDER":
-            project_root = self.get_project_root().resolve()
-            archive_path = project_root / "Daysheet Archive"
-
-            try:
-                with open(self.config_path, 'r', encoding='utf-8') as config_file:
-                    settings = json.load(config_file)
-
-                settings["SAVE_LOCATION"]["save_location_string"] = str(archive_path.resolve())
-                self.settings_save_loc = str(archive_path)
-
-                with open(self.config_path, 'w', encoding='utf-8') as config_file:
-                    json.dump(settings, config_file, indent=4)
-
-            except KeyError as e:
-                print(e)
-                print("Log: Save Location Setting Inaccessible. Config file may be broken. "
-                      "Log: Restore default settings or delete config file.")
-                sys.exit(1)
-
-            return f"Log: Save Location Path Is: {self.settings_save_loc}\n"
-
-        else:
-            return f"Log: Save Location Path Is: {self.settings_save_loc}\n"
-
-    def detect_config(self):
-        """
-        Checks if the configuration file exists in the working directory.
-        Returns:
-            bool: True if found, False otherwise.
-        """
-        for item in self.working_dir.iterdir():
-            if item.name == self.cfg_file_name:
-                print(f"Log: Config found: {item.name}")
-                return True
-        print("Log: Config not found in working directory.")
-        return False
-
-    def read_config(self):
-        """
-        Reads the JSON configuration file from disk.
-
-        Returns:
-            dict: The loaded configuration settings, or None if failed.
-        """
+    def read_config(self) -> dict:
         try:
-            with open(self.config_path, 'r', encoding='utf-8') as config_file:
-                settings = json.load(config_file)
-            print("Log: Config loaded successfully.\n")
+            with self.config_path.open("r", encoding="utf-8") as f:
+                settings = json.load(f)
+            print("Log: Config loaded successfully.")
             return settings
         except Exception as e:
             print(f"Log: Failed to load config: {e}")
-            sys.exit(1)
+            # propagate non-zero exit to caller if used as CLI
+            raise SystemExit(1)
 
-    def save_config(self):
-        """
-        Saves the current in-memory settings to the config file.
-        """
+    def save_config(self, data: dict | None = None) -> None:
         try:
-            with open(self.config_path, "w") as file:
-                json.dump(self.settings, file, indent = 4)
-            print("Log: Config updated successfully.\n")
+            if data is not None:
+                self.settings = data
+            with self.config_path.open("w", encoding="utf-8") as f:
+                json.dump(self.settings, f, indent=4)
+            print("Log: Config updated successfully.")
         except Exception as e:
             print(f"Log: Failed to save config: {e}")
-            sys.exit(1)
+            raise SystemExit(1)
 
-    def parse_config(self, settings):
+    # -------------------------
+    # Defaults / parsing
+    # -------------------------
+    def set_default_archive(self) -> str:
         """
-        Parses relevant keys from the configuration dictionary and assigns them to internal attributes.
+        Ensure a friendly default archive location if still placeholder.
+        Uses user's Documents/Daysheet Archive (cross-platform).
+        """
+        if self.settings_save_loc == "DEFAULT_PLACEHOLDER":
+            archive_path = self._user_docs_dir() / "Daysheet Archive"
+            try:
+                settings = self.read_config()
+                settings.setdefault("SAVE_LOCATION", {})["save_location_string"] = str(archive_path.resolve())
+                self.settings_save_loc = str(archive_path.resolve())
+                self.save_config(settings)
+            except KeyError as e:
+                print(e)
+                print("Log: Save Location Setting inaccessible. Restore defaults or delete config file.")
+                raise SystemExit(1)
+            return f"Log: Save Location Path Is: {self.settings_save_loc}\n"
+        else:
+            return f"Log: Save Location Path Is: {self.settings_save_loc}\n"
 
-        Args:
-            settings (dict): The loaded configuration dictionary.
-        """
+    def parse_config(self, settings: dict) -> None:
         # Maps
         self.settings_time_blocks = settings.get("TIME_BLOCKS", {})
         self.settings_role_map = settings.get("ROLE_MAP", {})
-        self.settings_new_dept_or_role_blacklist = self.settings_role_map.get("Blacklists", {})
+        self.settings_blacklists = self.settings_role_map.get("Blacklists", {})
+        self.settings_new_dept_or_role_blacklist = {
+            "departments": self.settings_blacklists.get("departments", []),
+            "roles": self.settings_blacklists.get("roles", []),
+        }
 
         # Toggles
-        settings_toggles_dict = settings.get("OUTPUT_SETTINGS", {})
-        self.settings_copy_input_to_archive = settings_toggles_dict.get("copy_input_to_archive", True)
-        self.settings_enable_esh = settings_toggles_dict.get("enable_esh", True)
-        self.settings_daily_notes = settings_toggles_dict.get("daily_notes_override", False)
-        self.settings_combined_labor_tracker = settings_toggles_dict.get("combined_labor_tracker", False)
+        toggles = settings.get("OUTPUT_SETTINGS", {})
+        self.settings_copy_input_to_archive = toggles.get("copy_input_to_archive", True)
+        self.settings_enable_esh = toggles.get("enable_esh", True)
+        self.settings_daily_notes = toggles.get("daily_notes_override", False)
+        self.settings_combined_labor_tracker = toggles.get("combined_labor_tracker", False)
 
         # Save Location
         try:
-            save_location_dict = settings.get("SAVE_LOCATION", {})
-            save_location_string = save_location_dict["save_location_string"]
-            self.settings_save_loc = save_location_string
+            self.settings_save_loc = settings.get("SAVE_LOCATION", {})["save_location_string"]
         except KeyError as e:
             print(e)
-            print("Log: Save Location Setting Inaccessible. Config file may be broken. "
-                  "Log: Restore default settings or delete config file.")
-            sys.exit(1)
+            print("Log: Save Location Setting inaccessible. Restore defaults or delete config file.")
+            raise SystemExit(1)
 
-        # Executes method, prints return value
+        # Ensure archive path is set if placeholder
         print(self.set_default_archive())
 
-        # Convert EXPEDITOR_REQUIREMENTS keys from strings to ints
+        # ESH keys as ints
         raw_esh = settings.get("EXPEDITOR_REQUIREMENTS", {})
         self.settings_esh = {int(k): v for k, v in raw_esh.items()}
 
-    def add_newly_detected_department_to_role_map(self, new_dept_list):
-        """
-        Add placeholder role map entries for newly detected departments.
-
-        This function is called when departments are found in a schedule
-        that do not exist in the current ROLE_MAP. It creates the required
-        structure (roles, clean_roles, labor_tracker_enabled, default) for
-        each new department, allowing them to be fully configured later.
-
-        Args:
-            new_dept_list (list): A list of department names (strings) to add.
-
-        Returns:
-            None
-        """
-        dict_key_dept_value_dict_of_dept_attributes = self.settings_role_map
-
+    # -------------------------
+    # Helpers to extend config
+    # -------------------------
+    def add_newly_detected_department_to_role_map(self, new_dept_list: list[str]) -> None:
+        rm = self.settings_role_map
         for dept in new_dept_list:
-            dict_key_dept_value_dict_of_dept_attributes[dept] = {
+            rm[dept] = {
                 "roles": [],
                 "clean_roles": [],
                 "labor_tracker_enabled": [],
-                "default": "Associate"
+                "default": "Associate",
             }
-
+        self.settings["ROLE_MAP"] = rm
         self.save_config()
-        self.settings_role_map = dict_key_dept_value_dict_of_dept_attributes
+        self.parse_config(self.settings)
 
-    def add_newly_detected_roles_to_relevant_depts(self, list_of_emp_obj_with_new_roles):
-        """
-        Add newly detected roles to the relevant departments in the ROLE_MAP.
-
-        For each employee in the provided list, this function updates the
-        corresponding department's role configuration by adding the new
-        role to both 'roles' and 'clean_roles', and adjusts
-        'labor_tracker_enabled' to maintain alignment with the total number
-        of roles.
-
-        Args:
-            list_of_emp_obj_with_new_roles (list): A list of Employee objects
-                that contain roles not currently present in ROLE_MAP.
-
-        Returns:
-            None
-        """
-        dict_key_dept_value_dict_of_dept_attributes = self.settings_role_map
-
+    def add_newly_detected_roles_to_relevant_depts(self, list_of_emp_obj_with_new_roles: list) -> None:
+        rm = self.settings_role_map
         for emp in list_of_emp_obj_with_new_roles:
             new_role = emp.role
             new_dept = emp.dept
-
-            dept_cfg = dict_key_dept_value_dict_of_dept_attributes.get(new_dept)
-
+            dept_cfg = rm.setdefault(new_dept, {"roles": [], "clean_roles": [], "labor_tracker_enabled": [], "default": "Associate"})
             roles = dept_cfg.setdefault("roles", [])
             clean_roles = dept_cfg.setdefault("clean_roles", [])
             labor = dept_cfg.setdefault("labor_tracker_enabled", [1] * len(clean_roles))
-
-            # only add if truly new for this dept
             if new_role not in roles:
                 roles.append(new_role)
                 clean_roles.append(new_role)
-                labor.append(1)  # keep lengths aligned
-
+                labor.append(1)
+        self.settings["ROLE_MAP"] = rm
         self.save_config()
+        self.parse_config(self.settings)
 
-    def add_time_blocks_for_new_depts(self, new_dept_list):
-        """
-        Adds placeholder time blocks for newly detected departments.
-
-        This function updates the TIME_BLOCKS section of the settings with a
-        default placeholder block for any department not already present. This
-        ensures downstream code (like populate_workbook) can safely access
-        time blocks for new departments.
-
-        Args:
-            new_dept_list (list): A list of department names (strings) to add
-                                  placeholder time blocks for.
-
-        Returns:
-            None
-        """
-        dict_key_dept_value_dict_of_time_blocks = self.settings_time_blocks
-
+    def add_time_blocks_for_new_depts(self, new_dept_list: list[str]) -> None:
+        tb = self.settings_time_blocks
         for dept in new_dept_list:
-            # Add only if dept not already present
-            if dept not in dict_key_dept_value_dict_of_time_blocks:
-                dict_key_dept_value_dict_of_time_blocks[dept] = [
+            if dept not in tb:
+                tb[dept] = [
                     ["07:00", "12:00", "Morning"],
                     ["12:00", "17:00", "Mid-day"],
-                    ["17:00", "22:00", "Evening"]
+                    ["17:00", "22:00", "Evening"],
                 ]
-
+        self.settings["TIME_BLOCKS"] = tb
         self.save_config()
+        self.parse_config(self.settings)
 
-    def apply_react_setting(self, react_string):
-            """
-            Applies a single update from React in the format:
-            - "key1,key2,...^value^flag"
-            - If flag == 'delete', removes the key.
-            - If flag == 'update', sets the key to the value.
-            - If the string is 'RESET_TO_DEFAULT', resets config to default.
+    # add somewhere in the class
+    def _is_valid_config(self, cfg: dict) -> bool:
+        try:
+            # minimal schema checks; expand if you like
+            if not isinstance(cfg, dict):
+                return False
+            if "ROLE_MAP" not in cfg or "TIME_BLOCKS" not in cfg:
+                return False
+            sl = cfg.get("SAVE_LOCATION", {})
+            if not isinstance(sl, dict) or "save_location_string" not in sl:
+                return False
+            return True
+        except Exception:
+            return False
 
-            Args:
-                react_string (str): Update instruction from React.
+    # -------------------------
+    # React bridge
+    # -------------------------
+    def apply_react_setting(self, react_string: str) -> str:
+        """
+        Accepts updates from the Electron UI.
 
-            Returns:
-                str: Status message.
-            """
-            if react_string.strip() == "RESET_TO_DEFAULT":
-                self.generate_default_config()
-                self.settings = self.read_config()
-                self.parse_config(self.settings)
-                return "Log: Configuration reset to default."
+        Formats:
+          - "RESET_TO_DEFAULT"
+          - "key1,key2,...^<json_value>^update"
+          - "key1,key2,...^<json_value>^delete"
+        """
+        payload = (react_string or "").strip()
+        if not payload:
+            return "NOOP"
 
-            try:
-                path_str, raw_value, flag = react_string.strip().split("^")
-                path_str = path_str.strip()
-                norm = path_str.replace(".", ",")
-                norm = re.sub(r"\]\[", ",", norm)
-                norm = re.sub(r"[\[\]]", ",", norm)
-                key_hierarchy = [k.strip().strip("\"'") for k in norm.split(",") if k.strip()]
-                parsed_value = json.loads(raw_value)
+        # Full reset
+        if payload == "RESET_TO_DEFAULT":
+            self.generate_default_config(force=True)
+            self.settings = self.read_config()
+            self.parse_config(self.settings)
+            return "Log: Configuration reset to default."
 
-                current_level_dict = self.settings
-                for current_key in key_hierarchy[:-1]:
-                    if current_key not in current_level_dict or not isinstance(current_level_dict[current_key], dict):
-                        current_level_dict[current_key] = {}
-                    current_level_dict = current_level_dict[current_key]
+        # Path^json^op
+        parts = payload.split("^")
+        if len(parts) != 3:
+            return "Log: Malformed string. Use 'key1,key2^value^flag'"
 
-                final_key = key_hierarchy[-1]
-                if flag == "delete":
-                    if final_key in current_level_dict:
-                        del current_level_dict[final_key]
-                elif flag == "update":
-                    current_level_dict[final_key] = parsed_value
-                else:
-                    return f"Log: Unknown flag '{flag}'"
+        path_str, raw_value, op = parts
+        # normalize path (allow a few syntaxes)
+        norm = path_str.replace(".", ",")
+        norm = re.sub(r"\]\[", ",", norm)
+        norm = re.sub(r"[\[\]]", ",", norm)
+        key_hierarchy = [k.strip().strip("\"'") for k in norm.split(",") if k.strip()]
+        if not key_hierarchy:
+            return "Log: Bad path."
 
-                self.save_config()
-                self.parse_config(self.settings)
-                return f"Log: Setting {'deleted' if flag == 'delete' else 'updated'} at {' -> '.join(key_hierarchy)}"
+        # parse value
+        try:
+            value = json.loads(raw_value)
+        except json.JSONDecodeError:
+            return "Log: Malformed JSON value. Could not decode."
 
-            except ValueError:
-                return "Log: Malformed string. Use 'key1,key2^value^flag'"
-            except json.JSONDecodeError:
-                return "Log: Malformed JSON value. Could not decode."
-            except Exception as e:
-                return f"Log: Failed to apply setting: {e}"
+        # current config
+        cfg = self.settings if isinstance(self.settings, dict) else {}
+        cursor = cfg
+        for k in key_hierarchy[:-1]:
+            if k not in cursor or not isinstance(cursor[k], dict):
+                cursor[k] = {}
+            cursor = cursor[k]
+        leaf = key_hierarchy[-1]
+
+        if op == "delete":
+            if isinstance(cursor, dict) and leaf in cursor:
+                cursor.pop(leaf, None)
+        elif op == "update":
+            cursor[leaf] = value
+        else:
+            return f"Log: Unknown flag '{op}'"
+
+        self.save_config(cfg)
+        self.parse_config(cfg)
+        return f"Log: Setting {'deleted' if op == 'delete' else 'updated'} at {' -> '.join(key_hierarchy)}"
