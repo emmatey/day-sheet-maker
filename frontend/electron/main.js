@@ -99,15 +99,19 @@ function getBackendInvoker() {
 function runBackend(args) {
   const { cmd, argsPrefix } = getBackendInvoker();
   const fullArgs = [...argsPrefix, ...args];
-  const env = { ...process.env, DAYSHEET_CONFIG_DIR: app.getPath("userData") };
+  const env = {
+    ...process.env,
+    DAYSHEET_CONFIG_DIR: app.getPath("userData"),
+    PYTHONIOENCODING: "utf-8", // <-- force UTF-8 for stdout/stderr
+    PYTHONUTF8: "1",           // <-- belt & suspenders
+  };
 
   return new Promise((resolve, reject) => {
     const child = spawn(cmd, fullArgs, { windowsHide: true, env });
     let out = "", err = "";
     child.stdout.on("data", d => (out += d.toString()));
-    child.stderr.on("data", d => { err += d.toString(); console.error("[backend:stderr]", d.toString()); });
+    child.stderr.on("data", d => (err += d.toString()));
     child.on("close", code => (code === 0 ? resolve(out.trim()) : reject(new Error(err || `backend exited ${code}`))));
-    child.on("error", e => reject(e));
   });
 }
 
