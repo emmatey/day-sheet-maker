@@ -1,13 +1,11 @@
-// src/App.jsx
 import "./App.css";
 import HomeScreen from "./components/HomeScreen/HomeScreen.jsx";
+import bgUrl from "/background.jpg";            // from frontend/public
 
-function App() {
+export default function App() {
   return (
-    <div className="app-background">
+    <div className="app-background" style={{ backgroundImage: `url(${bgUrl})` }}>
       <HomeScreen />
     </div>
   );
 }
-
-export default App;

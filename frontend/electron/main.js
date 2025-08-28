@@ -125,6 +125,7 @@ function createWindow() {
     minWidth: 900,
     minHeight: 600,
     backgroundColor: "#00000000",
+    icon: path.join(process.resourcesPath, "assets", "lilWorkerBuddy.ico"),
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,

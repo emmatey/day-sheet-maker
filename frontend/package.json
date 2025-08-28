@@ -4,6 +4,11 @@
   "version": "0.0.0",
   "type": "module",
   "main": "electron/main.js",
+  "description": "An Electron app for generating and managing day sheets from Hannaford schedules.",
+  "author": {
+    "name": "Emma Talley",
+    "email": "mcrib40@gmail.com"
+  },
   "scripts": {
     "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron ./electron/main.js\"",
     "build": "vite build && electron-builder --win portable",
@@ -43,10 +48,11 @@
     "asar": true,
     "extraResources": [
       { "from": "../backend/bin/win-x64", "to": "backend" },
-      { "from": "../defaults/settings.json", "to": "defaults/settings.json" }
+      { "from": "../defaults/settings.json", "to": "defaults/settings.json" },
       { "from": "../assets", "to": "assets" }
     ],
     "win": {
+      "icon": "../assets/lilWorkerBuddy.ico",
       "target": [
         { "target": "portable", "arch": ["x64"] }
       ],
