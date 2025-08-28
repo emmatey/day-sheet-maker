@@ -44,6 +44,7 @@
     "extraResources": [
       { "from": "../backend/bin/win-x64", "to": "backend" },
       { "from": "../defaults/settings.json", "to": "defaults/settings.json" }
+      { "from": "../assets", "to": "assets" }
     ],
     "win": {
       "target": [
