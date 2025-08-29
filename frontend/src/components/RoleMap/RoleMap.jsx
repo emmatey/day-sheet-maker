@@ -2,11 +2,9 @@
 import React from "react";
 import "./RoleMap.css";
 import "./../EshAssumptions/EshAssumptions.css"
-
 import TitleCardHeader from "../DepartmentSelect/TitleCardHeader/TitleCardHeader.jsx";
 import AccentStripe from "../HomeScreen/AccentStripe/AccentStripe.jsx";
 import StandardButton from "../StandardButton/StandardButton.jsx";
-
 import RoleRow from "./RoleRow/RoleRow.jsx";
 
 
@@ -100,10 +98,8 @@ export default function RoleMap({ onClose }) {
       const fresh = await window.electronAPI.readSettings();
       await window.electronAPI.applyConfig(update);
       setSettings(fresh);
-      
-      setShowToast(true);
+    
       setTimeout(() =>{
-        setShowToast(false);
         onClose?.();
       }, 1000); 
     } catch (e) {
@@ -149,7 +145,6 @@ export default function RoleMap({ onClose }) {
               <div className="settings-spacer" />
               <StandardButton label="Save & Close" onClick={save} />
       </div>
-      {showToast && <div className="esh-toast">Saved ✓</div>}
     </div>
   );
 }

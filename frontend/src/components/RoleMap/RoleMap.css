@@ -1,5 +1,4 @@
 /* src/components/RoleMap/RoleMap.css */
-
 :root{
   --peach:#FED7AA; --peach2:#FEE6CB; --gray:#D4D4D8; --tex:#C3D9D6; --text:#000;
   --white:#fff; --red:#B61F11; --green:#59FF59;
@@ -15,18 +14,21 @@
   color:var(--text);
 }
 
-.rm-card .header-frame-alt{ margin:0; }
-.rm-card .accent-stripe{ margin:0; }
+.rm-card .header-frame-alt{
+  margin:0;
+}
 
-/* Toolbar wrapper: center the select */
+.rm-card .accent-stripe{
+  margin:0;
+}
+
 .rm-toolbar {
   display: flex;
-  justify-content: center;   /* horizontal center */
-  align-items: center;       /* vertical center within the bar */
+  justify-content: center;   
+  align-items: center;       
   padding: 10px 16px 8px;
 }
 
-/* The dropdown itself */
 .rm-select {
   height: var(--ctl-h);
   line-height: var(--ctl-h);
@@ -37,8 +39,6 @@
   color: var(--text);
   box-sizing: border-box;
   border: 1px solid black;
-
-  /* width + centering */
   width: min(640px, 90%);    
   margin: 0 auto;            
 }
@@ -48,7 +48,6 @@
   padding:10px;
 }
 
-/* share row styles via classnames used in row subcomponents */
 .rm-row{
   display:grid;
   grid-template-columns: minmax(220px,1fr) minmax(220px,1fr) auto auto 40px; /* raw | display | enabled | movers | +/- */
@@ -58,7 +57,10 @@
   padding:10px;
   gap:10px;
 }
-.rm-row.add{ margin:0 10px; }
+
+.rm-row.add{
+  margin:0 10px;
+}
 
 .rm-display{
   width:100%;
@@ -80,15 +82,29 @@
   color: black;
 }
 
-.rm-enabled{ display:flex; align-items:center; gap:6px; }
+.rm-enabled{
+  display:flex;
+  align-items:center;
+  gap:6px; 
+}
 
-.rm-movers{ display:flex; gap:6px; justify-content:flex-end; }
+.rm-movers{display:flex;
+  gap:6px;
+  justify-content:flex-end;
+}
+
 .rm-mini{
   width:36px; height:36px; border:none; border-radius:999px; cursor:pointer;
   display:flex; align-items:center; justify-content:center; font-size:16px;
 }
-.rm-mini.danger{ background:var(--red); color:var(--white); }
-.rm-mini.success{ background:var(--green); color:#000; }
+
+.rm-mini.danger{background:var(--red);
+  color:var(--white);
+}
+
+.rm-mini.success{background:var(--green);
+  color:#000;
+}
 
 .rm-divider{
   height:42px; 
