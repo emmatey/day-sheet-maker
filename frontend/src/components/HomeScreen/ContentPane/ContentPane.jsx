@@ -6,6 +6,7 @@ import StandardPlusInfoButtonPanel from "./../../StandardPlusInfoButtonPanel/Sta
 import DepartmentSelect from "./../../DepartmentSelect/DepartmentSelect.jsx";
 import Modal from "./../../Modal/Modal.jsx";
 import InfoModal from "../../InfoModal/InfoModal.jsx";
+import startButtonPdf from "/HelpIconDocs/StartButton.pdf";
 
 export default function ContentPane() {
   const [showDeptSelect, setShowDeptSelect] = useState(false);
@@ -58,7 +59,7 @@ export default function ContentPane() {
         <StandardPlusInfoButtonPanel
           label = "Start"
           onClickMain = {handleSelectFile}
-          onClickInfo = {() => {handleInfoClick("/HelpIconDocs/StartButton.pdf")}}
+          onClickInfo = {() => {handleInfoClick(startButtonPdf)}}
           showInfo = {true}
         />
         <StandardPlusInfoButtonPanel

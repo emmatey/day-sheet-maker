@@ -5,6 +5,7 @@ import StandardButton from '../../StandardButton/StandardButton.jsx';
 import '../../StandardButton/StandardButton.css';
 import InfoButton from './../../InfoButton/InfoButton.jsx';
 import InfoModal from "../../InfoModal/InfoModal.jsx";
+import Mode_Explanation from "/HelpIconDocs/Mode_Explanation.pdf";
 
 export default function DeptSelectFooter({ onGenerateClick, loading }) {
   const [showInfo, setShowInfo] = useState(false);
@@ -35,7 +36,7 @@ export default function DeptSelectFooter({ onGenerateClick, loading }) {
     
     {/* Info Modal*/}
        <InfoModal
-         docUrl = "public/storeLogo.png"
+         docUrl = {Mode_Explanation}
          open = {showInfo}
          onClose = {() => setShowInfo(false)}
        />

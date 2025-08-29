@@ -8,6 +8,7 @@ import StandardButton from "../StandardButton/StandardButton.jsx";
 import TimeBlocks from "../TimeBlocks/TimeBlocks.jsx";
 import InfoButton from "../InfoButton/InfoButton.jsx";
 import InfoModal from "../InfoModal/InfoModal.jsx";
+import laborTrackersPdf from "/HelpIconDocs/LaborTrackers.pdf";
 
 function buildUpdateString(segments, value, action = "update") {
   const path = "[" + segments.map(String).join("][") + "]";
@@ -95,7 +96,7 @@ export default function LaborTrackers({ onClose, onEditTimeBlocks }) {
     </div>
 
     <InfoModal
-    docUrl={"/HelpIconDocs/LaborTrackers.pdf"}
+    docUrl={laborTrackersPdf}
     open={showInfo}
     onClose={() => {setShowInfo(false)}}
     />

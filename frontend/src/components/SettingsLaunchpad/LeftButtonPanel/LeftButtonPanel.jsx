@@ -3,8 +3,8 @@ import "./LeftButtonPanel.css";
 import StandardPlusInfoButtonPanel from "../../StandardPlusInfoButtonPanel/StandardPlusInfoButtonPanel";
 import { useState } from "react";
 import InfoModal from "../../InfoModal/InfoModal";
-
-
+import roleSetupPdf from "/HelpIconDocs/RoleSetup.pdf";
+import eshAssumptionsPdf from "/HelpIconDocs/EshAssumptions.pdf";
 
 export default function LeftButtonPanel({ onSaveLocation, onRoleMap, onTimeBlocks, onEshAssumptions }) {
   const [showInfo, setShowInfo] = useState(false);
@@ -30,7 +30,7 @@ export default function LeftButtonPanel({ onSaveLocation, onRoleMap, onTimeBlock
       <StandardPlusInfoButtonPanel
         label = "Role Setup"
         onClickMain = {onRoleMap}
-        onClickInfo = {() => {handleInfoClick("/HelpIconDocs/RoleSetup.pdf")}}
+        onClickInfo = {() => {handleInfoClick(roleSetupPdf)}}
         showInfo = {true}
         buttonClassName = "settings-launchpad-button"
         infoClassName = "settings-launchpad-info" 
@@ -48,7 +48,7 @@ export default function LeftButtonPanel({ onSaveLocation, onRoleMap, onTimeBlock
        <StandardPlusInfoButtonPanel
         label = "ESH Assumptions"
         onClickMain = {onEshAssumptions}
-        onClickInfo = {() => {handleInfoClick("/HelpIconDocs/EshAssumptions.pdf")}}
+        onClickInfo = {() => {handleInfoClick(eshAssumptionsPdf)}}
         showInfo = {true}
         buttonClassName = "settings-launchpad-button"
         infoClassName = "settings-launchpad-info" 
