@@ -83,20 +83,6 @@
   flex: 1 1 auto;
 }
 
-.esh-toast{
-  position: sticky;
-  bottom: 12px;
-  align-self: flex-end;
-  margin: 0 12px 12px 0;
-  padding: 8px 12px;
-  background: #1f2937;
-  color: white;
-  border-radius: 10px;
-  box-shadow: 0 6px 18px rgba(0,0,0,.2);
-  z-index: 6;
-  pointer-events: none;
-}
-
 .esh-toggle{
   display: inline-flex;
   align-items: center;

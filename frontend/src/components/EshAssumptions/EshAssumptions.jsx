@@ -125,7 +125,6 @@ function updateHour(idx, raw) {
         <div className="settings-spacer" />
         <StandardButton label="Save & Close" onClick={save} />
       </div>
-      {showToast && <div className="esh-toast">Saved ✓</div>}
     </div>
   );
 }
