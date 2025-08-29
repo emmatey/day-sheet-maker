@@ -25,7 +25,6 @@ export default function ESHAssumptions({ onClose }) {
   const [settings, setSettings] = React.useState(null);
   const [enableEsh, setEnableEsh] = React.useState(true);
   const [values, setValues] = React.useState({});
-  const [showToast, setShowToast] = React.useState(false);
 
   // Load settings
   React.useEffect(() => {
@@ -85,10 +84,7 @@ function updateHour(idx, raw) {
     try {
       const update = buildUpdateString(["EXPEDITOR_REQUIREMENTS"], clean, "update");
       await window.electronAPI.applyConfig(update);
-
-      setShowToast(true);
       setTimeout(() => {
-        setShowToast(false);
         onClose?.();
       }, 900);
     } catch (e) {
