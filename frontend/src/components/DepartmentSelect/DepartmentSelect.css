@@ -1,6 +1,5 @@
 /* DepartmentSelect.css */
 
-/* Main container for the entire department select modal */
 .department-select-container {
   display: flex;
   flex-direction: column;
@@ -8,20 +7,18 @@
   max-width: 800px;
   background-color: #fed7aa; 
   border-radius: 10px;
-  overflow: hidden; /* allows header to sit flush with top */
+  overflow: hidden; 
   box-sizing: border-box;
 }
 
-/* Full-width header bar — matches home screen style */
 .department-select-header-bar {
-  background-color: #c7dedc; /* same as home screen header */
+  background-color: #c7dedc; 
   padding: 10px;
   display: flex;
   justify-content: center;
   align-items: center;
 }
 
-/* Title card inside the header */
 .department-select-header-bar .title-card {
   background-color: white;
   padding: 0.5rem 1.5rem;
@@ -33,7 +30,6 @@
   text-align: center;
 }
 
-/* The content pane in the middle */
 .dept-select-content-pane {
   background-color: #fed7aa; 
   padding: 1rem;
@@ -42,7 +38,6 @@
   gap: 0.5rem;
 }
 
-/* Footer at the bottom */
 .dept-select-footer {
   display: flex;
   justify-content: space-between;
@@ -52,7 +47,6 @@
   background-color: #fed7aa;
 }
 
-/* Example styling for footer info area */
 .footer-info {
   display: flex;
   align-items: center;
@@ -66,7 +60,6 @@
   padding: 0;
 }
 
-/* Example styling for footer button panel */
 .footer-buttons {
   display: flex;
   align-items: center;

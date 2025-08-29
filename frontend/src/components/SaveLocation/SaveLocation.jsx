@@ -76,8 +76,6 @@ export default function SaveLocation({ onClose }) {
 
       <div className="sl-body">
         <div className="sl-title">Choose Save Location</div>
-
-        {/* Clickable pill (entire thing opens picker) */}
         <button type="button" className="sl-pill" onClick={pickDir} aria-label="Pick save location">
           <span className="sl-icon" aria-hidden>📁</span>
           <span className="sl-path" title={path || "(not set)"}>{path || "Not set"}</span>

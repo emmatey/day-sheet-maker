@@ -13,7 +13,6 @@ export default function DeptSelectFooter({ onGenerateClick, loading }) {
   return (
     <>
     <div className = "deptselect-footer">
-      {/* Left Section */}
       <div className = "footer-left">
         <div className = "footer-title-card">
           <span>Table, Wall, Both? </span>
@@ -24,17 +23,16 @@ export default function DeptSelectFooter({ onGenerateClick, loading }) {
           />
       </div>
 
-      {/* Right Section */}
       <div className = "footer-right">
         <StandardButton
           label = {loading ? "Loading...." : "Generate"}
           onClick = {onGenerateClick}
+          className = {loading ? "standard-button:disabled" : "standard-button"}
           disabled = {loading} 
         />
       </div>
     </div>
     
-    {/* Info Modal*/}
        <InfoModal
          docUrl = {Mode_Explanation}
          open = {showInfo}

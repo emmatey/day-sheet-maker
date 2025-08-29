@@ -17,11 +17,9 @@
   color: var(--text);
 }
 
-/* keep header & stripe flush */
 .sl-card .header-frame-alt { margin: 0; }
 .sl-card .accent-stripe   { margin: 0; }
 
-/* body */
 .sl-body {
   display: grid;
   gap: 14px;
@@ -37,7 +35,6 @@
   padding: 10px;
 }
 
-/* clickable pill */
 .sl-pill {
   display: grid;
   grid-template-columns: auto 1fr;
@@ -71,7 +68,6 @@
   color: black;
 }
 
-/* footer */
 .sl-footer {
   display: flex;
   justify-content: flex-end;

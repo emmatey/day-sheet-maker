@@ -15,6 +15,7 @@ export default function ContentPane() {
   const [filePath, setFilePath] = useState("");
   const [showInfo, setShowInfo] = useState(false);
   const [docUrl, setDocUrl] = useState("");
+  const [loading, setLoading] = useState(false);
 
   function handleInfoClick(docUrl){
     setDocUrl(docUrl);

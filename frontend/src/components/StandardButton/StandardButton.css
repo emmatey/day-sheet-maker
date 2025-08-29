@@ -1,20 +1,22 @@
 .standard-button {
-  background-color: #C3D9D6; 
-  border: 5px solid #FFEDD5; 
-  border-radius: 10px;
-  padding: 0.5rem 1rem;
-  color: black;
-  font-size: 1.1rem;
-  font-weight: bold;
-  cursor: pointer;
-  transition: all 0.2s ease;
+    background-color: #c3d9d6;
+    border: 5px solid #ffedd5;
+    border-radius: 10px;
+    padding: 0.5rem 1rem;
+    color: black;
+    font-size: 1.1rem;
+    font-weight: bold;
+    cursor: pointer;
+    transition: all 0.2s ease;
 }
 
 .standard-button:hover {
-  border-color: #ED3326;
+    border-color: #ed3326;
 }
 
 .standard-button:disabled {
-  opacity: 0.6;
-  cursor: not-allowed;
+    opacity: 0.6;
+    background-color: gray;
+    border-color: blue;
+    cursor: not-allowed;
 }
