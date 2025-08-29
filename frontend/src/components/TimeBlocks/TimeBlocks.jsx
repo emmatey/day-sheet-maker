@@ -36,7 +36,6 @@ export default function TimeBlocks({ onClose }) {
   const [dept, setDept] = React.useState("");
   // rows are [start24, end24, label, id]
   const [blocks, _setBlocks] = React.useState([]);
-  const [showToast, setShowToast] = React.useState(false);
 
   const getBlocksForDept = (cfg, name) => cfg?.TIME_BLOCKS?.[name] ?? [];
   const setBlocks = (next) => _setBlocks(hydrate(next));
@@ -85,7 +84,6 @@ export default function TimeBlocks({ onClose }) {
     // let React flush the last onChange
     await new Promise(r => requestAnimationFrame(r));
 
-
     const toSave = (blocks || [])
       .map(b => b.slice(0, 3))
       .sort((a, b) => (a?.[0] ?? "").localeCompare(b?.[0] ?? ""));
@@ -94,20 +92,17 @@ export default function TimeBlocks({ onClose }) {
     console.log(update);
     await window.electronAPI.applyConfig(update);
     
-    setShowToast(true);
     const fresh = await window.electronAPI.readSettings();
     console.log(fresh);
     setSettings(fresh);
     setBlocks(getBlocksForDept(fresh, dept));
     setTimeout(() => {
-       setShowToast(false);
        onClose?.();
      }, 900);
   } catch (e) {
     console.error("applyConfig failed:", e);
   }
 }
-
 
   if (!settings) return null;
 
@@ -153,7 +148,6 @@ export default function TimeBlocks({ onClose }) {
         <div className="settings-spacer" />
         <StandardButton label="Save & Close" onClick={save} />
       </div>
-      {showToast && <div className="esh-toast">Saved ✓</div>}
     </div>
   );
 }

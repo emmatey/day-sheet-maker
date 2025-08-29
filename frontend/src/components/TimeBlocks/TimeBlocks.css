@@ -1,7 +1,5 @@
 /* src/components/TimeBlocks/TimeBlocks.css */
-/* TimeBlocks — single source of truth for all tb-* styles */
 
-/* palette */
 :root {
   --red: #B61F11;
   --peach: #FED7AA;
@@ -13,7 +11,6 @@
   --text: #000000;
 }
 
-/* card */
 .tb-card {
   background: var(--peach);
   border: 1px solid var(--gray);
@@ -24,7 +21,6 @@
   color: var(--text);
 }
 
-/* ensure header + accent stripe are flush */
 .tb-card .header-frame-alt { margin: 0; }
 .tb-card .accent-stripe {
   margin: 0;
@@ -32,7 +28,6 @@
   width: 100%;
 }
 
-/* content padding */
 .tb-toolbar,
 .tb-rows,
 .tb-divider,
@@ -49,7 +44,6 @@
   flex-direction: center;
 }
 
-/* toolbar select */
 .tb-select {
   width: 75%;
   padding: 8px 10px;
@@ -60,14 +54,12 @@
   margin: 0 auto;
 }
 
-/* rows container */
 .tb-rows {
   display: flex;
   flex-direction: column;
   gap: 8px;
 }
 
-/* base row style — applies to standard and add rows */
 .tb-row {
   height: 40px;
   display: grid;
@@ -79,7 +71,6 @@
   padding: 10px;
 }
 
-/* name input */
 .tb-name {
   width: 100%;
   box-sizing: border-box;
@@ -91,7 +82,6 @@
   color: var(--text);
 }
 
-/* time group */
 .tb-time { 
   display: flex;
   align-items: center;
@@ -120,7 +110,6 @@
 
 .dash { opacity: 0.6; margin: 0 6px; }
 
-/* mini buttons */
 .tb-mini {
   width: 36px;
   height: 36px;
@@ -136,7 +125,6 @@
 .tb-mini.danger { background: var(--red); color: var(--white); }
 .tb-mini.success { background: var(--green); color: var(--text); }
 
-/* textured divider above the add panel */
 .tb-divider {
   height: 42px;
   border-radius: 8px;
