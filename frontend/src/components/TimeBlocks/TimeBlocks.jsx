@@ -36,6 +36,7 @@ export default function TimeBlocks({ onClose }) {
   const [dept, setDept] = React.useState("");
   // rows are [start24, end24, label, id]
   const [blocks, _setBlocks] = React.useState([]);
+  const [loading, setLoading] = React.useState(false);
 
   const getBlocksForDept = (cfg, name) => cfg?.TIME_BLOCKS?.[name] ?? [];
   const setBlocks = (next) => _setBlocks(hydrate(next));
@@ -90,6 +91,7 @@ export default function TimeBlocks({ onClose }) {
 
     const update = buildUpdateString(["TIME_BLOCKS", dept], toSave, "update");
     console.log(update);
+    setLoading(true);
     await window.electronAPI.applyConfig(update);
     
     const fresh = await window.electronAPI.readSettings();
@@ -98,6 +100,7 @@ export default function TimeBlocks({ onClose }) {
     setBlocks(getBlocksForDept(fresh, dept));
     setTimeout(() => {
        onClose?.();
+       setLoading(false);
      }, 900);
   } catch (e) {
     console.error("applyConfig failed:", e);
@@ -126,7 +129,7 @@ export default function TimeBlocks({ onClose }) {
             <option key={d} value={d}>{d}</option>
           ))}
         </select>
-      </div>
+      </div>r.useS
 
       <div className="tb-rows">
         {blocks.map((b, i) => (
@@ -144,9 +147,16 @@ export default function TimeBlocks({ onClose }) {
       </div>
 
       <div className="settings-footer">
-        <StandardButton label="Cancel" onClick={onClose} />
+        <StandardButton
+        label = "Cancel"
+        onClick = {onClose}
+        />
         <div className="settings-spacer" />
-        <StandardButton label="Save & Close" onClick={save} />
+        <StandardButton
+        label = {loading ? "Saving..." : "Save & Close"}
+        onClick = {save}
+        disabled = {loading ? true : false}
+        />
       </div>
     </div>
   );

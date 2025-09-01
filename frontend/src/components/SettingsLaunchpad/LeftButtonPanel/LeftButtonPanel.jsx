@@ -46,7 +46,7 @@ export default function LeftButtonPanel({ onSaveLocation, onRoleMap, onTimeBlock
       />
 
        <StandardPlusInfoButtonPanel
-        label = "ESH Assumptions"
+        label = "ESH"
         onClickMain = {onEshAssumptions}
         onClickInfo = {() => {handleInfoClick(eshAssumptionsPdf)}}
         showInfo = {true}
