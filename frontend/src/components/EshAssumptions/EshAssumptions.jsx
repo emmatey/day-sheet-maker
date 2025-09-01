@@ -25,6 +25,7 @@ export default function ESHAssumptions({ onClose }) {
   const [settings, setSettings] = React.useState(null);
   const [enableEsh, setEnableEsh] = React.useState(true);
   const [values, setValues] = React.useState({});
+  const [loading, setLoading] = React.useState(false);
 
   // Load settings
   React.useEffect(() => {
@@ -83,9 +84,11 @@ function updateHour(idx, raw) {
 
     try {
       const update = buildUpdateString(["EXPEDITOR_REQUIREMENTS"], clean, "update");
+      setLoading(true);
       await window.electronAPI.applyConfig(update);
       setTimeout(() => {
         onClose?.();
+        setLoading(false);
       }, 900);
     } catch (e) {
       console.error("applyConfig (ESH) failed:", e);
@@ -116,14 +119,21 @@ function updateHour(idx, raw) {
       </div>
 
       <div className="settings-footer">
-        <StandardButton label="Cancel" onClick={onClose} />
-        <div className="settings-spacer" />
+        <StandardButton
+        label = "Cancel"
+        onClick = {onClose}
+        />
+        <div className = "settings-spacer" />
         <label className = "esh-toggle">
           <input type = "checkbox" checked = {enableEsh} onChange = {toggleEnableEsh}/>
           Enable ESH
         </label>
-        <div className="settings-spacer" />
-        <StandardButton label="Save & Close" onClick={save} />
+        <div className = "settings-spacer" />
+        <StandardButton
+          label = {loading ? "Saving..." : "Save & Close"}
+          onClick = {save}
+          disabled = {loading ? true : false}
+        />
       </div>
     </div>
   );

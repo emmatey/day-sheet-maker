@@ -17,7 +17,7 @@ export default function RoleMap({ onClose }) {
   const [settings, setSettings] = React.useState(null);
   const [dept, setDept] = React.useState("");
   const [rows, setRows] = React.useState([]); // [{raw, display, enabled}, ...]
-  const [showToast, setShowToast] = React.useState(false);
+  const [loading, setLoading] = React.useState(false);
   
 
   const deptList = React.useMemo(() => {
@@ -95,12 +95,14 @@ export default function RoleMap({ onClose }) {
     const update = buildUpdateString(["ROLE_MAP", dept], payload, "update");
 
     try {
+      setLoading(true);
       const fresh = await window.electronAPI.readSettings();
       await window.electronAPI.applyConfig(update);
       setSettings(fresh);
     
       setTimeout(() =>{
         onClose?.();
+        setLoading(false);
       }, 1000); 
     } catch (e) {
       console.error("applyConfig (RoleMap) failed:", e);
@@ -141,9 +143,16 @@ export default function RoleMap({ onClose }) {
       </div>
 
       <div className="settings-footer">
-              <StandardButton label="Cancel" onClick={onClose} />
-              <div className="settings-spacer" />
-              <StandardButton label="Save & Close" onClick={save} />
+              <StandardButton
+              label = "Cancel"
+              onClick = {onClose}
+              />
+              <div className = "settings-spacer" />
+              <StandardButton
+                label = {loading ? "Saving..." : "Save & Close"}
+                onClick = {save}
+                disabled = {loading ? true : false}
+              />
       </div>
     </div>
   );
