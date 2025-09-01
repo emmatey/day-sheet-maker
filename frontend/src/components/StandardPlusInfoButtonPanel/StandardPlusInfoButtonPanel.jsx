@@ -1,6 +1,7 @@
 import "./StandardPlusInfoButtonPanel.css";
 import StandardButton from "../StandardButton/StandardButton";
 import InfoButton from "../InfoButton/InfoButton";
+import "../StandardButton/StandardButton.css";
 
 function StandardPlusInfoButtonPanel({
   label,
@@ -9,6 +10,7 @@ function StandardPlusInfoButtonPanel({
   showInfo = true,
   className = "",         // wrapper
   buttonClassName = "",   // button override
+  stdButtonDisabled = false,
   infoClassName = "",     // info-button override
 }) {
   const infoEl = showInfo ? (
@@ -23,7 +25,8 @@ function StandardPlusInfoButtonPanel({
       <StandardButton
         label={label}
         onClick={onClickMain}
-        className={`panel-button ${buttonClassName}`}
+        className={`standard-button ${buttonClassName}`}
+        stdButtonDisabled={stdButtonDisabled}
       />
       {infoEl}
     </div>

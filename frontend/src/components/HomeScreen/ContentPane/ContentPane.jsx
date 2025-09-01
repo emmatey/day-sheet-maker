@@ -29,21 +29,23 @@ export default function ContentPane() {
         console.log("File selection cancelled");
         return;
       }
-      setFilePath(selectedFilePath);
-      console.log("Selected file:", selectedFilePath);
+        setFilePath(selectedFilePath);
+        console.log("Selected file:", selectedFilePath);
 
-      const previewResult = await window.electronAPI.runPythonPreview(selectedFilePath);
+        setLoading(true);
+        const previewResult = await window.electronAPI.runPythonPreview(selectedFilePath);
+        setLoading(false);
+        const deptList = previewResult
+          .split("\n")
+          .map(line => line.trim())
+          .filter(line => line && !line.startsWith("Log:"));
+        console.log("Preview departments:", deptList);
 
-      const deptList = previewResult
-        .split("\n")
-        .map(line => line.trim())
-        .filter(line => line && !line.startsWith("Log:"));
-
-      console.log("Preview departments:", deptList);
-
-      setDepartments(deptList);
-      setShowDeptSelect(true);
-    } catch (err) {
+        setDepartments(deptList);
+        setShowDeptSelect(true);   
+        
+    }
+    catch (err) {
       console.error("Error selecting file or running preview:", err);
     }
   };
@@ -58,10 +60,12 @@ export default function ContentPane() {
     <>
       <div className="content-pane">
         <StandardPlusInfoButtonPanel
-          label = "Start"
+          label = {loading ? "Reading File..." : "Start"}
           onClickMain = {handleSelectFile}
           onClickInfo = {() => {handleInfoClick(startButtonPdf)}}
           showInfo = {true}
+          buttonClassName = {loading ? "standard-button:disabled" : "standard-button"}
+          stdButtonDisabled = {loading ? true : false}
         />
         <StandardPlusInfoButtonPanel
           label = "Settings"

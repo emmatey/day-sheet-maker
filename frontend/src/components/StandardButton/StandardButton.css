@@ -1,5 +1,19 @@
+:root {
+    --peach: #fed7aa;
+    --peach2: #fee6cb;
+    --gray: #d4d4d8;
+    --tex: #c3d9d6;
+    --text: #000;
+    --white: #fff;
+    --red: #b61f11;
+    --green: #59ff59;
+    --ctl-h: 42px;
+    --ctl-radius: 8px;
+    --blue: #00acf8;
+}
+
 .standard-button {
-    background-color: #c3d9d6;
+    background-color: var(--tex);
     border: 5px solid #ffedd5;
     border-radius: 10px;
     padding: 0.5rem 1rem;
@@ -16,7 +30,7 @@
 
 .standard-button:disabled {
     opacity: 0.6;
-    background-color: gray;
-    border-color: blue;
+    background-color: var(--gray);
+    border-color: var(--blue);
     cursor: not-allowed;
 }

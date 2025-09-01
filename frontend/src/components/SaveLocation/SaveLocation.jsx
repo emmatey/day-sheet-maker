@@ -47,21 +47,19 @@ export default function SaveLocation({ onClose }) {
   async function save() {
     try {
       setSaving(true);
-
-      // Save the path
       const u1 = buildUpdateString(["SAVE_LOCATION", "save_location_string"], path, "update");
       await window.electronAPI.applyConfig(u1);
 
-      // Save the checkbox
       const u2 = buildUpdateString(["OUTPUT_SETTINGS", "copy_input_to_archive"], copyToArchive, "update");
       await window.electronAPI.applyConfig(u2);
 
-      // (Optional) refresh & close
       const fresh = await window.electronAPI.readSettings();
       setSettings(fresh);
       onClose?.();
+      
     } catch (e) {
       console.error("applyConfig (SaveLocation) failed:", e);
+
     } finally {
       setSaving(false);
     }
