@@ -60,3 +60,9 @@
   gap: 1.5rem;                  
   border-radius: 0 0 1rem 1rem;
 }
+
+.home-screen-button {
+  width: 250px;
+  height: 75px;
+  font-size: 1.1rem;
+}

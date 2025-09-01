@@ -64,7 +64,7 @@ export default function ContentPane() {
           onClickMain = {handleSelectFile}
           onClickInfo = {() => {handleInfoClick(startButtonPdf)}}
           showInfo = {true}
-          buttonClassName = {loading ? "standard-button:disabled" : "standard-button"}
+          buttonClassName = {loading ? "standard-button:disabled" : "home-screen-button"}
           stdButtonDisabled = {loading ? true : false}
         />
         <StandardPlusInfoButtonPanel
@@ -72,12 +72,14 @@ export default function ContentPane() {
           onClickMain = {() => setShowSettingsLaunchpad(true)}
           onClickInfo = {() => console.log("Info clicked")}
           showInfo = {false}
+          buttonClassName = "home-screen-button"
         />
         <StandardPlusInfoButtonPanel
           label = "About"
           onClickMain = {handleAboutClick}
           onClickInfo = {() => console.log("Info clicked")}
           showInfo = {false}
+          buttonClassName = "home-screen-button"
         />
       </div>
 

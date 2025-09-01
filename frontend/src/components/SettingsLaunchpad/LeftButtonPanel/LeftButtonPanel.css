@@ -1,4 +1,3 @@
-/* Layout remains the same */
 .left-button-panel {
   display: flex;
   flex-direction: column;
@@ -7,14 +6,12 @@
   background-color: transparent;
 }
 
-/* MAIN BUTTON: override base .panel-button width/height with more specificity */
 .left-button-panel .standard-plus-info-panel .standard-button.settings-launchpad-button {
   width: 200px;
   height: 55px;
   font-size: 1.1rem;
 }
 
-/* INFO BUTTON: position it relative to the panel (beat .info-button-panel-style) */
 .left-button-panel .standard-plus-info-panel .info-button.info-button-panel-style.settings-launchpad-info {
   position: absolute;
   right: 50px;             
@@ -23,7 +20,6 @@
   /* don't set width/height on the button; size the rings below */
 }
 
-/* INFO BUTTON SIZES via CSS variables (this actually resizes the graphic) */
 .left-button-panel .settings-launchpad-info .outer-ring {
   --outer-ring-size: 40px;    /* ring diameter */
 }
