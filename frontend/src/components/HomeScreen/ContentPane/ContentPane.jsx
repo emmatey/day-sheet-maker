@@ -94,14 +94,15 @@ export default function ContentPane() {
         </Modal>
       )}
 
-      {/* Settings Modal */}
       {showSettingsLaunchpad && (
-        <Modal onClose={() => setShowSettingsLaunchpad(false)} allowClickAway = {true}>
-          <SettingsLaunchpad onClose={() => setShowSettingsLaunchpad(false)} />
+        <Modal
+          onClose={() => setShowSettingsLaunchpad(false)}
+          allowClickAway = {true}>
+          <SettingsLaunchpad
+            onClose={() => setShowSettingsLaunchpad(false)} />
         </Modal>
       )}
   
-      {/* Info Modal - Start Button */}
       <InfoModal
         docUrl = {docUrl}
         open = {showInfo}
