@@ -129,7 +129,7 @@ export default function TimeBlocks({ onClose }) {
             <option key={d} value={d}>{d}</option>
           ))}
         </select>
-      </div>r.useS
+      </div>
 
       <div className="tb-rows">
         {blocks.map((b, i) => (

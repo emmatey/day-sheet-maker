@@ -1,4 +1,21 @@
 /* InfoButton.css */
+:root {
+    --peach: #fed7aa;
+    --peach2: #fee6cb;
+    --gray: #d4d4d8;
+    --tex: #c3d9d6;
+    --text: #000;
+    --white: #fff;
+    --red: #b61f11;
+    --green: #59ff59;
+    --ctl-h: 42px;
+    --ctl-radius: 8px;
+    --blue: #00acf8;
+}
+
+.outer-ring:hover{
+  background-color: var(--red);
+}
 
 .outer-ring {
   width: var(--outer-ring-size, 60px);  /* default 60px */
