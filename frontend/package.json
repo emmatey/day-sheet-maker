@@ -1,5 +1,5 @@
 {
-  "name": "frontend",
+  "name": "day-sheet-maker",
   "private": true,
   "version": "1.0.0",
   "type": "module",
@@ -11,7 +11,7 @@
   },
   "scripts": {
     "dev": "concurrently \"vite\" \"wait-on http://localhost:5173 && cross-env VITE_DEV_SERVER_URL=http://localhost:5173 electron ./electron/main.js\"",
-    "build": "vite build && electron-builder --win portable",
+    "build": "vite build && electron-builder --win nsis",
     "lint": "eslint .",
     "preview": "vite preview"
   },
@@ -47,17 +47,37 @@
     ],
     "asar": true,
     "extraResources": [
-      { "from": "../backend/src/dist/daysheet-backend", "to": "backend/daysheet-backend" },
-      { "from": "../defaults/settings.json",            "to": "defaults/settings.json" },
-      { "from": "../assets",                             "to": "assets" }
+      {
+        "from": "../backend/src/dist/daysheet-backend",
+        "to": "backend/daysheet-backend"
+      },
+      {
+        "from": "../defaults/settings.json",
+        "to": "defaults/settings.json"
+      },
+      {
+        "from": "../assets",
+        "to": "assets"
+      }
     ],
     "win": {
       "icon": "../assets/lilWorkerBuddy.ico",
       "target": [
-        { "target": "portable", "arch": ["x64"] }
-      ],
-      "artifactName": "DaySheetMaker.exe",
-      "requestedExecutionLevel": "asInvoker"
+        {
+          "target": "nsis",
+          "arch": [
+            "x64"
+          ]
+        }
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "perMachine": false,
+      "allowToChangeInstallationDirectory": false,
+      "createDesktopShortcut": true,
+      "createStartMenuShortcut": false,
+      "artifactName": "DaySheetMaker-Setup-${version}.exe"
     }
   }
 }

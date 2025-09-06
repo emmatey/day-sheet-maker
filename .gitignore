@@ -45,7 +45,10 @@ frontend/coverage/
 .env.local
 frontend/.env
 frontend/.env.local
+frontend/dist/*
+frontend/release/*
 backend/src/.venv*
+backend/src/dist/*
 
 # === Allow list ===
 !assets/Day Sheet Master.xlsx
