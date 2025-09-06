@@ -86,15 +86,14 @@ function resolvePythonForDev() {
 function getBackendInvoker() {
   if (isDev()) {
     const py = resolvePythonForDev();
-    console.log("[dev] python resolved to:", py);
-    if (!py) throw new Error("No Python found. Create venv at backend/src/.venv or install python3.");
     const script = path.join(__dirname, "..", "..", "backend", "src", "output.py");
     return { cmd: py, argsPrefix: [script] };
   }
-  const exeName = process.platform === "win32" ? "daysheet-backend.exe" : "daysheet-backend";
-  const exePath = path.join(process.resourcesPath, "backend", exeName);
+  // onedir layout we copy into resources/backend/daysheet-backend/
+  const exePath = path.join(process.resourcesPath, "backend", "daysheet-backend", "daysheet-backend.exe");
   return { cmd: exePath, argsPrefix: [] };
 }
+
 
 function runBackend(args) {
   const { cmd, argsPrefix } = getBackendInvoker();
@@ -129,7 +128,7 @@ function createWindow() {
     webPreferences: {
       preload: path.join(__dirname, "preload.js"),
       contextIsolation: true,
-      andbox: true,
+      sandbox: true,
       nodeIntegration: false,
     },
   });
