@@ -67,14 +67,22 @@ export default function DepartmentSelect({ deptList, inputFile, onClose }) {
     }
     console.log("Sending to Python:", { inputFile, saveDir, outputMap });
 
-    await window.electronAPI.runPythonOutput({
+    let runPyStdOut = await window.electronAPI.runPythonOutput({
       inputFile,
       saveDir,
       outputMap,
     });
+    
+    let rawNewDirCreatedForOutput = runPyStdOut
+      .split("\n") 
+      .filter(line => line.startsWith("Log: Done! Files saved in:"));
 
+    let newDirCreatedForOutput = rawNewDirCreatedForOutput[0]
+      .replace("Log: Done! Files saved in:", "")
+      .trim();
+    
     setTimeout(() => {
-      window.electronAPI.openFolder(saveDir).catch(() => {});
+      window.electronAPI.openFolder(newDirCreatedForOutput).catch(() => {});
     }, 0);
 
     setLoading(false);

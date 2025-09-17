@@ -175,7 +175,6 @@ def populate_workbook(wb, dept, column_day_map, store_number, is_wall = False, c
         ws = wb[sheetname]
 
         employee_group = u.employee_group(dept, day, config_handler_object.settings_role_map)
-        print(f"Delete me line 173, output.py: {employee_group}")
 
         u.insert_title_cell(ws, day, column_day_map, dept.dept_name)
         u.insert_headers_and_employees(ws, employee_group, day)
@@ -370,7 +369,7 @@ if __name__ == "__main__":
             column_day_map,
             hrd
         )
-        print(f"\nLog: Done! Files saved in:\n{output_path}")
+        print(f"\nLog: Done! Files saved in: {output_path}")
 
     if "_converted.csv" in csv_path and os.path.exists(csv_path):
         try:
