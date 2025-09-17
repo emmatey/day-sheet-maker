@@ -44,7 +44,7 @@ def ProcessInput(input_file):
     return csv_file, input_file
 
 
-def FindValidDepts(hrd):
+def FindValidDepts(hrd, config_handler_object):
     """
     Filters the department list to only those with at least one employee.
 
@@ -54,10 +54,15 @@ def FindValidDepts(hrd):
     Returns:
         List[str]: List of department names with at least one employee
     """
+    blacklist_master = config_handler_object.settings_blacklists
+    blacklist = blacklist_master.get("departments", "")
+
     valid_depts = []
     for dept in hrd.department_list:
         if len(dept.employees) > 0:
-            valid_depts.append(dept.dept_name)
+            if dept.dept_name not in blacklist:
+                valid_depts.append(dept.dept_name)
+
     return valid_depts
 
 
@@ -170,6 +175,7 @@ def populate_workbook(wb, dept, column_day_map, store_number, is_wall = False, c
         ws = wb[sheetname]
 
         employee_group = u.employee_group(dept, day, config_handler_object.settings_role_map)
+        print(f"Delete me line 173, output.py: {employee_group}")
 
         u.insert_title_cell(ws, day, column_day_map, dept.dept_name)
         u.insert_headers_and_employees(ws, employee_group, day)
@@ -305,7 +311,6 @@ if __name__ == "__main__":
     if args.update_config:
         h = ConfigHandler()
         msg = h.apply_react_setting(args.update_config)
-        print(msg)
         sys.exit(0)
 
     csv_path, input_file = ProcessInput(args.input_file)
@@ -333,12 +338,12 @@ if __name__ == "__main__":
         config_handler_object.add_time_blocks_for_new_depts(new_depts)
         hrd = builder.build_store(csv_path, config_handler_object.settings_time_blocks, config_handler_object.settings_role_map)
 
-    elif args.preview:
-        preview_depts = FindValidDepts(hrd)
+    if args.preview:
+        preview_depts = FindValidDepts(hrd, config_handler_object)
         for dept in preview_depts:
             print(dept)
 
-    elif args.output:
+    if args.output:
         _, date_list = column_day_map
         weekEndingDate = date_list[-1]
         WEEK_ENDING_DATE = weekEndingDate.replace('/', '-')

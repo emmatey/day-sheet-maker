@@ -45,44 +45,46 @@ export default function DepartmentSelect({ deptList, inputFile, onClose }) {
   };
 
   const handleRunPython = async () => {
-    try {
-      setLoading(true); // Start loading
+  try {
+    setLoading(true); 
 
-      const outputMap = {};
-      departments.forEach((dept) => {
-        if (dept.selected) {
-          outputMap[dept.name] = dept.mode;
-        }
-      });
-
-      let outDir = saveDir;
-      if (!outDir) {
-        const picked = await window.electronAPI.selectDirectory();
-        if (!picked) {
-          setLoading(false);
-          return; // user canceled
-        }
-        outDir = picked;
-        setSaveDir(picked);
+    const outputMap = {};
+    departments.forEach((dept) => {
+      if (dept.selected) {
+        outputMap[dept.name] = dept.mode;
       }
-      console.log("Sending to Python:", { inputFile, saveDir, outputMap });
+    });
 
-      await window.electronAPI.runPythonOutput({
-        inputFile,
-        saveDir,
-        outputMap,
-      });
-
-      // Open the save folder
-      await window.electronAPI.openFolder(saveDir);
-
-      setLoading(false);
-      onClose?.(); // Close modal
-    } catch (err) {
-      setLoading(false);
-      console.error("Error running Python output:", err);
+    let outDir = saveDir;
+    if (!outDir) {
+      const picked = await window.electronAPI.selectDirectory();
+      if (!picked) {
+        setLoading(false);
+        return; // user canceled
+      }
+      outDir = picked;
+      setSaveDir(picked);
     }
-  };
+    console.log("Sending to Python:", { inputFile, saveDir, outputMap });
+
+    await window.electronAPI.runPythonOutput({
+      inputFile,
+      saveDir,
+      outputMap,
+    });
+
+    setTimeout(() => {
+      window.electronAPI.openFolder(saveDir).catch(() => {});
+    }, 0);
+
+    setLoading(false);
+    onClose();
+
+  } catch (err) {
+    setLoading(false);
+    console.error("--[Error running Python output]--\n", err);
+  }
+};
 
   return (
     <div

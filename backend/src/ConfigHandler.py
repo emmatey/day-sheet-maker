@@ -52,8 +52,10 @@ class ConfigHandler:
             try:
                 self.settings = self.read_config()
                 if not self._is_valid_config(self.settings):
-                    raise ValueError("Invalid config schema; regenerating.")
-            except Exception as _:
+                    self.generate_default_config(force=True)
+                    self.settings = self.read_config()
+
+            except:
                 # invalid or unreadable → regenerate
                 self.generate_default_config()
                 self.settings = self.read_config()
@@ -138,12 +140,10 @@ class ConfigHandler:
         try:
             with self.config_path.open("r", encoding="utf-8") as f:
                 settings = json.load(f)
-            print("Log: Config loaded successfully.")
+            print(f"Log: Config loaded successfully. Config path: {self.config_path}")
             return settings
         except Exception as e:
             print(f"Log: Failed to load config: {e}")
-            # propagate non-zero exit to caller if used as CLI
-            raise SystemExit(1)
 
     def save_config(self, data: dict | None = None) -> None:
         try:
@@ -154,7 +154,6 @@ class ConfigHandler:
             print("Log: Config updated successfully.")
         except Exception as e:
             print(f"Log: Failed to save config: {e}")
-            raise SystemExit(1)
 
     # -------------------------
     # Defaults / parsing
@@ -257,19 +256,21 @@ class ConfigHandler:
         self.save_config()
         self.parse_config(self.settings)
 
-    # add somewhere in the class
     def _is_valid_config(self, cfg: dict) -> bool:
         try:
-            # minimal schema checks; expand if you like
             if not isinstance(cfg, dict):
                 return False
-            if "ROLE_MAP" not in cfg or "TIME_BLOCKS" not in cfg:
-                return False
+
+            Schema = ["TIME_BLOCKS", "ROLE_MAP", "EXPEDITOR_REQUIREMENTS", "SAVE_LOCATION", "OUTPUT_SETTINGS"]
+            for role in Schema:
+                if role not in cfg:
+                    return False
             sl = cfg.get("SAVE_LOCATION", {})
             if not isinstance(sl, dict) or "save_location_string" not in sl:
                 return False
             return True
         except Exception:
+            print(Exception)
             return False
 
     # -------------------------

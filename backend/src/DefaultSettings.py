@@ -65,7 +65,7 @@ default_settings = {
     },
     "ROLE_MAP": {
         "Blacklists": {
-            "departments": ["Authorized Hours RX", "Authorized Hrs", "Default", "Light Duty", "Management", "Pre-Opening", "Storm Loss", "Support Employment", "Training"],
+            "departments": ["Management", "Authorized Hours RX", "Authorized Hrs", "Default", "Light Duty", "Pre-Opening", "Storm Loss", "Support Employment", "Training"],
             "roles": ["Asst ARM", "Scan File", "Default"]
             },
         "Hannaford to Go": {

@@ -85,7 +85,6 @@ def employee_group(dept, day_index, config_object_role_map):
 
     # Get the role mapping for this department (which defines header order)
     role_map = config_object_role_map.get(dept.dept_name, {})
-    raw_roles = role_map.get('roles', [])
     clean_roles = role_map.get('clean_roles', [])
     role_labor_tracker_enabled_bool_list = role_map.get('labor_tracker_enabled', [])
 
@@ -103,26 +102,25 @@ def employee_group(dept, day_index, config_object_role_map):
                         employee_group[emp.display_role] = ([emp], role_labor_tracker_enabled_bool_list[role_index])
                     else:
                         employee_group[emp.display_role][0].append(emp)
-                    
+
                     all_sorted.append(emp)
                     break
 
     # After the preferred roles, assign any remaining employees to largest role
     if employee_group:
-        most_populous_role = "Default"
+        most_populous_role = "Default_Placeholder"
         role_len = 0
         for role_name, values in employee_group.items():
             if len(values[0]) > role_len:
                 role_len = len(values[0])
                 most_populous_role = role_name
-    
-    for emp in dept.employees:
-        if emp in all_sorted:
-            continue
-        if any(shift.day_index == day_index for shift in emp.shifts):
-            employee_group[most_populous_role][0].append(emp)
-            all_sorted.append(emp)
 
+        for emp in dept.employees:
+            if emp in all_sorted:
+                continue
+            if any(shift.day_index == day_index for shift in emp.shifts):
+                employee_group[most_populous_role][0].append(emp)
+                all_sorted.append(emp)
     return employee_group
 
 
@@ -163,7 +161,7 @@ def detect_new_roles_and_departments(store_object, config_object):
                 if emp.role not in blacklist_role:
                     if emp.role not in extant_roles_set:
                         emp_objects_with_unseen_roles.append(emp)
-    
+
     return {
         "new_departments": sorted(list(unseen_departments)),
         "emp_objects_with_unseen_roles": list(emp_objects_with_unseen_roles)
@@ -392,7 +390,7 @@ def disambiguate_duplicate_names(store, debug=False):
 def dept_scope_time_blocks(dept_name, employee_group, config_object, day_index):
   time_blocks_master = config_object.settings_time_blocks
   time_blocks = time_blocks_master[dept_name]
-  
+
   totals = defaultdict(float)
 
   for employee_list, _bool in employee_group.values():
@@ -543,7 +541,7 @@ def insert_labor_tracker(ws, calculate_overlaps_output, title, start_row, start_
         cell = ws.cell(row = start_row, column = col)
         cell.border = thick_border
         cell.font = Font(bold = True, size = 12, name='Calibri')
-        cell.alignment = Alignment(horizontal="center", vertical = "center", wrap_text = True) 
+        cell.alignment = Alignment(horizontal="center", vertical = "center", wrap_text = True)
 
     title_cell = ws.cell(row = start_row, column = start_col)
     title_cell.value = title
@@ -732,7 +730,7 @@ def insert_headers_and_employees(ws, employee_group_dict, day_index, start_row =
                 elif col == 7:
                     target_cell.value = shift.paid_hours
                     if type(target_cell.value) == float:
-                        target_cell.number_format = '0.##'  
+                        target_cell.number_format = '0.##'
 
                 else:
                     target_cell.value = ""

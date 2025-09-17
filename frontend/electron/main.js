@@ -101,8 +101,8 @@ function runBackend(args) {
   const env = {
     ...process.env,
     DAYSHEET_CONFIG_DIR: app.getPath("userData"),
-    PYTHONIOENCODING: "utf-8", // <-- force UTF-8 for stdout/stderr
-    PYTHONUTF8: "1",           // <-- belt & suspenders
+    PYTHONIOENCODING: "utf-8", 
+    PYTHONUTF8: "1",           
   };
 
   return new Promise((resolve, reject) => {
@@ -176,7 +176,13 @@ function registerIpcHandlers() {
   });
 
   ipcMain.handle("open-folder", async (_e, folderPath) => {
-    await shell.openPath(folderPath);
+    const errorMessage = await shell.openPath(folderPath);
+      if (errorMessage){
+        console.error(`shell.openPath failed: ${errorMessage}`);
+      } else {
+        console.log("File opened sucessfully!");
+      }
+    return errorMessage;
   });
 
   ipcMain.handle("confirm-reset-config", async () => {
