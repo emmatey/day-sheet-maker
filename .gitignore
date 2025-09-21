@@ -7,6 +7,8 @@ scratchpad.py
 *.xlsx
 testData/
 settings.json
+backend/src/daysheet-backend.spec
+backend/src/build*
 
 # === Python Artifacts ===
 __pycache__/
