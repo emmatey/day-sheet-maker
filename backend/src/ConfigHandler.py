@@ -172,7 +172,7 @@ class ConfigHandler:
                 self.save_config(settings)
             except KeyError as e:
                 print(e)
-                print("Log: Save Location Setting inaccessible. Restore defaults or delete config file.")
+                print("Err: Save Location Setting inaccessible. Restore defaults or delete config file.")
                 raise SystemExit(1)
             return f"Log: Save Location Path Is: {self.settings_save_loc}\n"
         else:
@@ -200,7 +200,7 @@ class ConfigHandler:
             self.settings_save_loc = settings.get("SAVE_LOCATION", {})["save_location_string"]
         except KeyError as e:
             print(e)
-            print("Log: Save Location Setting inaccessible. Restore defaults or delete config file.")
+            print("Err: Save Location Setting inaccessible. Restore defaults or delete config file.")
             raise SystemExit(1)
 
         # Ensure archive path is set if placeholder
@@ -314,7 +314,7 @@ class ConfigHandler:
         try:
             value = json.loads(raw_value)
         except json.JSONDecodeError:
-            return "Log: Malformed JSON value. Could not decode."
+            return "Err: Malformed JSON value. Could not decode."
 
         # current config
         cfg = self.settings if isinstance(self.settings, dict) else {}

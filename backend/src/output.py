@@ -35,11 +35,11 @@ def ProcessInput(input_file):
             csv_file = input_file.replace('.xlsx', '_converted.csv')
             dataframe.to_csv(csv_file, index=False)
         except:
-            raise ValueError('Invalid Input, Could not Convert to CSV')
+            raise ValueError('Err: Invalid Input, Could not Convert to CSV')
     elif ext == '.csv':
         csv_file = input_file
     else:
-        raise ValueError(f'Invalid Input - input is: {input_file}')
+        raise ValueError(f'Err: Invalid Input - input is: {input_file}')
 
     return csv_file, input_file
 
@@ -353,7 +353,7 @@ if __name__ == "__main__":
                 dept_name, index_str = entry.split(":")
                 output_dict[dept_name] = int(index_str)
             except ValueError:
-                raise ValueError(f"Invalid format for --output entry: '{entry}'. Expected DeptName:Index")
+                raise ValueError(f"Err: Invalid format for --output entry: '{entry}'. Expected DeptName:Index")
 
         print("Log: Output selection received:")
         for dept_name, idx in output_dict.items():
@@ -375,4 +375,4 @@ if __name__ == "__main__":
         try:
             os.remove(csv_path)
         except Exception as e:
-            print(f"Log: Error {e}. \n {csv_path} was unable to be removed\n")
+            print(f"Err: {e}. \n {csv_path} was unable to be removed\n")

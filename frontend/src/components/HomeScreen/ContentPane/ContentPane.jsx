@@ -46,7 +46,8 @@ export default function ContentPane() {
         
     }
     catch (err) {
-      console.error("Error selecting file or running preview:", err);
+      console.error(err);
+      setLoading(false);
     }
   };
   
