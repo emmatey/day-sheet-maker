@@ -22,6 +22,37 @@ export default function ContentPane() {
     setShowInfo(true);
   };
 
+  function filterError(err){
+    let error_str = err.message
+    let detected = false;
+    let buffer = [];
+
+    for (let char of error_str) {
+      if (buffer.length < 4){
+        buffer.push(char);
+      }
+
+      if (buffer.length === 4 && detected === false){
+         buffer.shift();
+         buffer.push(char);
+      }
+
+      if (detected === true){
+        buffer.push(char);
+      }
+
+      if (buffer.join("") === ("Err:")){
+        detected = true;
+      }
+      
+      if (detected === true && char === "'"){
+        break;
+      }  
+    }
+      const filtered_error = buffer.join("");
+      return filtered_error;
+  };
+
   const handleSelectFile = async () => {
     try {
       const selectedFilePath = await window.electronAPI.selectFile();
@@ -47,6 +78,8 @@ export default function ContentPane() {
     }
     catch (err) {
       console.error(err);
+      const filtered_error = filterError(err);
+      window.alert(filtered_error);
       setLoading(false);
     }
   };
