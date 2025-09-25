@@ -729,8 +729,6 @@ def insert_headers_and_employees(ws, employee_group_dict, day_index, start_row =
 
                 elif col == 7:
                     target_cell.value = shift.paid_hours
-                    if type(target_cell.value) == float:
-                        target_cell.number_format = '0.##'
 
                 else:
                     target_cell.value = ""
@@ -882,7 +880,6 @@ def insert_effective_shopper_table(
         # Requirement
         c = ws.cell(row=current_row, column=start_col + 1)
         c.value = req
-        c.number_format = '0.##'
         c.alignment = centered_wrapped
         c.border = thin_border_all
         c.font = Font(name="Calibri", bold=True)
@@ -890,7 +887,6 @@ def insert_effective_shopper_table(
         # ESH value
         esh_cell = ws.cell(row=current_row, column=start_col + 2)
         esh_cell.value = esh
-        esh_cell.number_format = '0.##'
         esh_cell.alignment = centered_wrapped
         esh_cell.border = thin_border_all
 
@@ -914,7 +910,6 @@ def insert_effective_shopper_table(
 
         merged_total_cell = ws.cell(row=row_ptr, column=merge_col)
         merged_total_cell.value = three_hr_sum_esh
-        merged_total_cell.number_format = '0.##'
         merged_total_cell.alignment = centered_wrapped
         merged_total_cell.border = thin_border_all
         merged_total_cell.font = Font(name="Calibri", bold=False)
