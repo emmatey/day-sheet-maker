@@ -198,6 +198,14 @@ function registerIpcHandlers() {
     return response === 1;
   });
 
+  ipcMain.handle("start-button-info-dialog", async () => {
+    const { response } = await dialog.showMessageBox({
+      message: "To begin, select the input file\nThis must be the weekly schedule exported from Kronos in either .xlsx or .csv format\n(PDF Files are not supported!)",
+      type: "info"
+    });
+    return response;
+  })
+
   // Let Python regenerate canonical defaults
   ipcMain.handle("reset-config", async () => {
     return runBackend(["--update_config", "RESET_TO_DEFAULT"]);

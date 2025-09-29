@@ -882,7 +882,7 @@ def insert_effective_shopper_table(
         c.value = req
         c.alignment = centered_wrapped
         c.border = thin_border_all
-        c.font = Font(name="Calibri", bold=True)
+        c.font = Font(name="Calibri", bold=False)
 
         # ESH value
         esh_cell = ws.cell(row=current_row, column=start_col + 2)

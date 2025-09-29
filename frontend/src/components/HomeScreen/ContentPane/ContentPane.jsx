@@ -5,22 +5,13 @@ import SettingsLaunchpad from "../../SettingsLaunchpad/SettingsLaunchpad.jsx";
 import StandardPlusInfoButtonPanel from "./../../StandardPlusInfoButtonPanel/StandardPlusInfoButtonPanel.jsx";
 import DepartmentSelect from "./../../DepartmentSelect/DepartmentSelect.jsx";
 import Modal from "./../../Modal/Modal.jsx";
-import InfoModal from "../../InfoModal/InfoModal.jsx";
-import startButtonPdf from "/HelpIconDocs/StartButton.pdf";
 
 export default function ContentPane() {
   const [showDeptSelect, setShowDeptSelect] = useState(false);
   const [showSettingsLaunchpad, setShowSettingsLaunchpad] = useState(false);
   const [departments, setDepartments] = useState([]);
   const [filePath, setFilePath] = useState("");
-  const [showInfo, setShowInfo] = useState(false);
-  const [docUrl, setDocUrl] = useState("");
   const [loading, setLoading] = useState(false);
-
-  function handleInfoClick(docUrl){
-    setDocUrl(docUrl);
-    setShowInfo(true);
-  };
 
   function filterError(err){
     let error_str = err.message
@@ -49,9 +40,14 @@ export default function ContentPane() {
         break;
       }  
     }
-      const filtered_error = buffer.join("");
+      let filtered_error = buffer.join("");
       return filtered_error;
   };
+
+  const handleStartButtonInfoClick = () => {
+    const response = window.electronAPI.startButtonInfoDialog();
+    console.log("start info button clicked, response = ", response);
+  }
 
   const handleSelectFile = async () => {
     try {
@@ -96,7 +92,7 @@ export default function ContentPane() {
         <StandardPlusInfoButtonPanel
           label = {loading ? "Reading File..." : "Start"}
           onClickMain = {handleSelectFile}
-          onClickInfo = {() => {handleInfoClick(startButtonPdf)}}
+          onClickInfo = {handleStartButtonInfoClick}
           showInfo = {true}
           buttonClassName = {loading ? "standard-button:disabled" : "home-screen-button"}
           stdButtonDisabled = {loading ? true : false}
@@ -135,14 +131,7 @@ export default function ContentPane() {
           <SettingsLaunchpad
             onClose={() => setShowSettingsLaunchpad(false)} />
         </Modal>
-      )}
-  
-      <InfoModal
-        docUrl = {docUrl}
-        open = {showInfo}
-        onClose = {() => setShowInfo(false)}
-      />
-    
+      )}  
     </>
   );
 }
