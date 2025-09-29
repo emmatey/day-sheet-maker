@@ -27,5 +27,10 @@
 .info-button-panel-style {
   position: absolute;
   right: -100px;
-  background-color: transparent;           
+  background-color: transparent;
+  border: none;           
+}
+
+.info-button-panel-style:focus {
+  outline: none;
 }

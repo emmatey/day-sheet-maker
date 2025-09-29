@@ -66,4 +66,5 @@
 .info-button-lt button{
   scale: 70%;
   background: transparent;
+  border: none;
 }
