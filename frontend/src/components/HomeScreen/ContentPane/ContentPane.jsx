@@ -37,8 +37,14 @@ export default function ContentPane() {
       }
       
       if (detected === true && char === "'"){
+        buffer.pop();
         break;
       }  
+
+      if (detected === true && char === "\""){
+        buffer.pop();
+        break;
+      } 
     }
       let filtered_error = buffer.join("");
       return filtered_error;

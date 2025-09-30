@@ -339,6 +339,8 @@ if __name__ == "__main__":
 
     if args.preview:
         preview_depts = FindValidDepts(hrd, config_handler_object)
+        if len(preview_depts) <= 0:
+            raise Exception("Err: No departments found. please check the input file and try again.")
         for dept in preview_depts:
             print(dept)
 
