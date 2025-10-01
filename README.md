@@ -12,6 +12,8 @@ Prior to my workplace implementing this tool, it was a weekly ritual for a membe
 
 This tool automates the process entirely. Additionally, the daysheets produced by this program are much richer with information than anything worth the effort of implementing by hand. There’s a lot of data in those schedules, and the output from this program takes advantage of it to provide actionable information.
 
+*This project was primarally an opprotunity to educate myself. It's much more motivating to study when you're solving a real problem, trivial as it may be.*
+
 ---
 
 # What are ‘roles’ and how can I configure them?
