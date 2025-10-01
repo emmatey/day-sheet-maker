@@ -1,6 +1,4 @@
-<div style="text-align: center;">
-<img src="https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/documentHeader.png" alt="Document header." style="display: block; margin: 0 auto;" />
-</div>
+![Document header](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/documentHeader.png)
 
 Daysheet maker is a bespoke utility for a specific workplace and task. Its primary, and only function is to convert Kronos schedules, automatically generated for retail managers at the relevant business, and transform them into “Daysheets”.
 
