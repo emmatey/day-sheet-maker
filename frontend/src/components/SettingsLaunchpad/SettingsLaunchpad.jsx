@@ -54,8 +54,16 @@ export default function SettingsLaunchpad({ onClose }) {
   };
 
   const handleResetConfig = async () => {
-    const confirmed = await window.electronAPI.confirmResetConfig();
-    if (!confirmed) return;
+    const response = await window.electronAPI.nativeAlert({
+      type: "warning",
+      buttons: ["Cancel", "Reset"],
+      defaultId: 0,
+      cancelId: 0,
+      title: "Reset to Defaults",
+      message: "Reset all settings to default?",
+      detail: "This will overwrite your current configuration.",      
+    });
+    if (response == 0) return; // 0 = index of cancel button
     await window.electronAPI.resetConfig();
     console.log("Config reset to default.");
   };
@@ -78,7 +86,11 @@ export default function SettingsLaunchpad({ onClose }) {
         />
       </div>
 
-      <BottomButtonPanel onReset={handleResetConfig} onSave={() => onClose?.()} saveLabel="Close" />
+      <BottomButtonPanel 
+        onReset = {handleResetConfig} 
+        onSave = {() => onClose?.()}
+        saveLabel = "Close"
+        />
 
       {activeModal === "labor" && (
         <Modal onClose={() => navigate(null)} allowClickAway={true}>

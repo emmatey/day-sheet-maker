@@ -16,7 +16,6 @@ const __dirname = path.dirname(__filename);
 let mainWindow = null;
 const isDev = () => !app.isPackaged;
 
-// Optional: keep single instance
 const gotLock = app.requestSingleInstanceLock();
 if (!gotLock) app.quit();
 else {
@@ -89,7 +88,6 @@ function getBackendInvoker() {
     const script = path.join(__dirname, "..", "..", "backend", "src", "output.py");
     return { cmd: py, argsPrefix: [script] };
   }
-  // onedir layout we copy into resources/backend/daysheet-backend/
   const exePath = path.join(process.resourcesPath, "backend", "daysheet-backend", "daysheet-backend.exe");
   return { cmd: exePath, argsPrefix: [] };
 }
@@ -185,33 +183,21 @@ function registerIpcHandlers() {
     return errorMessage;
   });
 
-  ipcMain.handle("confirm-reset-config", async () => {
-    const { response } = await dialog.showMessageBox({
-      type: "warning",
-      buttons: ["Cancel", "Reset"],
-      defaultId: 0,
-      cancelId: 0,
-      title: "Reset to Defaults",
-      message: "Reset all settings to default?",
-      detail: "This will overwrite your current configuration.",
-    });
-    return response === 1;
-  });
+  ipcMain.handle("native-alert", async ({ sender }, ...args) => {
+    const webContents = sender;
+    const window = BrowserWindow.fromWebContents(webContents);
 
-  ipcMain.handle("start-button-info-dialog", async () => {
     const { response } = await dialog.showMessageBox({
-      message: "To begin, select the input file\nThis must be the weekly schedule exported from Kronos in either .xlsx or .csv format\n(PDF Files are not supported!)",
-      type: "info"
-    });
+      window,
+      ...args[0]
+    })
     return response;
   })
 
-  // Let Python regenerate canonical defaults
   ipcMain.handle("reset-config", async () => {
     return runBackend(["--update_config", "RESET_TO_DEFAULT"]);
   });
 
-  // Read settings.json (from userData)
   ipcMain.handle("read-settings", async () => {
     const p = ensureSettingsFile();
     try {
@@ -233,7 +219,6 @@ function registerIpcHandlers() {
 // App lifecycle
 // ==============================
 app.whenReady().then(() => {
-  // Use a real app name + stable userData path in dev (mirrors production)
   app.setName("DaySheet Maker");
   const desiredUserData = path.join(app.getPath("appData"), "DaySheet Maker");
   app.setPath("userData", desiredUserData);

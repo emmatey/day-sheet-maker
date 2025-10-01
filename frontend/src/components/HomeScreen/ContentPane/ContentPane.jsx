@@ -51,9 +51,17 @@ export default function ContentPane() {
   };
 
   const handleStartButtonInfoClick = () => {
-    const response = window.electronAPI.startButtonInfoDialog();
-    console.log("start info button clicked, response = ", response);
-  }
+    window.electronAPI.nativeAlert({
+      message: "To begin, select the input file\nThis must be the weekly schedule exported from Kronos in either .xlsx or .csv format\n(PDF Files are not supported!)",
+      type: "info"
+    })
+  };
+
+  const handleAboutClick = () => {
+    const windowFeatures = "width = 1000, height = 900";
+    const URL = "https://github.com/emmatey/day-sheet-maker";
+    window.open(URL, "_blank", windowFeatures);
+  };
 
   const handleSelectFile = async () => {
     try {
@@ -81,15 +89,12 @@ export default function ContentPane() {
     catch (err) {
       console.error(err);
       const filtered_error = filterError(err);
-      window.alert(filtered_error);
+      window.electronAPI.nativeAlert({
+        message: filtered_error,
+        type: "error",
+      });
       setLoading(false);
     }
-  };
-  
-  const handleAboutClick = () => {
-    const windowFeatures = "width = 1000, height = 900";
-    const URL = "https://github.com/emmatey/day-sheet-maker";
-    window.open(URL, "_blank", windowFeatures);
   };
 
   return (
