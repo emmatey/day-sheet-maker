@@ -1,4 +1,6 @@
+<div style="text-align: center;">
 ![Document header.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/documentHeader.png)
+</div>
 
 Daysheet maker is a bespoke utility for a specific workplace and task. Its primary, and only function is to convert Kronos schedules, automatically generated for retail managers at the relevant business, and transform them into “Daysheets”.
 
@@ -18,6 +20,7 @@ A ‘Time Block’ is a range of time of arbitrary duration and name. The applic
 >This can be implemented in a number of ways, depending on whats most useful to the manager and department inquestion. The time blocks tracked cold be >as simple as having one tracked block during a labor intensive time,like production at 5am - 8am in the bakery. Or it could be used to equally divide >the day to understand the ebband flow of labor coverage over time.
 
 ![The 'Time Blocks' managment menu.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/timeBlocksEditMenu.png)
+*The 'Time Blocks' managment menu.*
 
 # What are ‘roles’ and how can I configure them?
 Roles are the sub-categories of each department like ‘cashier’ vs ‘help desk’ vs ‘service leader’. Some departments utilize roles when making their schedules and some don’t. As a user of daysheet maker you have the option to configure a handful of roles related options.
@@ -32,15 +35,19 @@ Each role also allows you to enable or disable its ‘labor tracker’ from your
 >**Note:** In the case of ‘department A’ having a member of ‘department B’ scheduled for a shift in ‘department A’, next to the relevant employee’s name >will be *"– (Native Role)"*. So, for example if a cashier is scheduled in the meat department for a day, on the meat department’s daysheet the cashier will >be listed as *First Last - (“Cashier”)*
 
 ![The menu to configure roles.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/roleMapSettingsMenu.png)
+*The menu to configure roles.*
 
 # What are labor trackers
 The labor tracker is just a collection of all the time blocks you’ve configured shown as a table ordered by start time. They can have as many elements as you have time blocks, and will be rendered by default on a per role basis in your output. However there’s also the option to condense all the per-role labor trackers into a unified table that tracks the entire department as one unit.
 
 ![Standard 'Labor Trackers' for a department with 4 roles.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/laborTrackers.png)
+*Standard 'Labor Trackers' for a department with 4 roles.*
 
 !['Labor Trackers' for a department with 4 roles, and one disabled.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/roleDisabledLaborTrackerExample.png)
+*'Labor Trackers' for a department with 4 roles, and one disabled.*
 
 !['Labor Trackers' where scope is shifted from per role to per department.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/unifiedLaborTracker.png)
+*'Labor Trackers' where scope is shifted from per role to per department.*
 
 # What is ESH
 ESH, or effective/estimated shopping hours is an online fulfillment department specific metric. It attempts to show, at a glance, how many labor hours per hour of shopping power the department will have. This is useful for comparing against the estimated labor required figure in the order management system’s dashboard.
@@ -50,18 +57,22 @@ The metric ESH is derived by a simple formula. In any given hour ESH is calculat
 >ESH/hour = (Total_labor_scheduled_per_hour) – (hourly_ESH_constant)
 
 ![A daysheet featuring the ESH table.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/eshExample.png)
+*A daysheet featuring the ESH table.*
 
 The “ESH constant” is configurable by the user and can be changed for every hour. It is meant to represent time allotted for all activities that aren’t shopping. This could be the non-shopper role, it could be breaks, it could be the time that people take to set up between trips. The default settings were arrived at after surveying multiple people in the online fulfillment department and getting their opinions.
 ESH can also be disabled entirely in favor of the time blocks system, or the “Daily Notes”.
 
 ![The menu to edit ESH constant.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/eshEditMenu.png)
+*The menu to edit ESH constant.*
 
 # What do you mean by “Daily Notes”
 In the event that every role is “disabled” in settings, or the daily notes override setting is enabled, in lieu of the ESH table, or time time blocks, a “Daily Notes” block is rendered instead. This is just free writing space and is available both as a fallback option, and as a preference for people who find more value in writing their own announcements by hand, which is understandable because the daysheets are typically seen by everyone multiple times per day.
 
 !['Daily notes' example.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/dailyNotesExample.png)
+*'Daily notes' example.*
 
 # Where is the output saved?
 By default the program saves your output to a directory called "Daysheet Archive" located in the "Documents" directory of the current user. However, you can specify an arbitrary save location in the application settings.
 
 ![Save Location.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/saveLocation.png)
+*Save Location.*
