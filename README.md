@@ -12,7 +12,7 @@ Prior to my workplace implementing this tool, it was a weekly ritual for a membe
 
 This tool automates the process entirely. Additionally, the daysheets produced by this program are much richer with information than anything worth the effort of implementing by hand. There’s a lot of data in those schedules, and the output from this program takes advantage of it to provide actionable information.
 
-**Key concepts to know as a user.**
+# Key concepts to know as a user.
 
 # What are ‘roles’ and how can I configure them?
 Roles are the sub-categories of each department like ‘cashier’ vs ‘help desk’ vs ‘service leader’. Some departments utilize roles when making their schedules and some don’t. As a user of daysheet maker you have the option to configure a handful of roles related options.
