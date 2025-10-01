@@ -1,10 +1,10 @@
 {
   "name": "day-sheet-maker",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.0.1",
   "type": "module",
   "main": "electron/main.js",
-  "description": "An Electron app for generating and managing day sheets from Hannaford schedules.",
+  "description": "An app for generating and managing day sheets.",
   "author": {
     "name": "Emma Talley",
     "email": "mcrib40@gmail.com"
