@@ -12,6 +12,8 @@ Prior to my workplace implementing this tool, it was a weekly ritual for a membe
 
 This tool automates the process entirely. Additionally, the daysheets produced by this program are much richer with information than anything worth the effort of implementing by hand. There’s a lot of data in those schedules, and the output from this program takes advantage of it to provide actionable information.
 
+**Key concepts to know as a user.**
+
 # What are ‘roles’ and how can I configure them?
 Roles are the sub-categories of each department like ‘cashier’ vs ‘help desk’ vs ‘service leader’. Some departments utilize roles when making their schedules and some don’t. As a user of daysheet maker you have the option to configure a handful of roles related options.
 ##	1. “Raw name” vs “Display name” -
@@ -25,6 +27,7 @@ Each role also allows you to enable or disable its ‘labor tracker’ from your
 >**Note:** In the case of ‘department A’ having a member of ‘department B’ scheduled for a shift in ‘department A’, next to the relevant employee’s name >will be *"– (Native Role)"*. So, for example if a cashier is scheduled in the meat department for a day, on the meat department’s daysheet the cashier will >be listed as *First Last - (“Cashier”)*
 
 ![The menu to configure roles.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/roleMapSettingsMenu.png)
+
 *The menu to configure roles.*
 
 # What are time Blocks
@@ -33,6 +36,7 @@ A ‘Time Block’ is a range of time of arbitrary duration and name. The applic
 >This can be implemented in a number of ways, depending on whats most useful to the manager and department in question. The time blocks tracked cold be as simple as having one tracked block during a labor intensive time,like production at 5am - 8am in the bakery. Or it could be used to equally divide the day to understand the ebband flow of labor coverage over time.
 
 ![The 'Time Blocks' managment menu.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/timeBlocksEditMenu.png)
+
 *The 'Time Blocks' managment menu.*
 
 # What are labor trackers
