@@ -1,6 +1,6 @@
 ![Document header](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/documentHeader.png)
 
-Daysheet maker is a bespoke utility for a specific workplace and task. Its primary, and only function is to convert **Kronos schedules**, automatically generated for retail managers at the relevant business, and transform them into “Daysheets”.
+Daysheet maker is a bespoke utility for a specific workplace and task. Its primary and only function is to take **Kronos schedules**, automatically generated for retail managers at the relevant business, and transform them into “Daysheets”.
 
 ## Quick Start
 **This tool only works on Windows.**
@@ -38,32 +38,33 @@ The list order in the settings menu will be mirrored exactly in your final outpu
 
 ## C. Labor Tracker Enable/Disable
 Each configured role has an associated Labor Tracker (metrics for time blocks). If a role is very small or you don't need detailed staffing metrics for it, you can simply disable its Labor Tracker to keep your output cleaner. If all role trackers are disabled, the program will automatically substitute the tracking section with the "Daily Notes" block instead.
-<p>
+
 ![The menu to configure roles.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/roleMapSettingsMenu.png)
-</p>
+
 *The menu to configure roles.*
+
 # 2. What are time blocks
 A ‘Time Block’ is a range of time of arbitrary duration and name. The application stores the time blocks you define, and then can then measure the total labor hours which ‘overlap’ with these ranges. For example, if I define a time block from 5am to 10am and I have three employees, Jeff who works from 5am to noon, Laura who works from 7am to 3pm, and Michelle who works from noon to 9pm. Jeff would contribute 5 hours (5am – 10am), Laura would contribute 3 hours (7am – 10am), and Michelle would contribute 0 hours, as her shift starts past 10am. In total, this time block would have a value of 8 labor hours.
 
 >This can be implemented in a number of ways, depending on what's most useful to the manager and department in question. The time blocks tracked could be as simple as having one tracked block during a labor intensive time,like production from 5am - 8am in the bakery. Or it could be used to equally divide the day to understand the ebb and flow of labor coverage over time.
-<p>
+
 ![The 'Time Blocks' management menu.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/timeBlocksEditMenu.png)
-</p>
+
 *The 'Time Blocks' management menu.*
 
 # 3. What are labor trackers? (The Output of Roles and Time Blocks)
 The labor tracker is just a collection of all the time blocks you’ve configured shown as a table ordered by start time. They can have as many elements as you have time blocks, and will be rendered by default on a per role basis in your output. However there’s also the option to condense all the per-role labor trackers into a unified table that tracks the entire department as one unit.
-<p>
+
 ![Standard 'Labor Trackers' for a department with 4 roles.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/laborTrackers.png)
-</p>
+
 *Standard 'Labor Trackers' for a department with 4 roles.*
-<p>
+
 !['Labor Trackers' for a department with 4 roles, and one disabled.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/roleDisabledLaborTrackerExample.png)
-</p>
+
 *'Labor Trackers' for a department with 4 roles, and one disabled.*
-<p>
+
 !['Labor Trackers' where scope is shifted from per role to per department.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/unifiedLaborTracker.png)
-</p>
+
 *'Labor Trackers' where scope is shifted from per role to per department.*
 
 # 4. What is ESH
@@ -72,29 +73,29 @@ With these two data points, anyone will easily be able to forecast a labor short
 
 The metric ESH is derived by a simple formula: the Total Scheduled Labor per Hour minus a configurable Hourly ESH Constant.
 
-$$\text{ESH/hour} = (\text{Total\_labor\_scheduled\_per\_hour}) - (\text{hourly\_ESH\_constant})$$
-<p>
+> ESH/hour = (Total Labor Hours per hour) - (ESH Constant)
+
 ![A daysheet featuring the ESH table.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/eshExample.png)
-</p>
+
 *A daysheet featuring the ESH table.*
 
 The “ESH constant” is configurable by the user and can be changed for every hour. It is meant to represent time allotted for all activities that aren’t shopping. This could be the non-shopper role, it could be breaks, it could be the time that people take to set up between trips. The default settings were arrived at after surveying multiple people in the online fulfillment department and getting their opinions.
 ESH can also be disabled entirely in favor of the time blocks system, or the “Daily Notes”.
-<p>
+
 ![The menu to edit ESH constant.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/eshEditMenu.png)
-</p>
+
 *The menu to edit ESH constant.*
 
 # 5. What do you mean by “Daily Notes”
 In the event that every role is “disabled” in settings, or the daily notes override setting is enabled, in lieu of the ESH table, or time blocks, a “Daily Notes” block is rendered instead. This is just free writing space and is available both as a fallback option, and as a preference for people who find more value in writing their own announcements by hand, which is understandable because the daysheets are typically seen by everyone multiple times per day.
-<p>
+
 !['Daily notes' example.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/dailyNotesExample.png)
-</p>
+
 *'Daily notes' example.*
 
 # 6. Where is the output saved?
 By default the program saves your output to a directory called "Daysheet Archive" located in the "Documents" directory of the current user. However, you can specify an arbitrary save location in the application settings.
-<p>
+
 ![Save Location.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/saveLocation.png)
-</p>
+
 *Save Location.*
