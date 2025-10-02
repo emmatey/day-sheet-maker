@@ -28,9 +28,9 @@ This tool is composed of three sections, the ‘back-end’ processing logic, wr
 Roles are the specific job categories within your department, such as 'cashier' or 'service leader.' They determine how your Daysheet is organized. The DaySheet Maker gives you complete control over how these roles are presented and tracked.
 
 ## A. Raw Name vs. Display Name:  Cleanup and Grouping
-- **Cleanup:** The schedules exported from Kronos often contain abbreviated or "ugly" job titles, called Raw Names (e.g., 'Crt Str Assoc' or 'CashierEXP'). Your configuration allows you to map these raw names to a cleaner, user-friendly Display Name.
-  The Display Name is what appears on your final Daysheet output as the header for each role's subsection and Labor Tracker.
-- **Grouping:** You can assign multiple Raw Names to the same Display Name. For example, you might map both 'SL SelfScan' and 'Service Clerk' to the single Display Name, "Service Desk." This groups them together on the output and consolidates their labor hours into a single tracker.
+- **Cleanup:** The schedules exported from Kronos often contain abbreviated or "ugly" job titles, called **Raw Names** (e.g., 'Crt Str Assoc' or 'CashierEXP'). Your configuration allows you to map these raw names to a cleaner, user-friendly **Display Name**.
+  The Display Name is what appears on your final Daysheet output as the header for each role's subsection and Labor Tracker[Labor Trackers](# 3.).
+- **Grouping:** You can assign multiple Raw Names to the same Display Name. For example, you might map both 'SL SelfScan' and 'Service Clerk' to the single Display Name, "Service Desk." This groups them together on the output under the same header, and consolidates their labor hours into a single labor tracker.
 
 ## B. Role Order
 The list order in the settings menu will be mirrored exactly in your final output (e.g., placing Manager roles at the top).
