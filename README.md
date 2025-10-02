@@ -75,8 +75,11 @@ The labor tracker is just a collection of all the time blocks you’ve configure
 *'Labor Trackers' where scope is shifted from per role to per department.*
 
 # 4. What is ESH
-ESH, or effective/estimated shopping hours is an online fulfillment department specific metric. It attempts to show, at a glance, how many labor hours per hour of shopping power the department will have. This is useful for comparing against the estimated labor required figure in the order management system dashboard.
+ESH, or effective/estimated shopping hours is an online fulfillment department specific metric. 
+It attempts to show how many **shopping hours per hour** the department will have. i.e. the amount of labor dedicated to shopping in specific.
+This is useful for comparing against the estimated labor required figure in the order management system dashboard (OMS).
 With these two data points, anyone will easily be able to forecast a labor shortage and call for help well before it becomes an issue.
+In specific, if the ESH value is far below the estimated shopping labor required shown by OMS/Spectrum, it's worth reassessing your situation and perhaps calling for help.
 
 The metric ESH is derived by a simple formula: the Total Scheduled Labor per Hour minus a configurable Hourly ESH Constant.
 
