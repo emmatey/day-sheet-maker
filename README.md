@@ -1,7 +1,6 @@
 <p>
 ![Document header](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/documentHeader.png)
 </p>
-
 Daysheet maker is a bespoke utility for a specific workplace and task. Its primary, and only function is to convert **Kronos schedules**, automatically generated for retail managers at the relevant business, and transform them into “Daysheets”.
 
 ## Quick Start
@@ -40,9 +39,9 @@ The list order in the settings menu will be mirrored exactly in your final outpu
 
 ## C. Labor Tracker Enable/Disable
 Each configured role has an associated Labor Tracker (metrics for time blocks). If a role is very small or you don't need detailed staffing metrics for it, you can simply disable its Labor Tracker to keep your output cleaner. If all role trackers are disabled, the program will automatically substitute the tracking section with the "Daily Notes" block instead.
-
+<p>
 ![The menu to configure roles.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/roleMapSettingsMenu.png)
-
+</p>
 *The menu to configure roles.*
 # 2. What are time blocks
 A ‘Time Block’ is a range of time of arbitrary duration and name. The application stores the time blocks you define, and then can then measure the total labor hours which ‘overlap’ with these ranges. For example, if I define a time block from 5am to 10am and I have three employees, Jeff who works from 5am to noon, Laura who works from 7am to 3pm, and Michelle who works from noon to 9pm. Jeff would contribute 5 hours (5am – 10am), Laura would contribute 3 hours (7am – 10am), and Michelle would contribute 0 hours, as her shift starts past 10am. In total, this time block would have a value of 8 labor hours.
