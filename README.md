@@ -27,23 +27,30 @@ This tool is composed of three sections, the ‘back-end’ processing logic, wr
 # 1. How to Configure and Utilize Roles
 Roles are the specific job categories within your department, such as 'cashier' or 'service leader.' They determine how your Daysheet is organized. The DaySheet Maker gives you complete control over how these roles are presented and tracked.
 
-## A. Raw Name vs. Display Name: Grouping and Cleanup
-- Cleanup: The schedules exported from Kronos often contain abbreviated or "ugly" job titles, called Raw Names (e.g., 'Crt Str Assoc' or 'CashierEXP').
-Your configuration allows you to map these raw names to a cleaner, user-friendly Display Name. The Display Name is what appears on your final Daysheet output and as the header for each role's subsection and Labor Tracker.
-- Grouping: You can assign multiple Raw Names to the same Display Name. For example, you might map both 'SL SelfScan' and 'Service Clerk' to the single Display Name, "Service Desk." This groups them together on the output and consolidates their labor hours into a single tracker.
+## A. Raw Name vs. Display Name:  Cleanup and Grouping
+- **Cleanup:** The schedules exported from Kronos often contain abbreviated or "ugly" job titles, called Raw Names (e.g., 'Crt Str Assoc' or 'CashierEXP'). Your configuration allows you to map these raw names to a cleaner, user-friendly Display Name.
+  The Display Name is what appears on your final Daysheet output as the header for each role's subsection and Labor Tracker.
+- **Grouping:** You can assign multiple Raw Names to the same Display Name. For example, you might map both 'SL SelfScan' and 'Service Clerk' to the single Display Name, "Service Desk." This groups them together on the output and consolidates their labor hours into a single tracker.
 
 ## B. Role Order
 The list order in the settings menu will be mirrored exactly in your final output (e.g., placing Manager roles at the top).
 
 ## C. Labor Tracker Enable/Disable
-Each configured role has an associated Labor Tracker (metrics for time blocks). If a role is very small or you don't need detailed staffing metrics for it, you can simply disable its Labor Tracker to keep your output cleaner. If all role trackers are disabled, the program will automatically substitute the tracking section with the "Daily Notes" block instead.
+Each configured role has an associated Labor Tracker table (more on that later). If a role is very small or you don't need detailed staffing metrics for it, you can simply disable its Labor Tracker to keep your output cleaner. If all role trackers are disabled, the program will automatically substitute the tracking section with the "Daily Notes" block instead.
 
 ![The menu to configure roles.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/roleMapSettingsMenu.png)
 
 *The menu to configure roles.*
 
 # 2. What are time blocks
-A ‘Time Block’ is a range of time of arbitrary duration and name. The application stores the time blocks you define, and then can then measure the total labor hours which ‘overlap’ with these ranges. For example, if I define a time block from 5am to 10am and I have three employees, Jeff who works from 5am to noon, Laura who works from 7am to 3pm, and Michelle who works from noon to 9pm. Jeff would contribute 5 hours (5am – 10am), Laura would contribute 3 hours (7am – 10am), and Michelle would contribute 0 hours, as her shift starts past 10am. In total, this time block would have a value of 8 labor hours.
+A ‘Time Block’ is a range of time of arbitrary duration and name. The application stores the time blocks you define, and then can then measure the total labor hours which ‘overlap’ with these ranges. 
+
+For example, if I define a time block from 5am to 10am and I have three employees, 
+- Jeff who works from 5am to 12pm,
+- Laura who works from 7am to 3pm, and
+- Michelle who works from 12pm to 9pm.
+Jeff would contribute 5 hours (5am – 10am), Laura would contribute 3 hours (7am – 10am), and Michelle would contribute 0 hours, as her shift starts past 10am.
+In total, this time block would have a value of 8 labor hours.
 
 >This can be implemented in a number of ways, depending on what's most useful to the manager and department in question. The time blocks tracked could be as simple as having one tracked block during a labor intensive time,like production from 5am - 8am in the bakery. Or it could be used to equally divide the day to understand the ebb and flow of labor coverage over time.
 
@@ -68,7 +75,7 @@ The labor tracker is just a collection of all the time blocks you’ve configure
 
 # 4. What is ESH
 ESH, or effective/estimated shopping hours is an online fulfillment department specific metric. It attempts to show, at a glance, how many labor hours per hour of shopping power the department will have. This is useful for comparing against the estimated labor required figure in the order management system dashboard.
-With these two data points, anyone will easily be able to forecast a labor shortage.
+With these two data points, anyone will easily be able to forecast a labor shortage and call for help well before it becomes an issue.
 
 The metric ESH is derived by a simple formula: the Total Scheduled Labor per Hour minus a configurable Hourly ESH Constant.
 
