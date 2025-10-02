@@ -49,6 +49,7 @@ For example, if I define a time block from 5am to 10am and I have three employee
 - Jeff who works from 5am to 12pm,
 - Laura who works from 7am to 3pm, and
 - Michelle who works from 12pm to 9pm.
+  
 Jeff would contribute 5 hours (5am – 10am), Laura would contribute 3 hours (7am – 10am), and Michelle would contribute 0 hours, as her shift starts past 10am.
 In total, this time block would have a value of 8 labor hours.
 
