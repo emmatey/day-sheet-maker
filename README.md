@@ -29,14 +29,14 @@ Roles are the specific job categories within your department, such as 'cashier' 
 
 ## A. Raw Name vs. Display Name:  Cleanup and Grouping
 - **Cleanup:** The schedules exported from Kronos often contain abbreviated or "ugly" job titles, called **Raw Names** (e.g., 'Crt Str Assoc' or 'CashierEXP'). Your configuration allows you to map these raw names to a cleaner, user-friendly **Display Name**.
-  The Display Name is what appears on your final Daysheet output as the header for each role's subsection and Labor Tracker[Labor Trackers](# 3.).
-- **Grouping:** You can assign multiple Raw Names to the same Display Name. For example, you might map both 'SL SelfScan' and 'Service Clerk' to the single Display Name, "Service Desk." This groups them together on the output under the same header, and consolidates their labor hours into a single labor tracker.
+  The Display Name is what appears on your final Daysheet output as the header for each role's subsection and [Labor Tracker](#3-what-are-labor-trackers-the-output-of-roles-and-time-blocks).
+- **Grouping:** You can assign multiple Raw Names to the same Display Name. For example, you might map both 'SL SelfScan' and 'Service Clerk' to the [same Display Name "Service Desk"](#c-labor-tracker-enabledisable). This groups them together on the output under the same header, and consolidates their labor hours into a single labor tracker.
 
 ## B. Role Order
 The list order in the settings menu will be mirrored exactly in your final output (e.g., placing Manager roles at the top).
 
 ## C. Labor Tracker Enable/Disable
-Each configured role has an associated Labor Tracker table (more on that later). If a role is very small or you don't need detailed staffing metrics for it, you can simply disable its Labor Tracker to keep your output cleaner. If all role trackers are disabled, the program will automatically substitute the tracking section with the "Daily Notes" block instead.
+Each configured role has an associated Labor Tracker table (more on that later). If a role is very small or you don't need detailed staffing metrics for it, you can simply disable its Labor Tracker to keep your output cleaner. If all role trackers are disabled, the program will automatically substitute the tracking section with the ["Daily Notes"](#5-what-do-you-mean-by-daily-notes) block instead.
 
 ![The menu to configure roles.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/roleMapSettingsMenu.png)
 
@@ -79,7 +79,7 @@ ESH, or effective/estimated shopping hours is an online fulfillment department s
 It attempts to show how many **shopping hours per hour** the department will have. i.e. the amount of labor dedicated to shopping in specific.
 This is useful for comparing against the estimated labor required figure in the order management system dashboard (OMS).
 With these two data points, anyone will easily be able to forecast a labor shortage and call for help well before it becomes an issue.
-In specific, if the ESH value is far below the estimated shopping labor required shown by OMS/Spectrum, it's worth reassessing your situation and perhaps calling for help.
+In specific, if the ESH value is far below the "estimated shopping labor required" shown by OMS/Spectrum, it's worth reassessing your situation and perhaps calling for help.
 
 The metric ESH is derived by a simple formula: the Total Scheduled Labor per Hour minus a configurable Hourly ESH Constant.
 
@@ -89,7 +89,7 @@ The metric ESH is derived by a simple formula: the Total Scheduled Labor per Hou
 
 *A daysheet featuring the ESH table.*
 
-The “ESH constant” is configurable by the user and can be changed for every hour. It is meant to represent time allotted for all activities that aren’t shopping. This could be the non-shopper role, it could be breaks, it could be the time that people take to set up between trips. The default settings were arrived at after surveying multiple people in the online fulfillment department and getting their opinions.
+The “ESH constant” is configurable by the user and can be changed for every hour. The "ESH constant" is meant to represent time allotted for all activities that aren’t shopping. This could be the non-shopper role, it could be breaks, it could be the time that people take to set up between trips. The default settings were arrived at after surveying multiple people in the online fulfillment department and getting their opinions, but they will vary based on department size. A smaller staff needs to allot less time for breaks, and has fewer ~~expeditors~~ *facilitators* at any given time too, so feel free to experiment!
 ESH can also be disabled entirely in favor of the time blocks system, or the “Daily Notes”.
 
 ![The menu to edit ESH constant.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/eshEditMenu.png)
@@ -97,7 +97,7 @@ ESH can also be disabled entirely in favor of the time blocks system, or the “
 *The menu to edit ESH constant.*
 
 # 5. What do you mean by “Daily Notes”
-In the event that every role is “disabled” in settings, or the daily notes override setting is enabled, in lieu of the ESH table, or time blocks, a “Daily Notes” block is rendered instead. This is just free writing space and is available both as a fallback option, and as a preference for people who find more value in writing their own announcements by hand, which is understandable because the daysheets are typically seen by everyone multiple times per day.
+In the event that every role is [disabled](#c-labor-tracker-enabledisable) in settings, or the daily notes override setting is enabled, in lieu of the ESH table, or time blocks, a “Daily Notes” block is rendered instead. This is just free writing space and is available both as a fallback option, and as a preference for people who find more value in writing their own announcements by hand, which is understandable because the daysheets are typically seen by everyone multiple times per day.
 
 !['Daily notes' example.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/dailyNotesExample.png)
 
