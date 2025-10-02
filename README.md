@@ -36,7 +36,7 @@ Roles are the specific job categories within your department, such as 'cashier' 
 The list order in the settings menu will be mirrored exactly in your final output (e.g., placing Manager roles at the top).
 
 ## C. Labor Tracker Enable/Disable
-Each configured role has an associated Labor Tracker table (more on that later). If a role is very small or you don't need detailed staffing metrics for it, you can simply disable its Labor Tracker to keep your output cleaner. If all role trackers are disabled, the program will automatically substitute the tracking section with the ["Daily Notes"](#5-what-do-you-mean-by-daily-notes) block instead.
+Each configured role has an associated [Labor Tracker](#3-what-are-labor-trackers-the-output-of-roles-and-time-blocks) table. If a role is very small or you don't need detailed staffing metrics for it, you can simply disable its Labor Tracker to keep your output cleaner. If all role trackers are disabled, the program will automatically substitute the tracking section with the ["Daily Notes"](#5-what-do-you-mean-by-daily-notes) block instead.
 
 ![The menu to configure roles.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/roleMapSettingsMenu.png)
 
