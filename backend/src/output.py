@@ -256,6 +256,14 @@ def populate_workbook(wb, dept, column_day_map, store_number, is_wall = False, c
     return is_wall
 
 
+def removeConvertedCSV(csv_path):
+        if "_converted.csv" in csv_path and os.path.exists(csv_path):
+            try:
+                os.remove(csv_path)
+            except Exception as e:
+                print(f"Err: {e}. \n {csv_path} was unable to be removed\n")
+
+
 if __name__ == "__main__":
     desc = """
         Command-line entry point.
@@ -340,6 +348,7 @@ if __name__ == "__main__":
     if args.preview:
         preview_depts = FindValidDepts(hrd, config_handler_object)
         if len(preview_depts) <= 0:
+            removeConvertedCSV(csv_path)
             raise Exception("Err: No departments found. please check the input file and try again.")
         for dept in preview_depts:
             print(dept)
@@ -373,8 +382,4 @@ if __name__ == "__main__":
         )
         print(f"\nLog: Done! Files saved in: {output_path}")
 
-    if "_converted.csv" in csv_path and os.path.exists(csv_path):
-        try:
-            os.remove(csv_path)
-        except Exception as e:
-            print(f"Err: {e}. \n {csv_path} was unable to be removed\n")
+    removeConvertedCSV(csv_path)
