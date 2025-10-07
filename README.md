@@ -19,9 +19,6 @@ It was a weekly ritual for a member of the frontline management staff in the rel
 
 This tool automates the process entirely. Additionally, the daysheets produced by this program are much richer with information than anything worth the effort of implementing by hand. There’s a lot of data in those schedules, and the output from this program takes advantage of it to provide actionable information.
 
-## Tech Stack
-This tool is composed of three sections, the ‘back-end’ processing logic, written in **Python**, the ‘front-end’ i.e. the interface, written in **JS + React/CSS**, and the ‘middleware’ the software that allows these two domains to communicate, the **Electron framework**.
-
 ---
 
 # 1. How to Configure and Utilize Roles
