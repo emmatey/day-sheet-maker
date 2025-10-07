@@ -21,7 +21,7 @@ This tool automates the process entirely. Additionally, the daysheets produced b
 
 ---
 
-# 1. How to Configure and Utilize Roles
+# 1. What are roles?
 Roles are the specific job categories within your department, such as 'cashier' or 'service leader.' They determine how your Daysheet is organized. The DaySheet Maker gives you complete control over how these roles are presented and tracked.
 
 ## A. Raw Name vs. Display Name:  Cleanup and Grouping
