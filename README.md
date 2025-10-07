@@ -12,7 +12,7 @@ Daysheet maker is a bespoke utility for a specific workplace and task. Its prima
 --- 
 
 ## What is a daysheet
-A “Daysheet,” or daily staffing sheet, is a one-day schedule view for a specific department. It shows the date, day of the week, all employees in that department, and their shift start and end times.
+A “Daysheet,” or daily staffing sheet, is a one-day schedule view for a specific department. It shows the date, day of the week, all employees in that department who are working on any given day, and their shift start and end times. 
 
 ## Why does this tool exist
 It was a weekly ritual for a member of the frontline management staff in the relevant department to spend at least half an hour filling out seven daysheets by hand. This process involves scanning the schedule spreadsheet over and over; first picking out and typing all the names of employees on the relevant day, entering their name and shift hours into the daysheet, and ordering employees by role and start time. The alternative, using Kronos to generate daysheets, produces an inferior product. Leading multiple managers to manually create their own daysheets in Excel instead. 
