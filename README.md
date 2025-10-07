@@ -22,8 +22,7 @@ This tool automates the process entirely. Additionally, the daysheets produced b
 ---
 
 # 1. What are roles?
-Roles are the specific job categories within your department, such as 'cashier' or 'service leader.' They determine how your Daysheet is organized. The DaySheet Maker gives you complete control over how these roles are presented and tracked.
-
+Roles are the specific job categories within your department, such as 'cashier' or 'service leader.' They determine how your Daysheet is organized.
 ## A. Raw Name vs. Display Name:  Cleanup and Grouping
 - **Cleanup:** The schedules exported from Kronos often contain abbreviated or "ugly" job titles, called **Raw Names** (e.g., 'Crt Str Assoc' or 'CashierEXP'). Your configuration allows you to map these raw names to a cleaner, user-friendly **Display Name**.
   The Display Name is what appears on your final Daysheet output as the header for each role's subsection and [Labor Tracker](#3-what-are-labor-trackers-the-output-of-roles-and-time-blocks).
