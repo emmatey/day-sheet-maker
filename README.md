@@ -38,7 +38,7 @@ Each configured role has an associated [Labor Tracker](#3-what-are-labor-tracker
 
 *The menu to configure roles.*
 
-# 2. What are time blocks
+# 2. What are time blocks?
 A ‘Time Block’ is a range of time of arbitrary duration and name. The application stores the time blocks you define, and then can then measure the total labor hours which ‘overlap’ with these ranges. 
 
 For example, if I define a time block from 5am to 10am and I have three employees, 
@@ -70,7 +70,7 @@ The labor tracker is just a collection of all the time blocks you’ve configure
 
 *'Labor Trackers' where scope is shifted from per role to per department.*
 
-# 4. What is ESH
+# 4. What is ESH?
 ESH, or effective/estimated shopping hours is an online fulfillment department specific metric. 
 It attempts to show how many **shopping hours per hour** the department will have. i.e. the amount of labor dedicated to shopping in specific.
 This is useful for comparing against the estimated labor required figure in the order management system dashboard (OMS).
@@ -92,7 +92,7 @@ ESH can also be disabled entirely in favor of the time blocks system, or the “
 
 *The menu to edit ESH constant.*
 
-# 5. What do you mean by “Daily Notes”
+# 5. What do you mean by “Daily Notes”?
 In the event that every role is [disabled](#c-labor-tracker-enabledisable) in settings, or the daily notes override setting is enabled, in lieu of the ESH table, or time blocks, a “Daily Notes” block is rendered instead. This is just free writing space and is available both as a fallback option, and as a preference for people who find more value in writing their own announcements by hand, which is understandable because the daysheets are typically seen by everyone multiple times per day.
 
 !['Daily notes' example.](https://raw.githubusercontent.com/emmatey/day-sheet-maker/refs/heads/react-ui/assets/readmeImages/dailyNotesExample.png)
