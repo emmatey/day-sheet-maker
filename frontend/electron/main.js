@@ -170,6 +170,10 @@ function registerIpcHandlers() {
   // Generate output: output.py <input> <saveDir> --output <dept:mode>...
   ipcMain.handle("run-python-output", async (_e, { inputFile, saveDir, outputMap }) => {
     const outputArgs = Object.entries(outputMap).map(([dept, mode]) => `${dept}:${mode}`);
+    if (Object.keys(outputMap).length === 0)
+    {
+      return (1);
+    }
     return runBackend([inputFile, saveDir, "--output", ...outputArgs]);
   });
 

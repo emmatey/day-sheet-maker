@@ -72,7 +72,19 @@ export default function DepartmentSelect({ deptList, inputFile, onClose }) {
       saveDir,
       outputMap,
     });
-    
+    // runPythonOutput returns 1 in case of outputMap.length === 0
+    if(runPyStdOut === 1)
+    {
+      window.electronAPI.nativeAlert(
+        {
+      message: "No departments were selected. Please select at least one department and try again.\n",
+      type: "error",
+        })
+      
+      setLoading(false);
+      return;
+    }
+
     let rawNewDirCreatedForOutput = runPyStdOut
       .split("\n") 
       .filter(line => line.startsWith("Log: Done! Files saved in:"));
@@ -90,7 +102,14 @@ export default function DepartmentSelect({ deptList, inputFile, onClose }) {
 
   } catch (err) {
     setLoading(false);
-    console.error("--[Error running Python output]--\n", err);
+    // Handle other errors genetically.
+    console.error("[Error running Python output]--\n", err);
+    window.electronAPI.nativeAlert(
+      {
+        message: "--[Error running Python output]--\n Check the developer console for details\nctrl + shift + i",
+        type: "error",
+      }
+    )
   }
 };
 
