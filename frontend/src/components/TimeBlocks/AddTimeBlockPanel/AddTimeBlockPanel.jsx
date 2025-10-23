@@ -41,7 +41,7 @@ function SelectAMPM({ value, onChange, ariaLabel }) {
  *  - defaultStart?: "HH:MM" (default "09:00")
  *  - defaultEnd?:   "HH:MM" (default "10:00")
  */
-export default function AddTimeBlockPanel({ onAdd, defaultStart = "09:00", defaultEnd = "10:00" }) {
+export default function AddTimeBlockPanel({ onAdd, dept_list, defaultStart = "09:00", defaultEnd = "10:00" }) {
   const [label, setLabel] = React.useState("");
 
   // derive initial 12h from defaults
@@ -118,6 +118,7 @@ export default function AddTimeBlockPanel({ onAdd, defaultStart = "09:00", defau
           onClick={handleAdd}
           aria-label="Add block"
           type="button"
+          disabled={!dept_list || dept_list.length === 0}
         >
           ＋
         </button>

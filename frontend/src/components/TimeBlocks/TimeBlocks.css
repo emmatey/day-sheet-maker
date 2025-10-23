@@ -124,6 +124,11 @@
 }
 .tb-mini.danger { background: var(--red); color: var(--white); }
 .tb-mini.success { background: var(--green); color: var(--text); }
+.tb-mini:disabled {
+  opacity: 0.6; 
+  background: var(--gray);
+  cursor: not-allowed;
+}
 
 .tb-divider {
   height: 42px;

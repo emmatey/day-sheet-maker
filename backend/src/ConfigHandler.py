@@ -316,7 +316,6 @@ class ConfigHandler:
         except json.JSONDecodeError:
             return "Err: Malformed JSON value. Could not decode."
 
-        # current config
         cfg = self.settings if isinstance(self.settings, dict) else {}
         cursor = cfg
         for k in key_hierarchy[:-1]:
@@ -333,6 +332,22 @@ class ConfigHandler:
         else:
             return f"Log: Unknown flag '{op}'"
 
+        # FIX STRUCTURAL INTEGRITY (AFTER MODIFICATION)
+        # This ensures that if the deletion made a top-level key like 'TIME_BLOCKS' 
+        # empty, it doesn't get saved as a list, which breaks Python's .get() later.
+        
+        # TIME_BLOCKS: Ensure it's a dictionary
+        if not isinstance(cfg.get("TIME_BLOCKS"), dict):
+            cfg["TIME_BLOCKS"] = {}
+
+        # ROLE_MAP: Ensure it's a dictionary AND contains 'Blacklists'
+        if not isinstance(cfg.get("ROLE_MAP"), dict):
+            # If ROLE_MAP is somehow not a dict, ensure 'Blacklists' is re-created
+            cfg["ROLE_MAP"] = {"Blacklists": default_settings.get("ROLE_MAP", {}).get("Blacklists", {})}
+        elif "Blacklists" not in cfg["ROLE_MAP"]:
+             # If Blacklists was deleted, re-insert it from defaults
+             cfg["ROLE_MAP"]["Blacklists"] = default_settings.get("ROLE_MAP", {}).get("Blacklists", {})
+        
         self.save_config(cfg)
         self.parse_config(cfg)
         return f"Log: Setting {'deleted' if op == 'delete' else 'updated'} at {' -> '.join(key_hierarchy)}"
