@@ -1,0 +1,3 @@
+1. Centralize buildUpdateString method and remove all references scattered throughout frontend.
+
+2. add option to enable ESH for other depts, will require prompting the user to ask what role will be the shopper equivilent.
