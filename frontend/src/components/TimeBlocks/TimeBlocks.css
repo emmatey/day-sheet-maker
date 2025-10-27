@@ -29,6 +29,7 @@
 }
 
 .tb-toolbar,
+.tb-add,
 .tb-rows,
 .tb-divider,
 .tb-footer {
@@ -41,7 +42,9 @@
   margin-bottom: 0px;
   padding: 10px 16px 16px;
   display: flex;
-  flex-direction: center;
+  align-items: center; 
+  justify-content: center;
+  gap: 10px;
 }
 
 .tb-select {
@@ -51,7 +54,6 @@
   border-radius: 8px;
   background: var(--white);
   color: var(--text);
-  margin: 0 auto;
 }
 
 .tb-rows {
