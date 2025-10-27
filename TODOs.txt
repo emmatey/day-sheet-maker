@@ -1,6 +1,0 @@
-1. Centralize buildUpdateString method and remove all references scattered throughout frontend.
-
-2. stop dept removal from writing to config.json until the save and close button is clicked. currently it instantly writes after a warning popup but it makes more sense to just leave everything pending and have save and close be the only way to write 
-
-3. add option to enable ESH for other depts, will require prompting the user to ask what role will be the shopper equivilent.
- 

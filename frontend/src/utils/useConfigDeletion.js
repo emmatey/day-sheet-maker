@@ -1,7 +1,5 @@
 import React from 'react';
 
-// NOTE: This utility function is needed to format the payload for the Python backend.
-// It should ideally be moved to a shared utility file if other components use it.
 
 function buildUpdateString(segments, value, action = "update") {
   const path = "[" + segments.map(String).join("][") + "]";

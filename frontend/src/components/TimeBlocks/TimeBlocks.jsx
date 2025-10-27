@@ -9,11 +9,7 @@ import StandardButton from "../StandardButton/StandardButton.jsx";
 import TimeBlockPanel from "./TimeBlockPanel/TimeBlockPanel.jsx";
 import AddTimeBlockPanel from "./AddTimeBlockPanel/AddTimeBlockPanel.jsx";
 import useConfigDeletion from "../../utils/useConfigDeletion.js";
-
-function buildUpdateString(segments, value, action = "update") {
-  const path = "[" + segments.map(String).join("][") + "]";
-  return `${path}^${JSON.stringify(value)}^${action}`;
-}
+import {buildUpdateString} from "../../utils/buildUpdateString.js";
 
 const makeId = () =>
   (typeof crypto !== "undefined" && crypto.randomUUID

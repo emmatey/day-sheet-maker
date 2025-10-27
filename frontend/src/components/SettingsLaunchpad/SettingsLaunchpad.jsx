@@ -15,12 +15,7 @@ import SaveLocation from "../SaveLocation/SaveLocation.jsx";
 import LaborTrackers from "../LaborTrackers/LaborTrackers.jsx";
 import Modal from "../Modal/Modal.jsx";
 import TimeBlocks from "../TimeBlocks/TimeBlocks.jsx";
-
-function buildUpdateString(segments, value, action = "update") {
-  const path = "[" + segments.map(String).join("][") + "]";
-  const payload = JSON.stringify(value);
-  return `${path}^${payload}^${action}`;
-}
+import {buildUpdateString} from "../../utils/buildUpdateString.js";
 
 export default function SettingsLaunchpad({ onClose }) {
   const [activeModal, setActiveModal] = useState(null);

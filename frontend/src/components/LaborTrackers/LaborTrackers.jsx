@@ -9,12 +9,7 @@ import TimeBlocks from "../TimeBlocks/TimeBlocks.jsx";
 import InfoButton from "../InfoButton/InfoButton.jsx";
 import InfoModal from "../InfoModal/InfoModal.jsx";
 import laborTrackersPdf from "/HelpIconDocs/LaborTrackers.pdf";
-
-function buildUpdateString(segments, value, action = "update") {
-  const path = "[" + segments.map(String).join("][") + "]";
-  const payload = JSON.stringify(value);
-  return `${path}^${payload}^${action}`;
-}
+import {buildUpdateString} from "../../utils/buildUpdateString.js"
 
 export default function LaborTrackers({ onClose, onEditTimeBlocks }) {
   const [combined, setCombined] = React.useState(false);  // OUTPUT_SETTINGS.combined_labor_tracker

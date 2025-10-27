@@ -7,12 +7,8 @@ import AccentStripe from "../HomeScreen/AccentStripe/AccentStripe.jsx";
 import StandardButton from "../StandardButton/StandardButton.jsx";
 import RoleRow from "./RoleRow/RoleRow.jsx";
 import useConfigDeletion from "../../utils/useConfigDeletion.js";
+import {buildUpdateString} from "../../utils/buildUpdateString.js";
 
-
-function buildUpdateString(segments, value, action = "update") {
-  const path = "[" + segments.map(String).join("][") + "]";
-  return `${path}^${JSON.stringify(value)}^${action}`;
-}
 
 export default function RoleMap({ onClose }) {
   const [settings, setSettings] = React.useState(null);

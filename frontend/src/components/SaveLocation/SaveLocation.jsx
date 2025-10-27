@@ -5,12 +5,8 @@ import "./SaveLocation.css";
 import TitleCardHeader from "../DepartmentSelect/TitleCardHeader/TitleCardHeader.jsx";
 import AccentStripe from "../HomeScreen/AccentStripe/AccentStripe.jsx";
 import StandardButton from "../StandardButton/StandardButton.jsx";
+import {buildUpdateString} from "../../utils/buildUpdateString.js";
 
-function buildUpdateString(segments, value, action = "update") {
-  const path = "[" + segments.map(String).join("][") + "]";
-  const payload = JSON.stringify(value);
-  return `${path}^${payload}^${action}`;
-}
 
 export default function SaveLocation({ onClose }) {
   const [settings, setSettings] = React.useState(null);
