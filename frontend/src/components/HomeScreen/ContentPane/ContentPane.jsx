@@ -65,7 +65,7 @@ export default function ContentPane() {
     <>
       <div className="content-pane">
         <StandardPlusInfoButtonPanel
-          label = {loading ? "Reading File..." : "Start"}
+          label = {loading ? "Reading File..." : "Upload Schedule"}
           onClickMain = {handleSelectFile}
           onClickInfo = {handleStartButtonInfoClick}
           showInfo = {true}

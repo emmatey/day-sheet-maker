@@ -1,7 +1,7 @@
 {
   "name": "day-sheet-maker",
   "private": true,
-  "version": "1.0.1",
+  "version": "1.0.2",
   "type": "module",
   "main": "electron/main.js",
   "description": "An app for generating and managing day sheets.",
